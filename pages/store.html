@@ -1,138 +1,536 @@
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="FGP Store — Explore os jogos, aplicativos e produtos da Free Game Plant.">
+
+    <meta name="description" content="Explore os jogos e projetos da Free Game Plant. Conheça também o FGP MineLabs.">
+    <meta name="theme-color" content="#101827">
 
     <title>FGP Store | Free Game Plant</title>
+
+    <link rel="icon" href="../assets/images/gamestore.png">
 
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/store.css">
 
-    <script src="../js/main.js" defer></script>
-    <script src="../js/navigation.js" defer></script>
+    <script src="../js/store/games.js" defer></script>
+    <script src="../js/store.js" defer></script>
 </head>
 
-<body>
+<body class="store-page">
 
-<header class="header">
-    <a href="../index.html" class="logo">
-        <span class="logo-symbol">FGP</span>
-        <span class="logo-name">FREE GAME PLANT</span>
-    </a>
+    <!-- CABEÇALHO -->
+    <header class="store-header">
+        <div class="store-header-inner">
 
-    <nav class="navigation">
-        <a href="../index.html">Início</a>
-        <a href="technologies.html">Technologies</a>
-        <a href="entertainment.html">Entertainment</a>
-        <a href="store.html">FGP Store</a>
-        <a href="news.html">Notícias</a>
-        <a href="about.html">Sobre</a>
-    </nav>
-</header>
+            <a href="../index.html" class="store-brand">
+                <span class="store-brand-icon">FGP</span>
+                <span>STORE</span>
+            </a>
 
-<main>
-
-    <section class="hero">
-        <div class="hero-content">
-
-            <span class="hero-label">FGP ENTERTAINMENT / STORE</span>
-
-            <h1>
-                Descubra o universo FGP.
-            </h1>
-
-            <p class="hero-description">
-                Jogos, aplicativos e produtos desenvolvidos
-                e publicados pela Free Game Plant.
-            </p>
+            <nav class="store-navigation" aria-label="Navegação principal">
+                <a href="../index.html">Início</a>
+                <a href="technologies.html">Technologies</a>
+                <a href="entertainment.html">Entertainment</a>
+                <a href="about.html">Sobre</a>
+            </nav>
 
         </div>
-    </section>
+    </header>
 
 
-    <section class="divisions">
+    <main>
 
-        <div class="section-heading">
-            <span>CATÁLOGO FGP</span>
-            <h2>Nossos produtos.</h2>
+        <!-- APRESENTAÇÃO -->
+        <section class="store-hero">
 
-            <p>
-                Explore as criações digitais da Free Game Plant
-                e descubra novas experiências.
-            </p>
-        </div>
+            <div class="store-hero-content">
 
+                <span class="store-eyebrow">FREE GAME PLANT</span>
 
-        <article class="division-card entertainment">
-            <div class="division-content">
-
-                <span>FGP / GAMES</span>
-
-                <h2>SIU2D</h2>
+                <h1>FGP <span>Store</span></h1>
 
                 <p>
-                    Uma experiência de criação e exploração
-                    dentro do universo SIU2D.
-                </p>
-
-                <a href="https://play.google.com/store/apps/details?id=com.freegameplant.siu2d"
-                   class="button button-primary"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                    Ver no Google Play
-                </a>
-
-            </div>
-        </article>
-
-
-        <article class="division-card entertainment">
-            <div class="division-content">
-
-                <span>FGP / APPLICATIONS</span>
-
-                <h2>Mais produtos em breve.</h2>
-
-                <p>
-                    Novos jogos, aplicativos e experiências
-                    estão em desenvolvimento.
+                    Explore os projetos, jogos e criações
+                    desenvolvidos pela Free Game Plant.
                 </p>
 
             </div>
+
+            <div class="store-hero-decoration" aria-hidden="true">
+                <span>FGP</span>
+            </div>
+
+        </section>
+
+
+        <!-- NAVEGAÇÃO DA STORE -->
+        <section class="store-tabs-section">
+
+            <div class="store-tabs" role="tablist" aria-label="Categorias da Store">
+
+                <button
+                    class="store-tab active"
+                    id="gamesTab"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="gamesSection"
+                    data-store-tab="games">
+
+                    <span class="tab-icon">🎮</span>
+                    <span>Games</span>
+
+                </button>
+
+                <button
+                    class="store-tab"
+                    id="mineLabsTab"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="mineLabsSection"
+                    data-store-tab="minelabs">
+
+                    <span class="tab-icon">⛏️</span>
+                    <span>FGP MineLabs</span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- GAMES -->
+        <!-- ====================================== -->
+
+        <section
+            class="store-section"
+            id="gamesSection"
+            role="tabpanel"
+            aria-labelledby="gamesTab">
+
+            <div class="store-container">
+
+                <div class="store-section-heading">
+                    <div>
+                        <span class="store-eyebrow">FGP ENTERTAINMENT</span>
+                        <h2>Games</h2>
+                        <p>Jogos e experiências interativas da FGP.</p>
+                    </div>
+
+                    <span class="section-symbol">✦</span>
+                </div>
+
+
+                <!-- PESQUISA -->
+                <div class="games-toolbar">
+
+                    <label class="games-search">
+                        <span aria-hidden="true">⌕</span>
+
+                        <input
+                            type="search"
+                            id="gameSearch"
+                            placeholder="Pesquisar jogos..."
+                            aria-label="Pesquisar jogos">
+                    </label>
+
+                    <div class="games-filters" id="gameFilters">
+
+                        <button class="game-filter active" data-filter="all">
+                            Todos
+                        </button>
+
+                        <button class="game-filter" data-filter="available">
+                            Disponíveis
+                        </button>
+
+                        <button class="game-filter" data-filter="android">
+                            Android
+                        </button>
+
+                        <button class="game-filter" data-filter="windows">
+                            Windows
+                        </button>
+
+                        <button class="game-filter" data-filter="soon">
+                            Em breve
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RESULTADOS -->
+                <div class="games-results">
+
+                    <p id="gamesCount" aria-live="polite">
+                        Explorando o catálogo...
+                    </p>
+
+                    <div class="games-grid" id="gamesGrid">
+                        <!-- Os jogos serão inseridos pelo JavaScript. -->
+                    </div>
+
+                    <div class="games-empty" id="gamesEmpty" hidden>
+                        <span>🔎</span>
+                        <h3>Nenhum jogo encontrado</h3>
+                        <p>Tente outra pesquisa ou altere os filtros.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- FGP MINELABS -->
+        <!-- ====================================== -->
+
+        <section
+            class="store-section minelabs-section"
+            id="mineLabsSection"
+            role="tabpanel"
+            aria-labelledby="mineLabsTab"
+            hidden>
+
+            <div class="minelabs-container">
+
+                <!-- IDENTIDADE MINELABS -->
+                <div class="minelabs-hero">
+
+                    <span class="minelabs-label">
+                        FREE GAME PLANT
+                    </span>
+
+                    <h2>FGP <span>MineLabs</span></h2>
+
+                    <p>
+                        Um laboratório de ideias, mods e experiências
+                        para Minecraft.
+                    </p>
+
+                    <div class="minelabs-decoration" aria-hidden="true">
+                        <span>◆</span>
+                        <span>✦</span>
+                        <span>◆</span>
+                    </div>
+
+                </div>
+
+
+                <!-- PROJETO PRINCIPAL -->
+                <section class="mine-section">
+
+                    <div class="mine-section-heading">
+                        <div>
+                            <span class="mine-kicker">PROJETO EM DESTAQUE</span>
+                            <h3>Projetos MineLabs</h3>
+                        </div>
+                    </div>
+
+
+                    <article class="mod-feature">
+
+                        <div class="mod-feature-header">
+
+                            <div class="mod-project-icon">
+                                ⛏️
+                            </div>
+
+                            <div class="mod-project-info">
+
+                                <span class="mod-label">
+                                    ADD-ON OFICIAL
+                                </span>
+
+                                <h3>FGP Vanilla+</h3>
+
+                                <p>
+                                    Coisas que a Vanilla poderia ter.
+                                </p>
+
+                                <div class="mod-tags">
+                                    <span>Minecraft Bedrock</span>
+                                    <span>v1.0.1</span>
+                                    <span class="tag-success">Sem experimentos</span>
+                                    <span class="tag-success">Compatível com conquistas</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <p class="mod-description">
+                            O FGP Vanilla+ adiciona elementos que poderiam
+                            existir no Minecraft Vanilla, expandindo a
+                            experiência com novas ideias e sistemas.
+                        </p>
+
+
+                        <div class="mod-actions">
+
+                            <a
+                                href="FGPVanilla_1.0.1.mcaddon"
+                                class="mine-button mine-button-primary"
+                                download>
+
+                                ↓ Baixar Add-on
+
+                            </a>
+
+                            <button
+                                type="button"
+                                class="mine-button"
+                                id="vanillaContentButton"
+                                aria-expanded="false"
+                                aria-controls="vanillaContent">
+
+                                Explorar conteúdo
+
+                            </button>
+
+                            <a
+                                href="https://github.com/FreeGamePlant"
+                                class="mine-button"
+                                target="_blank"
+                                rel="noopener noreferrer">
+
+                                GitHub ↗
+
+                            </a>
+
+                        </div>
+
+
+                        <!-- CONTEÚDO DO ADD-ON -->
+                        <div class="vanilla-content" id="vanillaContent" hidden>
+
+                            <div class="vanilla-tabs" role="tablist">
+
+                                <button
+                                    type="button"
+                                    class="vanilla-tab active"
+                                    data-vanilla-tab="items">
+
+                                    Itens
+
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="vanilla-tab"
+                                    data-vanilla-tab="recipes">
+
+                                    Receitas
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- ITENS -->
+                            <div class="vanilla-view active" data-vanilla-view="items">
+
+                                <div class="mine-items-grid">
+
+                                    <article class="mine-item">
+                                        <span>🥖</span>
+                                        <h4>Baguette</h4>
+                                        <small>Alimento</small>
+                                        <p>Nutrição: 7.5</p>
+                                        <p>Saturação: 18</p>
+                                    </article>
+
+                                    <article class="mine-item">
+                                        <span>🥛</span>
+                                        <h4>Balde de leite quente</h4>
+                                        <small>Alimento</small>
+                                        <p>Nutrição: 0.5</p>
+                                        <p>Saturação: 0.6</p>
+                                    </article>
+
+                                    <article class="mine-item">
+                                        <span>🧈</span>
+                                        <h4>Balde de nata</h4>
+                                        <small>Alimento</small>
+                                        <p>Nutrição: 2.5</p>
+                                        <p>Saturação: 1.5</p>
+                                    </article>
+
+                                    <article class="mine-item">
+                                        <span>🧀</span>
+                                        <h4>Queijo</h4>
+                                        <small>Alimento</small>
+                                        <p>Nutrição: 5.15</p>
+                                        <p>Saturação: 4.5</p>
+                                    </article>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- RECEITAS -->
+                            <div class="vanilla-view" data-vanilla-view="recipes">
+
+                                <div class="mine-recipes-grid">
+
+                                    <article class="mine-recipe">
+                                        <span>🥖</span>
+                                        <div>
+                                            <h4>Baguette</h4>
+                                            <small>Bancada de trabalho</small>
+                                            <p>3 pães colocados em diagonal.</p>
+                                        </div>
+                                    </article>
+
+                                    <article class="mine-recipe">
+                                        <span>🥛</span>
+                                        <div>
+                                            <h4>Leite quente</h4>
+                                            <small>Fornalha / Fogueira</small>
+                                            <p>Esquentar um balde de leite.</p>
+                                        </div>
+                                    </article>
+
+                                    <article class="mine-recipe">
+                                        <span>🧈</span>
+                                        <div>
+                                            <h4>Balde de nata</h4>
+                                            <small>Fornalha / Fogueira</small>
+                                            <p>Esquentar um balde de leite quente.</p>
+                                        </div>
+                                    </article>
+
+                                    <article class="mine-recipe">
+                                        <span>🧀</span>
+                                        <div>
+                                            <h4>Queijo</h4>
+                                            <small>Bancada de trabalho</small>
+                                            <p>Balde de nata + cogumelo marrom + balde de nata.</p>
+                                        </div>
+                                    </article>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </section>
+
+
+                <!-- FUTUROS PROJETOS -->
+                <section class="mine-section">
+
+                    <div class="mine-section-heading">
+                        <div>
+                            <span class="mine-kicker">EM DESENVOLVIMENTO</span>
+                            <h3>Mais projetos</h3>
+                        </div>
+                    </div>
+
+                    <div class="mine-future-grid">
+
+                        <article class="mine-future-card">
+                            <span>🧪</span>
+                            <h4>FGP Vanilla Classic</h4>
+                            <p>Uma abordagem mais conservadora do conceito Vanilla+.</p>
+                            <small>Planejado</small>
+                        </article>
+
+                        <article class="mine-future-card">
+                            <span>🧬</span>
+                            <h4>FGP Vanilla++</h4>
+                            <p>Novas possibilidades e recursos experimentais.</p>
+                            <small>Planejado</small>
+                        </article>
+
+                        <article class="mine-future-card">
+                            <span>🚀</span>
+                            <h4>Novos projetos</h4>
+                            <p>O laboratório continua aberto a novas ideias.</p>
+                            <small>Futuro</small>
+                        </article>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- MODAL DE DETALHES DOS JOGOS -->
+    <div class="game-modal" id="gameModal" hidden>
+
+        <div class="game-modal-backdrop" data-close-modal></div>
+
+        <article
+            class="game-modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalGameTitle">
+
+            <button
+                type="button"
+                class="game-modal-close"
+                id="closeGameModal"
+                aria-label="Fechar">
+
+                ×
+
+            </button>
+
+            <div id="gameModalContent">
+                <!-- Detalhes preenchidos pelo JavaScript. -->
+            </div>
+
         </article>
 
-    </section>
-
-</main>
-
-
-<footer class="footer">
-
-    <div class="footer-brand">
-        <h2>FGP</h2>
-        <p>Free Game Plant</p>
-        <span>Tecnologia, criatividade e entretenimento.</span>
     </div>
 
-    <div class="footer-links">
-        <a href="../index.html">Início</a>
-        <a href="technologies.html">Technologies</a>
-        <a href="entertainment.html">Entertainment</a>
-        <a href="news.html">Notícias</a>
-        <a href="about.html">Sobre</a>
-    </div>
 
-    <div class="footer-copyright">
-        <p>Free Game Plant © 2026</p>
-        <span>Todos os direitos reservados.</span>
-    </div>
+    <!-- RODAPÉ -->
+    <footer class="store-footer">
 
-</footer>
+        <div class="store-footer-inner">
+
+            <div>
+                <strong>FREE GAME PLANT</strong>
+                <p>Entretenimento e tecnologia.</p>
+            </div>
+
+            <div class="store-footer-links">
+                <a href="../index.html">Início</a>
+                <a href="entertainment.html">Entertainment</a>
+                <a href="technologies.html">Technologies</a>
+            </div>
+
+        </div>
+
+        <div class="store-copyright">
+            © 2026 Free Game Plant — Todos os direitos reservados.
+        </div>
+
+    </footer>
 
 </body>
 </html>
