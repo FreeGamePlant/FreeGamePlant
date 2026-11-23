@@ -1,354 +1,196 @@
 
 /* ========================================
-   FREE GAME PLANT — IDENTIDADE VISUAL
-   Arquivo: css/main.css
+   FREE GAME PLANT
+   RESPONSIVIDADE
+   Arquivo: css/responsive.css
    ======================================== */
 
-/* 1. VARIÁVEIS GLOBAIS */
 
-:root {
-    color-scheme: dark;
+/* 1. TELAS MÉDIAS — TABLETS */
 
-    /* Identidade geral */
-    --bg-primary: #101827;
-    --bg-secondary: #18263a;
-    --bg-tertiary: #202f45;
+@media (max-width: 1024px) {
 
-    --text-primary: #f2f5f9;
-    --text-secondary: #a8b3c5;
+    section {
+        padding: 75px 5%;
+    }
 
-    --border-color: rgba(255, 255, 255, 0.09);
+    header {
+        padding: 16px 5%;
+    }
 
-    /* FGP Technologies */
-    --tech-dark: #123b5d;
-    --tech-main: #176b9b;
-    --tech-light: #35a7d9;
-    --tech-soft: #b9e6f8;
+    header nav {
+        gap: 16px;
+    }
 
-    /* FGP Entertainment */
-    --ent-dark: #382454;
-    --ent-main: #67439a;
-    --ent-light: #a77be0;
-    --ent-soft: #e2d1fa;
+    .hero {
+        min-height: 540px;
+    }
 
-    /* FGP Store */
-    --store-dark: #174b3a;
-    --store-main: #25845c;
-    --store-light: #55b88a;
-    --store-soft: #c7f0d9;
+    .divisions,
+    .divisions-container {
+        gap: 18px;
+    }
 
-    /* Formatação */
-    --radius-small: 8px;
-    --radius-medium: 14px;
-    --radius-large: 22px;
-
-    --content-width: 1180px;
-
-    --transition: 0.25s ease;
+    .card {
+        padding: 24px;
+    }
 }
 
 
-/* 2. RESET E CONFIGURAÇÕES GERAIS */
+/* 2. TELAS MENORES — TABLETS E CELULARES GRANDES */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+@media (max-width: 768px) {
 
-html {
-    scroll-behavior: smooth;
-    scroll-padding-top: 90px;
-}
+    header {
+        flex-direction: column;
+        gap: 16px;
 
-body {
-    min-width: 320px;
-    background: var(--bg-primary);
-    color: var(--text-primary);
+        padding: 18px 5%;
+    }
 
-    font-family: Arial, Helvetica, sans-serif;
-    line-height: 1.6;
+    header nav {
+        width: 100%;
+        justify-content: center;
+        gap: 12px 20px;
+    }
 
-    overflow-x: hidden;
-}
+    header nav a {
+        font-size: 0.9rem;
+    }
 
-a {
-    color: inherit;
-    text-decoration: none;
-    transition: var(--transition);
-}
+    section {
+        padding: 65px 6%;
+    }
 
-img {
-    display: block;
-    max-width: 100%;
-}
+    .hero {
+        min-height: 480px;
+    }
 
-button {
-    font: inherit;
-}
+    .hero p {
+        font-size: 1rem;
+    }
 
+    .divisions,
+    .divisions-container {
+        grid-template-columns: 1fr;
+    }
 
-/* 3. ELEMENTOS DE TEXTO */
+    .technologies,
+    .entertainment {
+        padding: 26px;
+    }
 
-h1, h2, h3, h4 {
-    color: var(--text-primary);
-    line-height: 1.2;
-}
-
-h1 {
-    font-size: clamp(2.3rem, 6vw, 4.5rem);
-    font-weight: 800;
-    letter-spacing: -2px;
-}
-
-h2 {
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    margin-bottom: 18px;
-}
-
-h3 {
-    font-size: 1.4rem;
-    margin-bottom: 12px;
-}
-
-p {
-    color: var(--text-secondary);
-    margin-bottom: 16px;
+    footer {
+        padding: 35px 6%;
+    }
 }
 
 
-/* 4. ESTRUTURA DAS SEÇÕES */
+/* 3. CELULARES */
 
-section {
-    padding: 90px 7%;
-}
+@media (max-width: 480px) {
 
-section > * {
-    max-width: var(--content-width);
-    margin-left: auto;
-    margin-right: auto;
-}
+    h1 {
+        font-size: 2.4rem;
+        letter-spacing: -1px;
+    }
 
+    h2 {
+        font-size: 1.8rem;
+    }
 
-/* 5. CABEÇALHO E NAVEGAÇÃO */
+    h3 {
+        font-size: 1.2rem;
+    }
 
-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    header {
+        padding: 16px 4%;
+    }
 
-    width: 100%;
-    padding: 18px 7%;
+    header nav {
+        gap: 10px 14px;
+    }
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
+    header nav a {
+        font-size: 0.82rem;
+    }
 
-    background: rgba(16, 24, 39, 0.92);
-    border-bottom: 1px solid var(--border-color);
+    section {
+        padding: 55px 5%;
+    }
 
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-}
+    .hero {
+        min-height: 430px;
+    }
 
-header nav {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 24px;
-}
+    .hero p {
+        font-size: 0.95rem;
+    }
 
-header nav a {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    font-weight: 600;
-}
+    .btn,
+    .button {
+        width: 100%;
+        max-width: 300px;
 
-header nav a:hover {
-    color: var(--text-primary);
-}
+        margin: 7px auto;
+        padding: 12px 16px;
+    }
 
+    .card {
+        padding: 20px;
+    }
 
-/* 6. APRESENTAÇÃO PRINCIPAL */
+    .technologies,
+    .entertainment {
+        padding: 22px;
+    }
 
-.hero {
-    min-height: 620px;
+    .news-card {
+        padding: 20px;
+    }
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    background:
-        radial-gradient(
-            ellipse at 50% 0%,
-            rgba(53, 167, 217, 0.13),
-            transparent 65%
-        ),
-        var(--bg-primary);
-}
-
-.hero h1 {
-    max-width: 950px;
-    margin-bottom: 24px;
-}
-
-.hero p {
-    max-width: 700px;
-    font-size: 1.1rem;
+    footer {
+        padding: 30px 5%;
+    }
 }
 
 
-/* 7. BOTÕES E LINKS DE DESTAQUE */
+/* 4. CELULARES MUITO PEQUENOS */
 
-.btn,
-.button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+@media (max-width: 360px) {
 
-    padding: 12px 24px;
-    margin: 8px 6px;
+    h1 {
+        font-size: 2rem;
+    }
 
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-medium);
+    h2 {
+        font-size: 1.6rem;
+    }
 
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    header nav {
+        gap: 9px;
+    }
 
-    font-weight: 700;
-    cursor: pointer;
+    header nav a {
+        font-size: 0.76rem;
+    }
 
-    transition: var(--transition);
-}
-
-.btn:hover,
-.button:hover {
-    transform: translateY(-3px);
-    background: #2a3c55;
+    .hero {
+        min-height: 390px;
+    }
 }
 
 
-/* 8. DIVISÕES FGP */
+/* 5. ACESSIBILIDADE — MOVIMENTO REDUZIDO */
 
-.divisions,
-.divisions-container {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
-}
+@media (prefers-reduced-motion: reduce) {
 
-.technologies,
-.entertainment {
-    padding: 32px;
-
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-large);
-
-    transition: var(--transition);
-}
-
-.technologies {
-    background:
-        linear-gradient(
-            145deg,
-            var(--tech-dark),
-            var(--bg-secondary)
-        );
-}
-
-.entertainment {
-    background:
-        linear-gradient(
-            145deg,
-            var(--ent-dark),
-            var(--bg-secondary)
-        );
-}
-
-.technologies:hover,
-.entertainment:hover {
-    transform: translateY(-5px);
-}
-
-
-/* 9. FGP STORE */
-
-.store {
-    text-align: center;
-
-    background:
-        radial-gradient(
-            ellipse at center,
-            rgba(37, 132, 92, 0.18),
-            transparent 70%
-        ),
-        var(--bg-secondary);
-}
-
-.store h2 {
-    color: var(--store-soft);
-}
-
-.store .btn,
-.store .button {
-    background: var(--store-dark);
-    border-color: var(--store-main);
-}
-
-.store .btn:hover,
-.store .button:hover {
-    background: var(--store-main);
-}
-
-
-/* 10. NOTÍCIAS */
-
-.news {
-    background: var(--bg-primary);
-}
-
-.news article {
-    padding: 24px;
-
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-medium);
-}
-
-
-/* 11. RODAPÉ */
-
-footer {
-    padding: 45px 7%;
-
-    background: #0b1220;
-    border-top: 1px solid var(--border-color);
-
-    text-align: center;
-}
-
-footer p {
-    margin: 8px 0;
-    font-size: 0.9rem;
-}
-
-footer a {
-    color: var(--text-secondary);
-}
-
-footer a:hover {
-    color: var(--text-primary);
-}
-
-
-/* 12. SELEÇÃO DE TEXTO */
-
-::selection {
-    background: var(--tech-main);
-    color: white;
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
