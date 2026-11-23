@@ -1,15 +1,11 @@
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="author" content="Free Game Plant">
-    <meta name="description" content="Free Game Plant — Tecnologia e entretenimento em uma só organização.">
-
-    <meta name="theme-color" content="#101827">
+    <meta name="description" content="Free Game Plant — Tecnologia e entretenimento em uma só identidade.">
 
     <title>Free Game Plant | FGP</title>
 
@@ -17,13 +13,14 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
 
+    <script src="js/main.js" defer></script>
+    <script src="js/navigation.js" defer></script>
 </head>
 
 <body>
 
     <!-- HEADER -->
     <header class="header">
-
         <a href="index.html" class="logo">
             <span class="logo-symbol">FGP</span>
             <span class="logo-name">FREE GAME PLANT</span>
@@ -33,22 +30,21 @@
             <a href="index.html">Início</a>
             <a href="#technologies">Technologies</a>
             <a href="#entertainment">Entertainment</a>
-            <a href="pages/store.html">FGP Store</a>
             <a href="pages/news.html">Notícias</a>
             <a href="pages/about.html">Sobre</a>
         </nav>
-
     </header>
 
 
+    <!-- HERO -->
     <main>
 
-        <!-- HERO -->
         <section class="hero">
-
             <div class="hero-content">
 
-                <p class="hero-label">FREE GAME PLANT</p>
+                <span class="hero-label">
+                    FREE GAME PLANT
+                </span>
 
                 <h1>
                     Tecnologia e entretenimento.
@@ -66,56 +62,70 @@
                         Conheça a FGP
                     </a>
 
-                    <a href="pages/store.html" class="button button-secondary">
-                        Explorar FGP Store
+                    <a href="#entertainment" class="button button-secondary">
+                        Explorar
                     </a>
                 </div>
 
             </div>
-
         </section>
 
 
-        <!-- DIVISÕES -->
+        <!-- DIVISIONS -->
         <section class="divisions" id="divisions">
 
             <div class="section-heading">
-                <p class="section-label">NOSSAS DIVISÕES</p>
-
-                <h2>
-                    Dois caminhos.
-                    <span>Uma mesma organização.</span>
-                </h2>
+                <span>NOSSAS DIVISÕES</span>
+                <h2>Dois caminhos. Uma organização.</h2>
             </div>
 
 
+            <!-- TECHNOLOGIES -->
             <article class="division-card technologies" id="technologies">
 
                 <div class="division-content">
-                    <p class="division-label">FGP / TECHNOLOGIES</p>
 
-                    <h3>Tecnologia para construir o futuro.</h3>
+                    <span>FGP / TECHNOLOGIES</span>
+
+                    <h2>
+                        Tecnologia para construir o futuro.
+                    </h2>
 
                     <p>
                         Desenvolvimento de softwares, aplicativos,
-                        sistemas, sites e soluções tecnológicas.
+                        sistemas e soluções tecnológicas para pessoas
+                        e empresas.
                     </p>
+
+                    <a href="pages/technologies.html" class="button button-primary">
+                        Conheça a FGP Tech
+                    </a>
+
                 </div>
 
             </article>
 
 
+            <!-- ENTERTAINMENT -->
             <article class="division-card entertainment" id="entertainment">
 
                 <div class="division-content">
-                    <p class="division-label">FGP / ENTERTAINMENT</p>
 
-                    <h3>Mundos para explorar.</h3>
+                    <span>FGP / ENTERTAINMENT</span>
+
+                    <h2>
+                        Mundos para explorar.
+                    </h2>
 
                     <p>
                         Jogos, animações, histórias, personagens
-                        e universos originais da FGP.
+                        e universos originais.
                     </p>
+
+                    <a href="pages/entertainment.html" class="button button-primary">
+                        Conheça a FGP Entertainment
+                    </a>
+
                 </div>
 
             </article>
@@ -127,11 +137,12 @@
         <section class="store-section">
 
             <div class="store-content">
-                <p class="section-label">FGP / STORE</p>
+
+                <span>FGP ENTERTAINMENT / STORE</span>
 
                 <h2>
                     Tudo o que a FGP publica.
-                    <span>Em um só lugar.</span>
+                    Em um só lugar.
                 </h2>
 
                 <p>
@@ -142,27 +153,28 @@
                 <a href="pages/store.html" class="button button-store">
                     Explorar FGP Store
                 </a>
+
             </div>
 
         </section>
 
 
-        <!-- NOTÍCIAS -->
+        <!-- NEWS -->
         <section class="news-section">
 
             <div class="section-heading">
-                <p class="section-label">FGP / NEWS</p>
-                <h2>Novidades e atualizações</h2>
+                <span>FGP / NEWS</span>
+                <h2>Novidades e atualizações.</h2>
 
                 <p>
                     Acompanhe os lançamentos e acontecimentos
                     da Free Game Plant.
                 </p>
-            </div>
 
-            <a href="pages/news.html" class="text-link">
-                Ver notícias →
-            </a>
+                <a href="pages/news.html" class="text-link">
+                    Ver notícias →
+                </a>
+            </div>
 
         </section>
 
@@ -173,15 +185,10 @@
     <footer class="footer">
 
         <div class="footer-brand">
-            <span class="logo-symbol">FGP</span>
-
+            <h2>FGP</h2>
             <p>Free Game Plant</p>
-
-            <p class="footer-description">
-                Tecnologia, criatividade e entretenimento.
-            </p>
+            <span>Tecnologia, criatividade e entretenimento.</span>
         </div>
-
 
         <div class="footer-links">
             <a href="pages/about.html">Sobre a FGP</a>
@@ -190,15 +197,12 @@
             <a href="policiesPrivacy/terms.html">Termos de Uso</a>
         </div>
 
-
         <div class="footer-copyright">
             <p>Free Game Plant © 2026</p>
-            <p>Todos os direitos reservados.</p>
+            <span>Todos os direitos reservados.</span>
         </div>
 
     </footer>
 
-    <script src="js/main.js" defer></script>
-    <script src="js/navigation.js" defer></script>
 </body>
 </html>
