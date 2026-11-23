@@ -1,438 +1,336 @@
 
-/* ========================================
+/* ============================================
    FREE GAME PLANT
-   COMPONENTES VISUAIS
-   Arquivo: css/components.css
-   ======================================== */
+   IDENTIDADE VISUAL GLOBAL
+   Arquivo: css/main.css
+   ============================================ */
 
 
-/* 1. BOTÕES */
+/* 1. VARIÁVEIS GLOBAIS */
 
-.btn,
-.button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+:root {
+    color-scheme: dark;
 
-    min-height: 44px;
-    padding: 12px 22px;
+    /* Identidade principal */
+    --bg-primary: #101827;
+    --bg-secondary: #18263a;
+    --bg-tertiary: #202f45;
 
-    border: 1px solid transparent;
-    border-radius: 10px;
+    --text-primary: #f2f5f9;
+    --text-secondary: #a8b3c5;
 
-    font-size: 0.95rem;
-    font-weight: 700;
+    --border-color: rgba(255, 255, 255, 0.09);
 
-    cursor: pointer;
-    transition: all 0.25s ease;
+    /* FGP Technologies */
+    --tech-dark: #123b5d;
+    --tech-main: #176b9b;
+    --tech-light: #35a7d9;
+    --tech-soft: #b9e6f8;
+
+    /* FGP Entertainment */
+    --ent-dark: #382454;
+    --ent-main: #67439a;
+    --ent-light: #a77be0;
+    --ent-soft: #e2d1fa;
+
+    /* FGP Store */
+    --store-dark: #174b3a;
+    --store-main: #25845c;
+    --store-light: #55b88a;
+    --store-soft: #c7f0d9;
+
+    /* Formatação */
+    --radius-small: 8px;
+    --radius-medium: 14px;
+    --radius-large: 22px;
+
+    --content-width: 1180px;
+
+    --transition: 0.25s ease;
 }
 
-.btn-primary {
-    background: var(--tech-main);
-    color: white;
+
+/* 2. RESET GLOBAL */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.btn-primary:hover {
-    background: var(--tech-light);
-    transform: translateY(-3px);
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
 }
 
-.btn-secondary {
-    background: transparent;
-    border-color: var(--border-color);
+body {
+    min-width: 320px;
+
+    background: var(--bg-primary);
     color: var(--text-primary);
+
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+
+    overflow-x: hidden;
 }
 
-.btn-secondary:hover {
-    background: var(--bg-tertiary);
-    transform: translateY(-3px);
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition);
 }
 
-.btn-entertainment {
-    background: var(--ent-main);
-    color: white;
+img {
+    display: block;
+    max-width: 100%;
 }
 
-.btn-entertainment:hover {
-    background: var(--ent-light);
-}
-
-.btn-store {
-    background: var(--store-main);
-    color: white;
-}
-
-.btn-store:hover {
-    background: var(--store-light);
+button {
+    font: inherit;
 }
 
 
-/* 2. CARTÕES */
+/* 3. TIPOGRAFIA */
 
-.card {
-    padding: 28px;
-
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 18px;
-
-    transition: all 0.25s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-.card p:last-child {
-    margin-bottom: 0;
-}
-
-
-/* 3. CARTÃO TECHNOLOGIES */
-
-.card-technologies {
-    background: linear-gradient(
-        145deg,
-        var(--tech-dark),
-        var(--bg-secondary)
-    );
-
-    border-color: rgba(53, 167, 217, 0.25);
-}
-
-.card-technologies:hover {
-    border-color: var(--tech-light);
-}
-
-
-/* 4. CARTÃO ENTERTAINMENT */
-
-.card-entertainment {
-    background: linear-gradient(
-        145deg,
-        var(--ent-dark),
-        var(--bg-secondary)
-    );
-
-    border-color: rgba(167, 123, 224, 0.25);
-}
-
-.card-entertainment:hover {
-    border-color: var(--ent-light);
-}
-
-
-/* 5. CARTÃO STORE */
-
-.card-store {
-    background: linear-gradient(
-        145deg,
-        var(--store-dark),
-        var(--bg-secondary)
-    );
-
-    border-color: rgba(85, 184, 138, 0.25);
-}
-
-.card-store:hover {
-    border-color: var(--store-light);
-}
-
-
-/* 6. ETIQUETAS */
-
-.tag {
-    display: inline-block;
-
-    padding: 5px 12px;
-    margin-bottom: 12px;
-
-    border-radius: 20px;
-
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.tag-tech {
-    background: var(--tech-dark);
-    color: var(--tech-soft);
-}
-
-.tag-entertainment {
-    background: var(--ent-dark);
-    color: var(--ent-soft);
-}
-
-.tag-store {
-    background: var(--store-dark);
-    color: var(--store-soft);
-}
-
-
-/* 7. LINKS */
-
-.link {
-    color: var(--tech-light);
-    font-weight: 600;
-}
-
-.link:hover {
-    color: var(--tech-soft);
-    text-decoration: underline;
-}
-
-.link-entertainment {
-    color: var(--ent-light);
-}
-
-.link-store {
-    color: var(--store-light);
-}
-
-
-/* 8. NAVEGAÇÃO */
-
-.nav-link {
-    position: relative;
-    padding: 6px 0;
-
-    color: var(--text-secondary);
-    font-weight: 600;
-}
-
-.nav-link::after {
-    content: "";
-
-    position: absolute;
-    bottom: 0;
-    left: 0;
-
-    width: 0;
-    height: 2px;
-
-    background: var(--tech-light);
-    transition: width 0.25s ease;
-}
-
-.nav-link:hover {
+h1,
+h2,
+h3,
+h4 {
     color: var(--text-primary);
+    line-height: 1.2;
 }
 
-.nav-link:hover::after {
+h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    letter-spacing: -2px;
+}
+
+h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+
+/* 4. ESTRUTURA PRINCIPAL */
+
+main {
     width: 100%;
 }
 
-
-/* 9. CARTÕES DE NOTÍCIAS */
-
-.news-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-    padding: 24px;
-
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-
-    transition: all 0.25s ease;
-}
-
-.news-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--tech-main);
-}
-
-.news-date {
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-}
-
-.news-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-
-/* 10. SEPARADORES */
-
-.separator {
+section {
     width: 100%;
-    height: 1px;
-
-    margin: 30px 0;
-
-    background: var(--border-color);
+    padding: 90px 7%;
 }
 
 
-/* 11. ÍCONES */
-
-.icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 42px;
-    height: 42px;
-
-    border-radius: 12px;
-    background: var(--bg-tertiary);
-
-    font-size: 1.3rem;
-}
-
-.icon-tech {
-    background: var(--tech-dark);
-}
-
-.icon-entertainment {
-    background: var(--ent-dark);
-}
-
-.icon-store {
-    background: var(--store-dark);
-}
-
-
-/* 12. EFEITOS DE FOCO */
-
-button:focus-visible,
-a:focus-visible {
-    outline: 3px solid var(--tech-light);
-    outline-offset: 4px;
-}
-
-
-/* 13. ESTADOS DESABILITADOS */
-
-button:disabled,
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-
-/* ========================================
-   INTEGRAÇÃO COM O INDEX.HTML
-   ======================================== */
-
-/* HEADER */
+/* 5. CABEÇALHO */
 
 .header {
     position: sticky;
     top: 0;
     z-index: 1000;
 
+    width: 100%;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
+    gap: 24px;
 
     padding: 18px 7%;
 
-    background: rgba(16, 24, 39, 0.95);
+    background: rgba(16, 24, 39, 0.94);
     border-bottom: 1px solid var(--border-color);
+
     backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
+
+
+/* LOGOTIPO */
 
 .logo {
     display: flex;
     align-items: center;
     gap: 12px;
+
+    flex-shrink: 0;
 }
 
 .logo-symbol {
+    width: 46px;
+    height: 46px;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    width: 46px;
-    height: 46px;
-
     border-radius: 12px;
-    background: var(--tech-main);
 
+    background: var(--tech-main);
     color: white;
+
+    font-size: 1rem;
     font-weight: 900;
     letter-spacing: -1px;
 }
 
 .logo-name {
-    font-size: 0.95rem;
+    color: var(--text-primary);
+
+    font-size: 0.9rem;
     font-weight: 800;
     letter-spacing: 1px;
 }
 
+
+/* NAVEGAÇÃO */
+
 .navigation {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     flex-wrap: wrap;
     gap: 22px;
 }
 
+.navigation a {
+    position: relative;
 
-/* HERO */
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.navigation a:hover {
+    color: var(--text-primary);
+}
+
+.navigation a[aria-current="location"] {
+    color: var(--tech-light);
+}
+
+
+/* 6. HERO */
+
+.hero {
+    min-height: 650px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 0%,
+            rgba(53, 167, 217, 0.16),
+            transparent 65%
+        ),
+        var(--bg-primary);
+}
 
 .hero-content {
     width: 100%;
     max-width: 950px;
 }
 
-.hero-label,
-.section-label,
-.division-label {
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 2px;
+.hero-label {
+    margin-bottom: 24px;
+
     color: var(--tech-light);
-    margin-bottom: 18px;
+
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 3px;
 }
 
-.hero h1 span,
-.section-heading h2 span {
+.hero h1 {
+    margin-bottom: 24px;
+}
+
+.hero h1 span {
     display: block;
     color: var(--tech-light);
 }
 
 .hero-description {
     max-width: 700px;
-    margin: 24px auto;
+
+    margin: 0 auto 28px;
+
+    font-size: 1.1rem;
+    line-height: 1.8;
 }
 
 .hero-actions {
     display: flex;
+    align-items: center;
     justify-content: center;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 28px;
 }
 
 
-/* DIVISÕES */
+/* 7. TÍTULOS DE SEÇÃO */
+
+.section-heading {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.section-label {
+    margin-bottom: 16px;
+
+    color: var(--tech-light);
+
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.section-heading h2 span {
+    display: block;
+    color: var(--tech-light);
+}
+
+.section-heading > p:last-child {
+    max-width: 650px;
+    margin-top: 16px;
+}
+
+
+/* 8. DIVISÕES */
 
 .divisions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
+
+    background: var(--bg-primary);
 }
 
-.section-heading {
+.divisions .section-heading {
     grid-column: 1 / -1;
-    width: 100%;
-    margin-bottom: 15px;
 }
 
 .division-card {
-    min-height: 270px;
+    min-height: 280px;
+
     display: flex;
     align-items: flex-end;
 
@@ -448,28 +346,64 @@ button:disabled,
     transform: translateY(-5px);
 }
 
-.division-card.technologies {
-    background: linear-gradient(
-        145deg,
-        var(--tech-dark),
-        var(--bg-secondary)
-    );
-}
-
-.division-card.entertainment {
-    background: linear-gradient(
-        145deg,
-        var(--ent-dark),
-        var(--bg-secondary)
-    );
-}
-
 .division-content {
-    max-width: 450px;
+    max-width: 460px;
+}
+
+.division-label {
+    margin-bottom: 16px;
+
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.division-card h3 {
+    margin-bottom: 14px;
+}
+
+.division-card p:last-child {
+    margin-bottom: 0;
 }
 
 
-/* STORE */
+/* TECHNOLOGIES */
+
+.technologies {
+    background:
+        linear-gradient(
+            145deg,
+            var(--tech-dark),
+            var(--bg-secondary)
+        );
+
+    border-color: rgba(53, 167, 217, 0.25);
+}
+
+.technologies .division-label {
+    color: var(--tech-light);
+}
+
+
+/* ENTERTAINMENT */
+
+.entertainment {
+    background:
+        linear-gradient(
+            145deg,
+            var(--ent-dark),
+            var(--bg-secondary)
+        );
+
+    border-color: rgba(167, 123, 224, 0.25);
+}
+
+.entertainment .division-label {
+    color: var(--ent-light);
+}
+
+
+/* 9. FGP STORE */
 
 .store-section {
     text-align: center;
@@ -477,7 +411,7 @@ button:disabled,
     background:
         radial-gradient(
             ellipse at center,
-            rgba(37, 132, 92, 0.2),
+            rgba(37, 132, 92, 0.22),
             transparent 70%
         ),
         var(--bg-secondary);
@@ -485,11 +419,15 @@ button:disabled,
 
 .store-content {
     max-width: 800px;
-    margin: auto;
+    margin: 0 auto;
 }
 
 .store-content .section-label {
     color: var(--store-light);
+}
+
+.store-content h2 {
+    margin-bottom: 22px;
 }
 
 .store-content h2 span {
@@ -497,27 +435,31 @@ button:disabled,
     color: var(--store-light);
 }
 
-.store-content .button {
-    margin-top: 20px;
+.store-content > p:not(.section-label) {
+    max-width: 650px;
+    margin: 0 auto 24px;
+
+    font-size: 1.05rem;
 }
 
 
-/* NOTÍCIAS */
+/* 10. NOTÍCIAS */
 
 .news-section {
-    text-align: center;
+    background: var(--bg-primary);
 }
 
 .news-section .section-heading {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .text-link {
     display: inline-block;
-    margin-top: 15px;
 
     color: var(--tech-light);
     font-weight: 700;
+
+    transition: var(--transition);
 }
 
 .text-link:hover {
@@ -525,7 +467,7 @@ button:disabled,
 }
 
 
-/* FOOTER */
+/* 11. RODAPÉ */
 
 .footer {
     display: grid;
@@ -547,13 +489,23 @@ button:disabled,
     gap: 10px;
 }
 
-.footer-description,
-.footer-copyright p {
-    font-size: 0.85rem;
+.footer-brand .logo-symbol {
+    margin-bottom: 6px;
+}
+
+.footer-brand p {
+    margin-bottom: 0;
+}
+
+.footer-description {
+    font-size: 0.88rem;
 }
 
 .footer-links a {
+    width: fit-content;
+
     color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 .footer-links a:hover {
@@ -562,4 +514,22 @@ button:disabled,
 
 .footer-copyright {
     text-align: right;
+}
+
+.footer-copyright p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+
+/* 12. ACESSIBILIDADE */
+
+::selection {
+    background: var(--tech-main);
+    color: white;
+}
+
+:focus-visible {
+    outline: 3px solid var(--tech-light);
+    outline-offset: 4px;
 }
