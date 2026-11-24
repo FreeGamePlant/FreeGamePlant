@@ -1252,11 +1252,53 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 let currentFile = null;
 
+/* Popula os selects de parcelas e vencimento */
+function populateInstallmentOptions() {
+  const selCount = document.getElementById('installmentCount');
+  const selDay = document.getElementById('dueDay');
+  if (!selCount || !selDay) return;
+
+  // Quantidade de parcelas: 3 a 27 + "Outra"
+  const countOpts = ['<option value="">Selecione...</option>'];
+  for (let i = 3; i <= 27; i++) {
+    countOpts.push(`<option value="${i}">${i}x</option>`);
+  }
+  countOpts.push('<option value="outra">Outra quantidade — avaliar</option>');
+  selCount.innerHTML = countOpts.join('');
+
+  // Dia de vencimento: 1 a 28
+  const dayOpts = ['<option value="">Selecione...</option>'];
+  for (let i = 1; i <= 28; i++) {
+    dayOpts.push(`<option value="${i}">Dia ${i}</option>`);
+  }
+  selDay.innerHTML = dayOpts.join('');
+}
+
+/* Mostra/oculta os campos de parcelamento conforme a escolha */
+function updateInstallmentVisibility() {
+  const selected = document.querySelector('input[name="productionPayment"]:checked');
+  const isParcelado = selected && selected.value === 'Parcelado';
+  const fields = document.getElementById('installmentFields');
+  if (!fields) return;
+
+  if (isParcelado) {
+    fields.classList.add('visible');
+  } else {
+    fields.classList.remove('visible');
+    // Não limpa os valores — preserva as escolhas do cliente
+    // (mas limpa classes de erro para não persistirem ocultas)
+    document.getElementById('installmentCount')?.classList.remove('error');
+    document.getElementById('dueDay')?.classList.remove('error');
+    document.getElementById('installmentCountError')?.classList.remove('visible');
+    document.getElementById('dueDayError')?.classList.remove('visible');
+  }
+}
+
 function openRequestModal(cat, sub) {
   const modal = dom.requestModal();
   if (!modal) return;
 
-  // Preenche o tipo de pedido
+  // Tipo de pedido (fixo)
   const typeText = `${cat.title} > ${sub.title}`;
   document.getElementById('requestTypeDisplay').textContent = typeText;
   document.getElementById('requestType').value = typeText;
@@ -1269,10 +1311,24 @@ function openRequestModal(cat, sub) {
   document.getElementById('initialDescription').value =
     `Olá! Tenho interesse no desenvolvimento de ${sub.title.toLowerCase()} (${cat.title}) e gostaria de conhecer as condições de contratação.`;
 
-  // Limpa campos
+  // Limpa campos do projeto
   document.getElementById('projectDescription').value = '';
-  document.querySelectorAll('input[name="paymentPreference"]').forEach(r => r.checked = false);
+
+  // Limpa as duas seções de preferência (A e B)
+  document.querySelectorAll('input[name="productionPayment"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="maintenancePreference"]').forEach(r => r.checked = false);
   document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+
+  // Reseta selects de parcelamento (mas mantém opções populadas)
+  const instCount = document.getElementById('installmentCount');
+  const dueDay = document.getElementById('dueDay');
+  if (instCount) instCount.value = '';
+  if (dueDay) dueDay.value = '';
+
+  // Oculta campos condicionais
+  updateInstallmentVisibility();
+
+  // Reseta upload e erros
   resetFileUpload();
   clearErrors();
 
@@ -1300,7 +1356,8 @@ function closeRequestModal() {
 
 function clearErrors() {
   document.querySelectorAll('.field-error').forEach(el => el.classList.remove('visible'));
-  document.querySelectorAll('.form-group input, .form-group textarea').forEach(el => el.classList.remove('error'));
+  document.querySelectorAll('.form-group input, .form-group textarea, .form-group select')
+    .forEach(el => el.classList.remove('error'));
 }
 
 /* ============================================================
@@ -1406,28 +1463,54 @@ function validateForm() {
   const title = document.getElementById('requestTitle');
   const initialDesc = document.getElementById('initialDescription');
   const projectDesc = document.getElementById('projectDescription');
-  const paymentSelected = document.querySelector('input[name="paymentPreference"]:checked');
 
+  // Título
   if (!title.value.trim()) {
     title.classList.add('error');
     document.getElementById('titleError').classList.add('visible');
     valid = false;
   }
 
+  // Descrição inicial
   if (!initialDesc.value.trim()) {
     initialDesc.classList.add('error');
     document.getElementById('initialDescError').classList.add('visible');
     valid = false;
   }
 
+  // Descrição do projeto
   if (!projectDesc.value.trim()) {
     projectDesc.classList.add('error');
     document.getElementById('projectDescError').classList.add('visible');
     valid = false;
   }
 
-  if (!paymentSelected) {
-    document.getElementById('paymentError').classList.add('visible');
+  // ===== SEÇÃO A: Produção =====
+  const production = document.querySelector('input[name="productionPayment"]:checked');
+  if (!production) {
+    document.getElementById('productionPaymentError').classList.add('visible');
+    valid = false;
+  } else if (production.value === 'Parcelado') {
+    const instCount = document.getElementById('installmentCount');
+    const dueDay = document.getElementById('dueDay');
+
+    if (!instCount.value) {
+      instCount.classList.add('error');
+      document.getElementById('installmentCountError').classList.add('visible');
+      valid = false;
+    }
+    if (!dueDay.value) {
+      dueDay.classList.add('error');
+      document.getElementById('dueDayError').classList.add('visible');
+      valid = false;
+    }
+  }
+  // Se "À vista": os campos ocultos NÃO bloqueiam o envio
+
+  // ===== SEÇÃO B: Manutenção =====
+  const maintenance = document.querySelector('input[name="maintenancePreference"]:checked');
+  if (!maintenance) {
+    document.getElementById('maintenanceError').classList.add('visible');
     valid = false;
   }
 
@@ -1443,7 +1526,6 @@ async function submitRequest(e) {
     return;
   }
 
-  // Verifica se o Forminit está configurado
   if (FORMINIT_FORM_ID === 'YOUR_FORMINIT_FORM_ID' || !FORMINIT_FORM_ID) {
     const feedback = document.getElementById('submitFeedback');
     feedback.className = 'submit-feedback error visible';
@@ -1460,19 +1542,39 @@ async function submitRequest(e) {
   feedback.classList.remove('visible', 'success', 'error');
 
   const formData = new FormData();
+
+  // Campos básicos
   formData.append('title', document.getElementById('requestTitle').value.trim());
   formData.append('initialDescription', document.getElementById('initialDescription').value.trim());
   formData.append('requestType', document.getElementById('requestType').value);
   formData.append('projectDescription', document.getElementById('projectDescription').value.trim());
 
-  const payment = document.querySelector('input[name="paymentPreference"]:checked');
-  formData.append('paymentPreference', payment ? payment.value : '');
+  // ===== SEÇÃO A: Produção =====
+  const prodPayment = document.querySelector('input[name="productionPayment"]:checked');
+  let productionText = prodPayment ? prodPayment.value : '';
 
+  if (prodPayment && prodPayment.value === 'Parcelado') {
+    const countEl = document.getElementById('installmentCount');
+    const dueEl = document.getElementById('dueDay');
+    const countText = countEl.value === 'outra'
+      ? 'Outra quantidade — avaliar'
+      : `${countEl.value} parcelas`;
+    productionText += ` — ${countText}, vencimento dia ${dueEl.value}`;
+  }
+  formData.append('productionPayment', productionText);
+
+  // ===== SEÇÃO B: Manutenção =====
+  const maintPref = document.querySelector('input[name="maintenancePreference"]:checked');
+  formData.append('maintenancePreference', maintPref ? maintPref.value : '');
+
+  // Anexo
   if (currentFile) {
     formData.append('attachment', currentFile, currentFile.name);
   }
 
-  formData.append('_subject', `Nova solicitação de orçamento — ${document.getElementById('requestType').value} | FGP Technologies`);
+  // Metadados Forminit
+  formData.append('_subject',
+    `Nova solicitação de orçamento — ${document.getElementById('requestType').value} | FGP Technologies`);
   formData.append('_captcha', 'false');
 
   try {
@@ -1486,7 +1588,6 @@ async function submitRequest(e) {
       feedback.className = 'submit-feedback success visible';
       feedback.innerHTML = '<i class="fas fa-circle-check"></i> Pedido enviado com sucesso! A FGP Technologies entrará em contato pelos canais informados.';
       feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
       setTimeout(() => closeRequestModal(), 5000);
     } else {
       const err = await response.json().catch(() => ({}));
@@ -1754,18 +1855,46 @@ function setupRequestModal() {
   const closeBtn = document.getElementById('closeRequestBtn');
   if (!modal || !form) return;
 
+  // Popula selects
+  populateInstallmentOptions();
+
   closeBtn.addEventListener('click', closeRequestModal);
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeRequestModal();
   });
 
-  // Pagamento — seleção visual
-  document.querySelectorAll('.payment-option').forEach(option => {
-    option.addEventListener('click', () => {
-      document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-      option.classList.add('selected');
-      option.querySelector('input[type="radio"]').checked = true;
+  // ===== Radio groups — trata cada grupo separadamente =====
+  document.querySelectorAll('.payment-options').forEach(group => {
+    group.querySelectorAll('.payment-option').forEach(option => {
+      option.addEventListener('click', () => {
+        // Remove 'selected' apenas deste grupo
+        group.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+
+        const radio = option.querySelector('input[type="radio"]');
+        if (radio) {
+          radio.checked = true;
+          // Se for o grupo de produção, atualiza campos condicionais
+          if (radio.name === 'productionPayment') {
+            updateInstallmentVisibility();
+          }
+        }
+      });
     });
+  });
+
+  // Ao alterar selects, remove estado de erro se preenchidos
+  document.getElementById('installmentCount')?.addEventListener('change', (e) => {
+    if (e.target.value) {
+      e.target.classList.remove('error');
+      document.getElementById('installmentCountError').classList.remove('visible');
+    }
+  });
+  document.getElementById('dueDay')?.addEventListener('change', (e) => {
+    if (e.target.value) {
+      e.target.classList.remove('error');
+      document.getElementById('dueDayError').classList.remove('visible');
+    }
   });
 
   form.addEventListener('submit', submitRequest);
