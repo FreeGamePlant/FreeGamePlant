@@ -55,7 +55,7 @@ Decisions will be made according to the circumstances and the severity of the be
 If you experience or witness behavior that violates this Code of Conduct, please contact:
 
 **Free Game Plant (FGP)**  
-Email: elaifigueroa@gmail.com
+Email: fgpfreegameplant@gmail.com
 
 Reports will be handled with appropriate discretion.
 
