@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="FGP Technologies — aplicativos, sites, sistemas e soluções digitais. Desenvolvimento sob medida pela Free Game Plant." />
+  <meta name="description" content="FGP Technologies — aplicativos, sites, sistemas e soluções digitais. Desenvolvimento sob medida com contratação mensal acessível." />
   <meta name="theme-color" content="#0a0e17" />
-  <title>FGP Technologies — Free Game Plant</title>
+  <title>FGP Technologies</title>
 
   <link rel="icon" type="image/png" href="../src/assets/images/lOGOFGP.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -18,19 +18,16 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      /* Paleta padrão da TECH (configurável via JS + localStorage) */
       --bg: #0a0e17;
       --text: #f1f5f9;
       --primary: #3b82f6;
       --accent: #06b6d4;
 
-      /* Derivadas — recalculadas via JS */
       --surface: rgba(255, 255, 255, 0.05);
       --surface-strong: rgba(255, 255, 255, 0.09);
       --border: rgba(255, 255, 255, 0.12);
       --text-muted: rgba(241, 245, 249, 0.65);
 
-      /* Estruturais */
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 18px;
@@ -401,7 +398,7 @@
     }
 
     .hero h1 {
-      font-size: clamp(2.4rem, 7vw, 4.6rem);
+      font-size: clamp(2.4rem, 7vw, 4.4rem);
       font-weight: 900;
       line-height: 1.05;
       letter-spacing: -0.03em;
@@ -416,7 +413,7 @@
     .hero p {
       font-size: clamp(1rem, 2vw, 1.15rem);
       color: var(--text-muted);
-      max-width: 620px;
+      max-width: 640px;
       margin: 0 auto 36px;
       line-height: 1.65;
     }
@@ -470,6 +467,23 @@
       transform: translateY(-3px);
     }
 
+    .hero-highlights {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 42px;
+    }
+    .hero-highlight {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .hero-highlight i { color: var(--primary); font-size: 0.85rem; }
+
     /* ============================================================
        7. SEÇÕES GENÉRICAS
        ============================================================ */
@@ -508,7 +522,135 @@
     }
 
     /* ============================================================
-       8. DIFERENCIAIS
+       8. COMO FUNCIONA — FLUXO
+       ============================================================ */
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+    .flow-step {
+      position: relative;
+      padding: 26px 22px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+    .flow-step:hover {
+      border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+      transform: translateY(-3px);
+      background: var(--surface-strong);
+    }
+    .flow-number {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+    .flow-step h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .flow-step p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       9. MODELO COMERCIAL
+       ============================================================ */
+    .model-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .model-info-card {
+      padding: 26px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .model-info-card:hover {
+      border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+      background: var(--surface-strong);
+    }
+    .model-info-icon {
+      width: 48px; height: 48px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--primary) 15%, transparent);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+    }
+    .model-info-card h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .model-info-card > p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .model-info-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .model-info-list li {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+    .model-info-list li i {
+      color: var(--primary);
+      font-size: 0.7rem;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+    .model-info-price {
+      padding: 14px;
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: var(--primary);
+      text-align: center;
+      margin: 14px 0;
+      letter-spacing: 0.01em;
+    }
+    .model-info-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.5;
+      margin-top: auto;
+    }
+
+    /* ============================================================
+       10. DIFERENCIAIS
        ============================================================ */
     .diffs-grid {
       display: grid;
@@ -553,7 +695,7 @@
     }
 
     /* ============================================================
-       9. CATEGORIAS DE SERVIÇOS
+       11. CATEGORIAS DE SERVIÇOS
        ============================================================ */
     .category-block {
       margin-bottom: 60px;
@@ -607,7 +749,7 @@
       padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       transition: var(--transition);
       position: relative;
       overflow: hidden;
@@ -681,47 +823,63 @@
       flex-shrink: 0;
     }
 
-    .model-footer {
-      margin-top: auto;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
+    /* Bloco de preço */
+    .price-block {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 6px;
+      padding: 14px 16px;
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+      border-radius: 10px;
+      margin-top: 6px;
     }
-
-    .model-price {
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: var(--accent);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+    .price-value {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: 0.01em;
+      line-height: 1.2;
     }
-    .model-price small {
-      display: block;
-      font-size: 0.65rem;
+    .price-value small {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+    .price-deadline {
+      font-size: 0.76rem;
       color: var(--text-muted);
       font-weight: 600;
-      text-transform: none;
-      letter-spacing: 0;
-      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.4;
+    }
+    .price-deadline i { color: var(--accent); font-size: 0.7rem; }
+
+    .price-note {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.5;
     }
 
     .btn-quote {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 16px;
       border-radius: 8px;
       background: color-mix(in srgb, var(--primary) 14%, transparent);
       color: var(--primary);
       font-weight: 700;
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
       transition: var(--transition);
-      white-space: nowrap;
+      margin-top: 6px;
+      width: 100%;
     }
     .btn-quote:hover {
       background: var(--primary);
@@ -729,10 +887,10 @@
       border-color: var(--primary);
       transform: translateY(-1px);
     }
-    .btn-quote i { font-size: 0.7rem; }
+    .btn-quote i { font-size: 0.75rem; }
 
     /* ============================================================
-       10. CONTATO
+       12. CONTATO
        ============================================================ */
     .contact-section {
       background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--primary) 5%, transparent));
@@ -795,7 +953,7 @@
     }
 
     /* ============================================================
-       11. MODAIS
+       13. MODAL ACESSOS
        ============================================================ */
     .modal-overlay {
       position: fixed;
@@ -897,20 +1055,8 @@
     .access-item-info span { font-size: 0.75rem; color: var(--text-muted); word-break: break-all; }
     .access-item > i:last-child { color: var(--text-muted); font-size: 0.7rem; }
 
-    .modal-service-name {
-      display: inline-block;
-      padding: 5px 12px;
-      background: color-mix(in srgb, var(--accent) 15%, transparent);
-      color: var(--accent);
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-      letter-spacing: 0.02em;
-    }
-
     /* ============================================================
-       12. FOOTER
+       14. FOOTER
        ============================================================ */
     .site-footer {
       border-top: 1px solid var(--border);
@@ -993,7 +1139,7 @@
     .footer-bottom i { color: var(--accent); }
 
     /* ============================================================
-       13. ANIMAÇÕES
+       15. ANIMAÇÕES
        ============================================================ */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(24px); }
@@ -1010,7 +1156,7 @@
     }
 
     /* ============================================================
-       14. RESPONSIVIDADE
+       16. RESPONSIVIDADE
        ============================================================ */
     @media (max-width: 640px) {
       .container { padding: 0 18px; }
@@ -1037,15 +1183,16 @@
       </button>
 
       <a href="../index.html" class="logo">
-        <img src="../src/assets/images/lOGOFGP.png" alt="Free Game Plant"
+        <img src="../src/assets/images/lOGOFGP.png" alt="FGP"
              onerror="this.style.display='none'" />
-        <span class="logo-text">FREE GAME PLANT</span>
+        <span class="logo-text">FGP</span>
         <span class="logo-tag">TECH</span>
       </a>
 
       <nav class="main-nav">
-        <a href="#servicos">Serviços</a>
-        <a href="#categorias">Categorias</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#modelo-comercial">Modelo</a>
+        <a href="#categorias">Serviços</a>
         <a href="#contato">Contato</a>
       </nav>
 
@@ -1077,8 +1224,10 @@
       <div class="divider"></div>
       <span class="menu-label">Navegação</span>
 
-      <a href="#servicos"><i class="fas fa-briefcase"></i> Serviços</a>
-      <a href="#categorias"><i class="fas fa-layer-group"></i> Categorias</a>
+      <a href="#como-funciona"><i class="fas fa-route"></i> Como funciona</a>
+      <a href="#modelo-comercial"><i class="fas fa-receipt"></i> Modelo comercial</a>
+      <a href="#servicos"><i class="fas fa-briefcase"></i> Diferenciais</a>
+      <a href="#categorias"><i class="fas fa-layer-group"></i> Serviços e preços</a>
       <a href="#contato"><i class="fas fa-envelope"></i> Contato</a>
 
       <div class="divider"></div>
@@ -1144,35 +1293,164 @@
             <i class="fas fa-microchip"></i> FGP Technologies
           </span>
 
-          <h1>Tecnologia sob medida, feita com propósito.</h1>
+          <h1>Tecnologia sob medida, com contratação acessível.</h1>
 
           <p>
-            A divisão tecnológica da Free Game Plant desenvolve aplicativos, sites,
-            sistemas e soluções digitais para pessoas e empresas. Cada projeto é
-            pensado do zero — sem pacotes engessados.
+            A FGP Technologies desenvolve aplicativos, sites, sistemas e soluções digitais
+            para pessoas e empresas. Cada projeto é pensado do zero, com pagamento mensal
+            durante o desenvolvimento — sem exigir o valor total de uma só vez.
           </p>
 
           <div class="hero-actions">
             <a href="#categorias" class="btn-primary">
-              <i class="fas fa-compass"></i> Explorar serviços
+              <i class="fas fa-compass"></i> Ver serviços e preços
             </a>
-            <button class="btn-outline" id="heroContactBtn">
+            <a href="#contato" class="btn-outline">
               <i class="fas fa-envelope"></i> Falar com a FGP
-            </button>
+            </a>
+          </div>
+
+          <div class="hero-highlights">
+            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Contratação mensal</span>
+            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Escopo transparente</span>
+            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Manutenção opcional</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===== SERVIÇOS / DIFERENCIAIS ===== -->
+    <!-- ===== COMO FUNCIONA ===== -->
+    <section class="section" id="como-funciona">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">Processo</span>
+          <h2 class="section-title">Como funciona a contratação</h2>
+          <p class="section-desc">
+            Do primeiro contato à entrega, um processo claro e sem surpresas.
+          </p>
+        </div>
+
+        <div class="flow-steps">
+          <div class="flow-step reveal">
+            <div class="flow-number">1</div>
+            <h3>Escolha do serviço</h3>
+            <p>Você identifica a solução que deseja contratar entre as categorias disponíveis.</p>
+          </div>
+
+          <div class="flow-step reveal">
+            <div class="flow-number">2</div>
+            <h3>Solicitação</h3>
+            <p>Ao clicar em "Solicitar orçamento", uma mensagem de e-mail já preenchida é aberta para você revisar.</p>
+          </div>
+
+          <div class="flow-step reveal">
+            <div class="flow-number">3</div>
+            <h3>Análise</h3>
+            <p>A FGP avalia as necessidades, a complexidade e o escopo do projeto solicitado.</p>
+          </div>
+
+          <div class="flow-step reveal">
+            <div class="flow-number">4</div>
+            <h3>Proposta</h3>
+            <p>Você recebe uma proposta com preço, prazo, escopo detalhado e condições.</p>
+          </div>
+
+          <div class="flow-step reveal">
+            <div class="flow-number">5</div>
+            <h3>Desenvolvimento</h3>
+            <p>Após a aprovação e o pagamento inicial, o projeto começa e segue o planejamento acordado.</p>
+          </div>
+
+          <div class="flow-step reveal">
+            <div class="flow-number">6</div>
+            <h3>Entrega e manutenção</h3>
+            <p>O projeto é entregue, e você poderá contratar um plano opcional de manutenção contínua.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== MODELO COMERCIAL ===== -->
+    <section class="section" id="modelo-comercial">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">Modelo comercial</span>
+          <h2 class="section-title">Contratação transparente e sustentável</h2>
+          <p class="section-desc">
+            A FGP prioriza qualidade e entregas realistas. Por isso, trabalhamos com
+            pagamentos mensais durante o desenvolvimento — sem exigir o valor total de uma só vez.
+          </p>
+        </div>
+
+        <div class="model-cards">
+          <article class="model-info-card reveal">
+            <div class="model-info-icon"><i class="fas fa-calendar-check"></i></div>
+            <h3>Desenvolvimento por mensalidade</h3>
+            <p>
+              O cliente paga mensalmente durante um prazo combinado. O desenvolvimento começa
+              após aprovação da proposta e pagamento inicial.
+            </p>
+            <ul class="model-info-list">
+              <li><i class="fas fa-check"></i> Prazo e valor definidos antes do início</li>
+              <li><i class="fas fa-check"></i> Escopo detalhado das funcionalidades contratadas</li>
+              <li><i class="fas fa-check"></i> Entregas seguem o planejamento acordado</li>
+              <li><i class="fas fa-check"></i> Alterações fora do escopo podem gerar custos adicionais</li>
+              <li><i class="fas fa-check"></i> Não é uma assinatura ilimitada</li>
+            </ul>
+          </article>
+
+          <article class="model-info-card reveal">
+            <div class="model-info-icon"><i class="fas fa-screwdriver-wrench"></i></div>
+            <h3>Manutenção após a entrega</h3>
+            <p>
+              Plano opcional e independente do desenvolvimento. Ideal para manter o projeto
+              atualizado e receber suporte técnico contínuo.
+            </p>
+            <div class="model-info-price">R$ 99 – 299 / mês</div>
+            <ul class="model-info-list">
+              <li><i class="fas fa-check"></i> Correções e ajustes</li>
+              <li><i class="fas fa-check"></i> Atualizações periódicas</li>
+              <li><i class="fas fa-check"></i> Suporte técnico conforme escopo</li>
+              <li><i class="fas fa-check"></i> Pequenas melhorias</li>
+            </ul>
+            <p class="model-info-note">
+              O valor depende do serviço e da quantidade de suporte necessária.
+              Não oferece trabalho ilimitado.
+            </p>
+          </article>
+
+          <article class="model-info-card reveal">
+            <div class="model-info-icon"><i class="fas fa-receipt"></i></div>
+            <h3>Custos externos</h3>
+            <p>
+              Alguns itens são cobrados separadamente, pois envolvem serviços de terceiros
+              e não fazem parte da mensalidade de desenvolvimento.
+            </p>
+            <ul class="model-info-list">
+              <li><i class="fas fa-check"></i> Domínio</li>
+              <li><i class="fas fa-check"></i> Hospedagem</li>
+              <li><i class="fas fa-check"></i> Servidores</li>
+              <li><i class="fas fa-check"></i> APIs e serviços pagos</li>
+              <li><i class="fas fa-check"></i> Taxas de publicação nas lojas</li>
+              <li><i class="fas fa-check"></i> Licenças e ferramentas externas</li>
+            </ul>
+            <p class="model-info-note">
+              Esses custos não estão incluídos na mensalidade por padrão.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DIFERENCIAIS ===== -->
     <section class="section" id="servicos">
       <div class="container">
         <div class="section-header reveal">
           <span class="section-eyebrow">Como trabalhamos</span>
           <h2 class="section-title">Desenvolvimento com clareza</h2>
           <p class="section-desc">
-            Sem números inventados, sem promessas vazias. Trabalhamos com escopo definido,
-            orçamento personalizado e comunicação direta.
+            Sem números inventados, sem promessas vazias. Escopo definido, orçamento
+            personalizado e comunicação direta.
           </p>
         </div>
 
@@ -1209,10 +1487,10 @@
       <div class="container">
         <div class="section-header reveal">
           <span class="section-eyebrow">Catálogo</span>
-          <h2 class="section-title">Serviços e categorias</h2>
+          <h2 class="section-title">Serviços e valores estimados</h2>
           <p class="section-desc">
-            Cinco frentes de atuação. Escolha um modelo abaixo para solicitar um
-            orçamento personalizado — todos os valores são definidos caso a caso.
+            Cinco frentes de atuação. Os valores abaixo são faixas mensais de referência —
+            o orçamento final considera complexidade, funcionalidades e prazo do projeto.
           </p>
         </div>
 
@@ -1229,26 +1507,26 @@
           <span class="section-eyebrow">Contato comercial</span>
           <h2 class="section-title">Vamos conversar</h2>
           <p class="section-desc">
-            Atendimento pelos canais oficiais da Free Game Plant. Descreva sua ideia
+            Atendimento pelos canais oficiais da FGP Technologies. Descreva sua ideia
             e retornaremos com uma proposta.
           </p>
         </div>
 
         <div class="contact-grid">
-          <a href="mailto:freegameplantplaystory@gmail.com" class="contact-card reveal">
+          <a href="mailto:fgpfreegameplant@gmail.com" class="contact-card reveal">
             <div class="contact-icon"><i class="fas fa-envelope"></i></div>
             <div class="contact-info">
               <strong>Contato comercial</strong>
-              <span>freegameplantplaystory@gmail.com</span>
+              <span>fgpfreegameplant@gmail.com</span>
             </div>
             <i class="fas fa-arrow-up-right-from-square"></i>
           </a>
 
-          <a href="mailto:fgpfreegameplant@gmail.com" class="contact-card reveal">
-            <div class="contact-icon"><i class="fab fa-google"></i></div>
+          <a href="mailto:freegameplantplaystory@gmail.com" class="contact-card reveal">
+            <div class="contact-icon"><i class="fas fa-envelope-open-text"></i></div>
             <div class="contact-info">
-              <strong>Gmail alternativo</strong>
-              <span>fgpfreegameplant@gmail.com</span>
+              <strong>Contato geral</strong>
+              <span>freegameplantplaystory@gmail.com</span>
             </div>
             <i class="fas fa-arrow-up-right-from-square"></i>
           </a>
@@ -1268,7 +1546,7 @@
   </main>
 
   <!-- ============================================================
-       MODAL: ACESSOS
+       MODAL ACESSOS
        ============================================================ -->
   <div class="modal-overlay" id="accessosModal" role="dialog" aria-modal="true">
     <div class="modal-box">
@@ -1277,23 +1555,23 @@
       </button>
 
       <h2><i class="fas fa-address-book" style="color:var(--primary);margin-right:8px;"></i> FGP Acessos</h2>
-      <p>Canais oficiais da Free Game Plant.</p>
+      <p>Canais oficiais da FGP.</p>
 
       <div class="access-list">
-        <a href="mailto:freegameplantplaystory@gmail.com" class="access-item">
+        <a href="mailto:fgpfreegameplant@gmail.com" class="access-item">
           <div class="access-item-icon"><i class="fas fa-envelope"></i></div>
           <div class="access-item-info">
-            <strong>Play Store / Contato</strong>
-            <span>freegameplantplaystory@gmail.com</span>
+            <strong>Contato comercial</strong>
+            <span>fgpfreegameplant@gmail.com</span>
           </div>
           <i class="fas fa-arrow-up-right-from-square"></i>
         </a>
 
-        <a href="mailto:fgpfreegameplant@gmail.com" class="access-item">
-          <div class="access-item-icon"><i class="fab fa-google"></i></div>
+        <a href="mailto:freegameplantplaystory@gmail.com" class="access-item">
+          <div class="access-item-icon"><i class="fas fa-envelope-open-text"></i></div>
           <div class="access-item-info">
-            <strong>Gmail</strong>
-            <span>fgpfreegameplant@gmail.com</span>
+            <strong>Contato geral</strong>
+            <span>freegameplantplaystory@gmail.com</span>
           </div>
           <i class="fas fa-arrow-up-right-from-square"></i>
         </a>
@@ -1311,45 +1589,6 @@
   </div>
 
   <!-- ============================================================
-       MODAL: ORÇAMENTO
-       ============================================================ -->
-  <div class="modal-overlay" id="quoteModal" role="dialog" aria-modal="true">
-    <div class="modal-box">
-      <button class="modal-close" id="closeQuoteBtn" aria-label="Fechar">
-        <i class="fas fa-xmark"></i>
-      </button>
-
-      <span class="modal-service-name" id="quoteServiceName">Serviço</span>
-
-      <h2>Solicitar orçamento</h2>
-      <p>
-        Escolha um dos canais oficiais abaixo para falar com a FGP Technologies.
-        O assunto do e-mail já vem pré-preenchido com o serviço selecionado.
-      </p>
-
-      <div class="access-list">
-        <a href="mailto:freegameplantplaystory@gmail.com" class="access-item quote-mailto" data-mail="freegameplantplaystory@gmail.com">
-          <div class="access-item-icon"><i class="fas fa-envelope"></i></div>
-          <div class="access-item-info">
-            <strong>Contato comercial</strong>
-            <span>freegameplantplaystory@gmail.com</span>
-          </div>
-          <i class="fas fa-arrow-up-right-from-square"></i>
-        </a>
-
-        <a href="mailto:fgpfreegameplant@gmail.com" class="access-item quote-mailto" data-mail="fgpfreegameplant@gmail.com">
-          <div class="access-item-icon"><i class="fab fa-google"></i></div>
-          <div class="access-item-info">
-            <strong>Gmail alternativo</strong>
-            <span>fgpfreegameplant@gmail.com</span>
-          </div>
-          <i class="fas fa-arrow-up-right-from-square"></i>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================================
        FOOTER
        ============================================================ -->
   <footer class="site-footer">
@@ -1358,16 +1597,17 @@
         <div class="footer-col">
           <div class="footer-brand">
             <img src="../src/assets/images/lOGOFGP.png" alt="" onerror="this.style.display='none'" />
-            FREE GAME PLANT
+            FGP TECHNOLOGIES
           </div>
-          <p>Divisão tecnológica da Free Game Plant. Aplicativos, sites, sistemas e soluções digitais sob medida.</p>
+          <p>Divisão tecnológica da FGP. Aplicativos, sites, sistemas e soluções digitais sob medida.</p>
         </div>
 
         <div class="footer-col">
           <h4>Navegação</h4>
           <ul class="footer-links">
-            <li><a href="#servicos"><i class="fas fa-arrow-right"></i> Serviços</a></li>
-            <li><a href="#categorias"><i class="fas fa-arrow-right"></i> Categorias</a></li>
+            <li><a href="#como-funciona"><i class="fas fa-arrow-right"></i> Como funciona</a></li>
+            <li><a href="#modelo-comercial"><i class="fas fa-arrow-right"></i> Modelo comercial</a></li>
+            <li><a href="#categorias"><i class="fas fa-arrow-right"></i> Serviços e preços</a></li>
             <li><a href="#contato"><i class="fas fa-arrow-right"></i> Contato</a></li>
           </ul>
         </div>
@@ -1392,7 +1632,7 @@
       </div>
 
       <div class="footer-bottom">
-        © 2025 Free Game Plant — Todos os direitos reservados. Feito com <i class="fas fa-heart"></i> para gamers.
+        © 2025 FGP — Todos os direitos reservados. Feito com <i class="fas fa-heart"></i> para gamers.
       </div>
     </div>
   </footer>
@@ -1404,9 +1644,14 @@
     /* ============================================================
        1. BASE DE DADOS DE SERVIÇOS
        ------------------------------------------------------------
-       Para adicionar um novo modelo, basta incluir um objeto em
-       "models". Para alterar um preço, basta editar o campo "price".
-       Valores padrão: "Sob consulta" — nada é exibido como oficial.
+       Estrutura de cada modelo:
+         name        — nome do serviço
+         icon        — classe FontAwesome
+         description — descrição curta
+         features[]  — lista de características
+         priceRange  — faixa de mensalidade (ex.: "R$ 199 – 349")
+         deadline    — texto do prazo/modalidade
+       Para adicionar novos modelos: basta incluí-los em "models".
        ============================================================ */
     const SERVICES_DB = [
       {
@@ -1414,38 +1659,44 @@
         icon: 'fa-mobile-screen-button',
         title: 'Aplicativos',
         description: 'Apps para Android, iOS e web — do MVP ao produto final.',
+        questions: [
+          'Plataforma desejada (Android, iOS, web ou multiplataforma)',
+          'Funcionalidades desejadas',
+          'Integrações necessárias',
+          'Público-alvo'
+        ],
         models: [
           {
             name: 'App Android',
             icon: 'fa-android',
             description: 'Aplicativo nativo para a plataforma Android, publicado na Play Store.',
-            features: ['Desenvolvimento nativo', 'Publicação na Play Store', 'Suporte pós-lançamento'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            features: ['Desenvolvimento nativo', 'Publicação na Play Store', 'Suporte pós-lançamento conforme contratação'],
+            priceRange: 'R$ 499 – 899',
+            deadline: 'Prazo estimado: 12 a 18 meses'
           },
           {
             name: 'App iOS',
             icon: 'fa-apple',
             description: 'Aplicativo nativo para iPhone e iPad, publicado na App Store.',
-            features: ['Desenvolvimento nativo', 'Publicação na App Store', 'Suporte pós-lançamento'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            features: ['Desenvolvimento nativo', 'Publicação na App Store', 'Suporte pós-lançamento conforme contratação'],
+            priceRange: 'R$ 699 – 1.199',
+            deadline: 'Prazo estimado: 12 a 18 meses'
           },
           {
             name: 'App multiplataforma',
             icon: 'fa-layer-group',
             description: 'Uma única base de código para Android, iOS e web.',
-            features: ['Código único', 'Android + iOS + web', 'Atualizações centralizadas'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            features: ['Código compartilhado', 'Android, iOS e web', 'Atualizações centralizadas'],
+            priceRange: 'R$ 799 – 1.399',
+            deadline: 'Prazo estimado: 12 a 18 meses'
           },
           {
             name: 'App sob medida',
             icon: 'fa-sliders',
             description: 'Aplicativo empresarial ou de uso interno, com funcionalidades customizadas.',
             features: ['Escopo personalizado', 'Integrações específicas', 'Design dedicado'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 999 – 1.799',
+            deadline: 'Prazo estimado: 12 a 24 meses'
           }
         ]
       },
@@ -1454,38 +1705,44 @@
         icon: 'fa-globe',
         title: 'Sites',
         description: 'Do cartão de visitas digital à loja virtual completa.',
+        questions: [
+          'Finalidade do site',
+          'Quantidade aproximada de páginas',
+          'Recursos necessários (formulário, blog, catálogo etc.)',
+          'Necessita painel administrativo?'
+        ],
         models: [
           {
             name: 'Landing page',
             icon: 'fa-bullseye',
             description: 'Página única focada em conversão para um produto, serviço ou campanha.',
-            features: ['Design focado em conversão', 'Responsivo', 'Formulário de contato'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            features: ['Design focado em conversão', 'Layout responsivo', 'Formulário de contato'],
+            priceRange: 'R$ 99 – 179',
+            deadline: 'Prazo estimado: 12 meses'
           },
           {
             name: 'Site institucional',
             icon: 'fa-building',
             description: 'Site de apresentação da empresa, com múltiplas seções e páginas.',
             features: ['Múltiplas páginas', 'Design responsivo', 'Otimização básica de SEO'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 199 – 349',
+            deadline: 'Prazo estimado: 12 meses'
           },
           {
             name: 'Loja virtual',
             icon: 'fa-cart-shopping',
             description: 'E-commerce completo com catálogo, carrinho e checkout.',
             features: ['Catálogo de produtos', 'Carrinho e checkout', 'Painel administrativo'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 399 – 799',
+            deadline: 'Prazo estimado: 18 a 24 meses'
           },
           {
             name: 'Site personalizado / Web app',
             icon: 'fa-code',
             description: 'Site com funcionalidades sob medida, integrações e área restrita.',
             features: ['Lógica personalizada', 'Integrações com APIs', 'Área de usuário'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 499 – 999',
+            deadline: 'Prazo estimado: 12 a 24 meses'
           }
         ]
       },
@@ -1494,38 +1751,44 @@
         icon: 'fa-server',
         title: 'Sistemas',
         description: 'Sistemas internos, painéis e automação de processos.',
+        questions: [
+          'Processo que será automatizado ou gerenciado',
+          'Tipos de usuários que vão utilizar o sistema',
+          'Dados que serão administrados',
+          'Funcionalidades necessárias'
+        ],
         models: [
           {
             name: 'Sistema de gestão',
             icon: 'fa-clipboard-list',
             description: 'Sistema para organizar clientes, produtos, pedidos ou operações internas.',
             features: ['Cadastros e relatórios', 'Controle de usuários', 'Painel personalizado'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 399 – 699',
+            deadline: 'Prazo estimado: 12 a 18 meses'
           },
           {
             name: 'Painel administrativo',
             icon: 'fa-gauge-high',
             description: 'Dashboard para visualizar métricas e administrar dados.',
             features: ['Visualização de dados', 'Gestão de conteúdo', 'Controle de permissões'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 299 – 599',
+            deadline: 'Prazo estimado: 12 meses'
           },
           {
             name: 'Automação e integrações',
             icon: 'fa-robot',
             description: 'Automação de tarefas repetitivas e integração entre sistemas.',
-            features: ['Robôs de tarefas', 'Integração com APIs', 'Agendamento'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            features: ['Automação de tarefas', 'Integração com APIs', 'Agendamento'],
+            priceRange: 'R$ 249 – 599',
+            deadline: 'Prazo estimado: 6 a 12 meses'
           },
           {
             name: 'Sistema sob medida',
             icon: 'fa-cogs',
             description: 'Sistema construído do zero para um processo específico do seu negócio.',
-            features: ['Escopo dedicado', 'Banco de dados próprio', 'Evolução contínua'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            features: ['Escopo dedicado', 'Banco de dados próprio', 'Possibilidade de evolução contínua'],
+            priceRange: 'R$ 699 – 1.299',
+            deadline: 'Prazo estimado: 18 a 24 meses'
           }
         ]
       },
@@ -1534,38 +1797,44 @@
         icon: 'fa-wand-magic-sparkles',
         title: 'Soluções Digitais',
         description: 'Consultoria, identidade digital e suporte técnico.',
+        questions: [
+          'Problema identificado',
+          'Objetivo a ser alcançado',
+          'Situação atual do projeto ou negócio',
+          'Resultado esperado'
+        ],
         models: [
           {
             name: 'Identidade digital',
             icon: 'fa-fingerprint',
             description: 'Presença digital completa: site, redes sociais e comunicação visual.',
             features: ['Diretrizes visuais', 'Presença nas redes', 'Materiais de apoio'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 149 – 299',
+            deadline: 'Prazo estimado: 6 a 12 meses'
           },
           {
             name: 'Consultoria técnica',
             icon: 'fa-lightbulb',
             description: 'Análise, diagnóstico e recomendação para projetos digitais.',
             features: ['Diagnóstico', 'Recomendações práticas', 'Plano de ação'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 149 – 299',
+            deadline: 'Modalidade: contratação mensal'
           },
           {
             name: 'Manutenção e suporte',
             icon: 'fa-screwdriver-wrench',
             description: 'Manutenção contínua de sites, apps ou sistemas já existentes.',
-            features: ['Atualizações periódicas', 'Correções sob demanda', 'Relatórios'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            features: ['Atualizações periódicas', 'Correções conforme escopo', 'Relatórios'],
+            priceRange: 'R$ 99 – 299',
+            deadline: 'Modalidade: contratação mensal'
           },
           {
             name: 'Integrações e APIs',
             icon: 'fa-plug',
             description: 'Conexão entre sistemas via APIs e integrações específicas.',
             features: ['APIs REST', 'Webhooks', 'Documentação'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 299 – 699',
+            deadline: 'Prazo estimado: 6 a 12 meses'
           }
         ]
       },
@@ -1574,45 +1843,133 @@
         icon: 'fa-briefcase',
         title: 'Serviços e Negócios da FGP',
         description: 'Parcerias, publicação de jogos e desenvolvimento de mods.',
+        questions: [
+          'Projeto que deseja desenvolver',
+          'Plataforma de interesse',
+          'Tipo de parceria desejada',
+          'Objetivo da contratação'
+        ],
         models: [
           {
             name: 'Publicação de jogos',
             icon: 'fa-gamepad',
             description: 'Apoio na publicação de jogos independentes em lojas digitais.',
             features: ['Play Store / itch.io', 'Ajustes de build', 'Suporte ao lançamento'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 149 – 399',
+            deadline: 'Modalidade: por projeto ou período'
           },
           {
             name: 'Mods e add-ons (Minecraft)',
             icon: 'fa-cubes',
             description: 'Desenvolvimento de mods ou add-ons para Minecraft Bedrock sob demanda.',
             features: ['Comportamentos e itens', 'Compatibilidade Bedrock', 'Pacote .mcaddon'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 199 – 499',
+            deadline: 'Prazo estimado: 6 a 12 meses'
           },
           {
             name: 'Parceria de desenvolvimento',
             icon: 'fa-handshake-angle',
             description: 'Colaboração contínua em projetos de longo prazo.',
             features: ['Escopo recorrente', 'Comunicação direta', 'Acompanhamento'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 399 – 899',
+            deadline: 'Modalidade: contratação recorrente'
           },
           {
             name: 'Consultoria de produto',
             icon: 'fa-compass',
             description: 'Orientação sobre escopo, viabilidade e roadmap de um projeto.',
             features: ['Análise de escopo', 'Viabilidade técnica', 'Roadmap sugerido'],
-            price: 'Sob consulta',
-            priceNote: 'Orçamento personalizado'
+            priceRange: 'R$ 149 – 299',
+            deadline: 'Modalidade: contratação mensal'
           }
         ]
       }
     ];
 
     /* ============================================================
-       2. SISTEMA DE CORES
+       2. GERADOR DE MAILTO POR SERVIÇO
+       ------------------------------------------------------------
+       Constrói um link mailto: com assunto e corpo já preenchidos,
+       incluindo perguntas específicas para cada categoria.
+       ============================================================ */
+    const CONTACT_EMAIL = 'fgpfreegameplant@gmail.com';
+
+    function buildMailto(category, model) {
+      const subject = `Solicitação de orçamento — ${model.name} | FGP Technologies`;
+
+      let body = '';
+      body += 'Olá, equipe FGP Technologies!\n\n';
+      body += `Tenho interesse no serviço de ${model.name}.\n\n`;
+      body += 'Gostaria de apresentar algumas informações sobre meu projeto:\n\n';
+      body += 'Nome:\n';
+      body += 'Empresa (se aplicável):\n';
+      (category.questions || []).forEach(q => {
+        body += `${q}:\n`;
+      });
+      body += '\nGostaria de receber informações sobre valores, prazos e condições de desenvolvimento.\n\n';
+      body += 'Atenciosamente,\n[Seu nome]';
+
+      const encodedSubject = encodeURIComponent(subject);
+      const encodedBody = encodeURIComponent(body);
+
+      return `mailto:${CONTACT_EMAIL}?subject=${encodedSubject}&body=${encodedBody}`;
+    }
+
+    /* ============================================================
+       3. RENDERIZAÇÃO DE CATEGORIAS
+       ============================================================ */
+    function renderCategories() {
+      const container = document.getElementById('categoriesContainer');
+      if (!container) return;
+
+      container.innerHTML = SERVICES_DB.map(cat => `
+        <div class="category-block reveal">
+          <div class="category-header">
+            <div class="category-icon"><i class="fas ${cat.icon}"></i></div>
+            <div class="category-header-text">
+              <h2>${cat.title}</h2>
+              <p>${cat.description}</p>
+            </div>
+          </div>
+
+          <div class="models-grid">
+            ${cat.models.map(model => {
+              const mailto = buildMailto(cat, model);
+              return `
+                <article class="model-card">
+                  <div class="model-card-header">
+                    <div class="model-card-icon"><i class="fas ${model.icon}"></i></div>
+                    <h3>${model.name}</h3>
+                  </div>
+                  <p class="model-card-desc">${model.description}</p>
+                  <ul class="model-features">
+                    ${model.features.map(f => `<li><i class="fas fa-check"></i> ${f}</li>`).join('')}
+                  </ul>
+
+                  <div class="price-block">
+                    <div class="price-value">
+                      ${model.priceRange}<small>/mês</small>
+                    </div>
+                    <div class="price-deadline">
+                      <i class="fas fa-clock"></i> ${model.deadline}
+                    </div>
+                  </div>
+
+                  <p class="price-note">Valor final definido após avaliação do projeto.</p>
+
+                  <a href="${mailto}" class="btn-quote">
+                    <i class="fas fa-paper-plane"></i> Solicitar orçamento
+                  </a>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* ============================================================
+       4. SISTEMA DE CORES
        ============================================================ */
     const COLOR_STORAGE_KEY = 'fgp_tech_palette';
 
@@ -1685,98 +2042,6 @@
       } catch (_) { return { ...DEFAULT_PALETTE }; }
     }
 
-    /* ============================================================
-       3. RENDERIZAÇÃO DE CATEGORIAS
-       ============================================================ */
-    function renderCategories() {
-      const container = document.getElementById('categoriesContainer');
-      if (!container) return;
-
-      container.innerHTML = SERVICES_DB.map(cat => `
-        <div class="category-block reveal">
-          <div class="category-header">
-            <div class="category-icon"><i class="fas ${cat.icon}"></i></div>
-            <div class="category-header-text">
-              <h2>${cat.title}</h2>
-              <p>${cat.description}</p>
-            </div>
-          </div>
-
-          <div class="models-grid">
-            ${cat.models.map(model => `
-              <article class="model-card">
-                <div class="model-card-header">
-                  <div class="model-card-icon"><i class="fas ${model.icon}"></i></div>
-                  <h3>${model.name}</h3>
-                </div>
-                <p class="model-card-desc">${model.description}</p>
-                <ul class="model-features">
-                  ${model.features.map(f => `<li><i class="fas fa-check"></i> ${f}</li>`).join('')}
-                </ul>
-                <div class="model-footer">
-                  <div class="model-price">
-                    ${model.price}
-                    ${model.priceNote ? `<small>${model.priceNote}</small>` : ''}
-                  </div>
-                  <button class="btn-quote" data-service="${model.name}">
-                    <i class="fas fa-paper-plane"></i> Solicitar
-                  </button>
-                </div>
-              </article>
-            `).join('')}
-          </div>
-        </div>
-      `).join('');
-
-      // Delegação de clique nos botões "Solicitar"
-      container.querySelectorAll('.btn-quote').forEach(btn => {
-        btn.addEventListener('click', () => {
-          openQuoteModal(btn.dataset.service);
-        });
-      });
-    }
-
-    /* ============================================================
-       4. MODAL DE ORÇAMENTO
-       ============================================================ */
-    function openQuoteModal(serviceName) {
-      const modal = document.getElementById('quoteModal');
-      const label = document.getElementById('quoteServiceName');
-      label.textContent = serviceName || 'Serviço';
-
-      const subject = encodeURIComponent('Orçamento — ' + (serviceName || 'Serviço FGP'));
-      document.querySelectorAll('.quote-mailto').forEach(a => {
-        a.href = `mailto:${a.dataset.mail}?subject=${subject}`;
-      });
-
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeQuoteModal() {
-      const modal = document.getElementById('quoteModal');
-      if (modal.classList.contains('open')) {
-        modal.classList.remove('open');
-        document.body.style.overflow = '';
-      }
-    }
-
-    function setupQuoteModal() {
-      document.getElementById('closeQuoteBtn').addEventListener('click', closeQuoteModal);
-      const modal = document.getElementById('quoteModal');
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeQuoteModal();
-      });
-
-      // Botão do hero
-      document.getElementById('heroContactBtn').addEventListener('click', () => {
-        openQuoteModal('Contato geral');
-      });
-    }
-
-    /* ============================================================
-       5. PAINEL DE CORES
-       ============================================================ */
     function setupColorPanel() {
       const panel = document.getElementById('colorPanel');
       const overlay = document.getElementById('sideOverlay');
@@ -1847,7 +2112,7 @@
     }
 
     /* ============================================================
-       6. SIDE MENU
+       5. SIDE MENU
        ============================================================ */
     function closeSideMenu() {
       const menu = document.getElementById('sideMenu');
@@ -1880,7 +2145,6 @@
         }
       });
 
-      // Links que fecham menu (exceto Acessos, que abre modal)
       menu.querySelectorAll('a').forEach(a => {
         a.addEventListener('click', () => {
           if (a.id !== 'accessosSideBtn') closeSideMenu();
@@ -1902,13 +2166,12 @@
             cp.setAttribute('aria-hidden', 'true');
           }
           closeAccessosModal();
-          closeQuoteModal();
         }
       });
     }
 
     /* ============================================================
-       7. MODAL ACESSOS
+       6. MODAL ACESSOS
        ============================================================ */
     function openAccessosModal() {
       const modal = document.getElementById('accessosModal');
@@ -1932,7 +2195,7 @@
     }
 
     /* ============================================================
-       8. HEADER SHADOW
+       7. HEADER SHADOW
        ============================================================ */
     function setupHeaderScroll() {
       const header = document.getElementById('siteHeader');
@@ -1945,7 +2208,7 @@
     }
 
     /* ============================================================
-       9. REVEAL ON SCROLL
+       8. REVEAL ON SCROLL
        ============================================================ */
     function setupReveal() {
       const items = document.querySelectorAll('.reveal');
@@ -1966,13 +2229,12 @@
     }
 
     /* ============================================================
-       10. INIT
+       9. INIT
        ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
       setupColorPanel();
       setupSideMenu();
       setupAccessosModal();
-      setupQuoteModal();
       renderCategories();
       setupReveal();
       setupHeaderScroll();
