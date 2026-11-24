@@ -406,148 +406,277 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       MODAL DE SOLICITAÇÃO DE ORÇAMENTO
-       ============================================================ -->
-  <div class="modal-overlay" id="requestModal" role="dialog" aria-modal="true" aria-labelledby="requestModalTitle">
-    <div class="modal-box request-modal-box">
-      <button class="modal-close" id="closeRequestBtn" aria-label="Fechar">
-        <i class="fas fa-xmark"></i>
+<!-- ============================================================
+     MODAL DE SOLICITAÇÃO DE ORÇAMENTO
+     ============================================================ -->
+<div class="modal-overlay" id="requestModal" role="dialog" aria-modal="true" aria-labelledby="requestModalTitle">
+  <div class="modal-box request-modal-box">
+    <button class="modal-close" id="closeRequestBtn" aria-label="Fechar">
+      <i class="fas fa-xmark"></i>
+    </button>
+
+    <h2 id="requestModalTitle"><i class="fas fa-paper-plane icon-primary"></i> Solicitar orçamento</h2>
+    <p>Preencha os detalhes abaixo. Todos os campos marcados com <span class="asterisk">*</span> são obrigatórios.</p>
+
+    <form class="request-form" id="requestForm" novalidate>
+
+      <!-- ===== Título do pedido ===== -->
+      <div class="form-group">
+        <label for="requestTitle">Título do pedido <span class="required">*</span></label>
+        <input type="text" id="requestTitle" name="title" required maxlength="150" />
+        <span class="field-error" id="titleError">
+          <i class="fas fa-circle-exclamation"></i> Por favor, preencha o título.
+        </span>
+      </div>
+
+      <!-- ===== Descrição inicial ===== -->
+      <div class="form-group">
+        <label for="initialDescription">Descrição inicial <span class="required">*</span></label>
+        <textarea id="initialDescription" name="initialDescription" required maxlength="500"></textarea>
+        <span class="field-error" id="initialDescError">
+          <i class="fas fa-circle-exclamation"></i> Por favor, preencha a descrição inicial.
+        </span>
+      </div>
+
+      <!-- ===== Tipo de pedido (fixo) ===== -->
+      <div class="form-group">
+        <label>Tipo de pedido</label>
+        <div class="fixed-type">
+          <i class="fas fa-tag"></i>
+          <strong>Tipo de pedido:</strong>
+          <span id="requestTypeDisplay">—</span>
+        </div>
+        <input type="hidden" id="requestType" name="requestType" value="" />
+      </div>
+
+      <!-- ===== Descrição para o Projeto ===== -->
+      <div class="form-group">
+        <label for="projectDescription">Descrição para o Projeto <span class="required">*</span></label>
+        <textarea
+          id="projectDescription"
+          name="projectDescription"
+          class="project-desc"
+          required
+          maxlength="3000"
+          placeholder="Conte para nós um pouco mais sobre sua ideia! Como você imagina esse projeto? Quais funcionalidades gostaria de incluir? Quanto mais detalhes compartilhar, melhor poderemos compreender suas necessidades e preparar uma proposta adequada."
+        ></textarea>
+        <span class="field-error" id="projectDescError">
+          <i class="fas fa-circle-exclamation"></i> Por favor, descreva seu projeto.
+        </span>
+        <p class="form-hint">
+          <i class="fas fa-lightbulb icon-accent"></i>
+          Não precisa utilizar termos técnicos. Explique sua ideia com suas próprias palavras.
+          Nossa equipe analisará as informações e poderá solicitar detalhes adicionais.
+        </p>
+      </div>
+
+      <!-- =====================================================
+           SEÇÃO A — PAGAMENTO DA PRODUÇÃO
+           ===================================================== -->
+      <div class="form-section" id="productionSection">
+        <div class="form-section-header">
+          <span class="form-section-letter">A</span>
+          <div>
+            <h3 class="form-section-title">Pagamento da produção</h3>
+            <p class="form-section-desc">
+              Informe como você prefere realizar o pagamento pelo desenvolvimento inicial do projeto.
+            </p>
+          </div>
+        </div>
+
+        <div class="payment-options" id="productionPaymentOptions">
+          <label class="payment-option" data-value="À vista">
+            <input type="radio" name="productionPayment" value="À vista" />
+            <div class="payment-option-info">
+              <strong>À vista</strong>
+              <span>Pagamento integral do investimento de desenvolvimento.</span>
+            </div>
+          </label>
+
+          <label class="payment-option" data-value="Parcelado">
+            <input type="radio" name="productionPayment" value="Parcelado" />
+            <div class="payment-option-info">
+              <strong>Parcelado</strong>
+              <span>Pague em parcelas mensais durante o desenvolvimento do projeto.</span>
+            </div>
+          </label>
+        </div>
+
+        <span class="field-error" id="productionPaymentError">
+          <i class="fas fa-circle-exclamation"></i> Selecione como deseja pagar a produção.
+        </span>
+
+        <!-- Campos condicionais de parcelamento -->
+        <div class="conditional-fields" id="installmentFields">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="installmentCount">Quantidade de parcelas <span class="required">*</span></label>
+              <select id="installmentCount" name="installmentCount">
+                <!-- Preenchido via JS -->
+              </select>
+              <span class="field-error" id="installmentCountError">
+                <i class="fas fa-circle-exclamation"></i> Escolha a quantidade de parcelas.
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="dueDay">Dia de vencimento <span class="required">*</span></label>
+              <select id="dueDay" name="dueDay">
+                <!-- Preenchido via JS -->
+              </select>
+              <span class="field-error" id="dueDayError">
+                <i class="fas fa-circle-exclamation"></i> Escolha o dia de vencimento.
+              </span>
+            </div>
+          </div>
+
+          <p class="form-hint">
+            <i class="fas fa-calendar-day icon-accent"></i>
+            Escolha o dia do mês em que prefere realizar os pagamentos.
+            A data definitiva será confirmada na proposta comercial.
+          </p>
+        </div>
+
+        <p class="form-hint">
+          <i class="fas fa-info-circle icon-accent"></i>
+          A quantidade de parcelas, os valores e as condições definitivas serão estabelecidos
+          pela FGP após analisar o escopo, o investimento necessário, os custos e a viabilidade
+          financeira do projeto.
+        </p>
+      </div>
+
+      <!-- =====================================================
+           SEÇÃO B — PREFERÊNCIA DE MANUTENÇÃO
+           ===================================================== -->
+      <div class="form-section" id="maintenanceSection">
+        <div class="form-section-header">
+          <span class="form-section-letter">B</span>
+          <div>
+            <h3 class="form-section-title">Preferência de manutenção</h3>
+            <p class="form-section-desc">
+              Informe como você prefere contratar os serviços de manutenção, caso sejam
+              necessários para o seu projeto.
+            </p>
+          </div>
+        </div>
+
+        <div class="payment-options" id="maintenanceOptions">
+          <label class="payment-option" data-value="Mensal">
+            <input type="radio" name="maintenancePreference" value="Mensal" />
+            <div class="payment-option-info">
+              <strong>Plano mensal</strong>
+              <span>Pagamento recorrente mensal. Maior flexibilidade, sem desconto por antecipação.</span>
+            </div>
+          </label>
+
+          <label class="payment-option" data-value="Anual">
+            <input type="radio" name="maintenancePreference" value="Anual" />
+            <div class="payment-option-info">
+              <strong>Plano anual</strong>
+              <span>Pagamento antecipado referente a 12 meses. Desconto estimado de 5% a 10%, quando aplicável. Valor final apresentado na proposta comercial.</span>
+            </div>
+          </label>
+
+          <label class="payment-option" data-value="Não desejo contratar agora">
+            <input type="radio" name="maintenancePreference" value="Não desejo contratar agora" />
+            <div class="payment-option-info">
+              <strong>Não desejo contratar manutenção neste momento</strong>
+              <span>Você pode solicitar o orçamento mesmo sem contratar manutenção inicialmente.</span>
+            </div>
+          </label>
+        </div>
+
+        <span class="field-error" id="maintenanceError">
+          <i class="fas fa-circle-exclamation"></i> Selecione sua preferência de manutenção.
+        </span>
+
+        <p class="form-hint">
+          <i class="fas fa-info-circle icon-accent"></i>
+          A preferência mensal ou anual não representa uma contratação automática. A FGP
+          avaliará quais atividades de manutenção são necessárias e quais serviços serão
+          efetivamente oferecidos.
+        </p>
+      </div>
+
+      <!-- =====================================================
+           SEÇÃO C — DESPESAS EXTERNAS (informativa)
+           ===================================================== -->
+      <div class="form-section form-section-info">
+        <div class="form-section-header">
+          <span class="form-section-letter">C</span>
+          <div>
+            <h3 class="form-section-title">Despesas externas</h3>
+            <p class="form-section-desc">
+              Serviços de terceiros, quando aplicáveis, são identificados separadamente.
+            </p>
+          </div>
+        </div>
+
+        <p class="external-costs-note">
+          <i class="fas fa-circle-info"></i>
+          Alguns projetos podem exigir serviços externos ou taxas de plataformas.
+          Quando aplicáveis, esses custos serão identificados e apresentados separadamente
+          na proposta comercial.
+        </p>
+      </div>
+
+      <!-- ===== Imagem de referência (opcional) ===== -->
+      <div class="form-group">
+        <label>Imagem de referência <span class="optional">(opcional)</span></label>
+        <div class="upload-area" id="uploadArea">
+          <i class="fas fa-image upload-icon"></i>
+          <p>Clique para selecionar uma imagem</p>
+          <p class="formats">JPEG, PNG ou WebP · máx. 5 MB</p>
+        </div>
+        <input
+          type="file"
+          id="fileInput"
+          name="attachment"
+          class="file-input-hidden"
+          accept="image/jpeg,image/png,image/webp"
+        />
+        <div class="upload-preview" id="uploadPreview">
+          <img id="previewImg" src="" alt="Prévia da imagem" />
+          <div class="upload-preview-info">
+            <div class="filename" id="previewFilename"></div>
+            <div class="filesize" id="previewFilesize"></div>
+          </div>
+          <button type="button" class="btn-remove-file" id="removeFileBtn" aria-label="Remover imagem">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+        <span class="field-error" id="fileError">
+          <i class="fas fa-circle-exclamation"></i> Arquivo inválido.
+        </span>
+      </div>
+
+      <!-- ===== Avisos ===== -->
+      <div class="modal-deadline-note">
+        <i class="fas fa-clock"></i>
+        Os prazos são estimativas. A entrega poderá ocorrer antes do previsto ou exigir
+        ajustes, conforme a complexidade do projeto e as condições acordadas.
+      </div>
+
+      <div class="modal-deadline-note">
+        <i class="fas fa-file-signature"></i>
+        As preferências informadas neste formulário são iniciais. Os valores, condições de
+        pagamento, prazos, serviços de manutenção e eventuais despesas externas serão
+        definidos pela FGP após a análise do projeto e apresentados na proposta comercial.
+      </div>
+
+      <!-- ===== Feedback ===== -->
+      <div class="submit-feedback" id="submitFeedback"></div>
+
+      <!-- ===== Botão Enviar ===== -->
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <i class="fas fa-paper-plane btn-label"></i>
+        <span class="btn-label">Enviar pedido</span>
+        <i class="fas fa-spinner spinner"></i>
       </button>
 
-      <h2 id="requestModalTitle"><i class="fas fa-paper-plane icon-primary"></i> Solicitar orçamento</h2>
-      <p>Preencha os detalhes abaixo. Todos os campos marcados com <span class="asterisk">*</span> são obrigatórios.</p>
-
-      <form class="request-form" id="requestForm" novalidate>
-
-        <!-- Título do pedido -->
-        <div class="form-group">
-          <label for="requestTitle">Título do pedido <span class="required">*</span></label>
-          <input type="text" id="requestTitle" name="title" required maxlength="150" />
-          <span class="field-error" id="titleError">
-            <i class="fas fa-circle-exclamation"></i> Por favor, preencha o título.
-          </span>
-        </div>
-
-        <!-- Descrição inicial -->
-        <div class="form-group">
-          <label for="initialDescription">Descrição inicial <span class="required">*</span></label>
-          <textarea id="initialDescription" name="initialDescription" required maxlength="500"></textarea>
-          <span class="field-error" id="initialDescError">
-            <i class="fas fa-circle-exclamation"></i> Por favor, preencha a descrição inicial.
-          </span>
-        </div>
-
-        <!-- Tipo de pedido (fixo, preenchido por JS) -->
-        <div class="form-group">
-          <label>Tipo de pedido</label>
-          <div class="fixed-type">
-            <i class="fas fa-tag"></i>
-            <strong>Tipo de pedido:</strong>
-            <span id="requestTypeDisplay">—</span>
-          </div>
-          <input type="hidden" id="requestType" name="requestType" value="" />
-        </div>
-
-        <!-- Descrição para o Projeto (obrigatória) -->
-        <div class="form-group">
-          <label for="projectDescription">Descrição para o Projeto <span class="required">*</span></label>
-          <textarea
-            id="projectDescription"
-            name="projectDescription"
-            class="project-desc"
-            required
-            maxlength="3000"
-            placeholder="Conte para nós um pouco mais sobre sua ideia! Como você imagina esse projeto? Quais funcionalidades gostaria de incluir? Quanto mais detalhes compartilhar, melhor poderemos compreender suas necessidades e preparar uma proposta adequada."
-          ></textarea>
-          <span class="field-error" id="projectDescError">
-            <i class="fas fa-circle-exclamation"></i> Por favor, descreva seu projeto.
-          </span>
-          <p class="form-hint">
-            <i class="fas fa-lightbulb icon-accent"></i>
-            Não precisa utilizar termos técnicos. Explique sua ideia com suas próprias palavras.
-            Nossa equipe analisará as informações e poderá solicitar detalhes adicionais.
-          </p>
-        </div>
-
-        <!-- Preferência de pagamento -->
-        <div class="form-group">
-          <label>Preferência de pagamento <span class="required">*</span></label>
-          <div class="payment-options" id="paymentOptions">
-            <label class="payment-option" data-value="Mensal">
-              <input type="radio" name="paymentPreference" value="Mensal" required />
-              <div class="payment-option-info">
-                <strong>Plano mensal</strong>
-                <span>Pagamento recorrente mensal. Maior flexibilidade, sem desconto por antecipação.</span>
-              </div>
-            </label>
-            <label class="payment-option" data-value="Anual">
-              <input type="radio" name="paymentPreference" value="Anual" required />
-              <div class="payment-option-info">
-                <strong>Plano anual</strong>
-                <span>Pagamento antecipado referente a 12 meses. Desconto estimado de 5% a 10%, quando aplicável. Valor final apresentado na proposta comercial.</span>
-              </div>
-            </label>
-          </div>
-          <span class="field-error" id="paymentError">
-            <i class="fas fa-circle-exclamation"></i> Selecione uma preferência de pagamento.
-          </span>
-          <p class="form-hint">
-            A modalidade selecionada representa sua preferência inicial. As condições definitivas
-            serão apresentadas pela FGP após a análise do projeto.
-          </p>
-        </div>
-
-        <!-- Upload de imagem (opcional) -->
-        <div class="form-group">
-          <label>Imagem de referência <span class="optional">(opcional)</span></label>
-          <div class="upload-area" id="uploadArea">
-            <i class="fas fa-image upload-icon"></i>
-            <p>Clique para selecionar uma imagem</p>
-            <p class="formats">JPEG, PNG ou WebP · máx. 5 MB</p>
-          </div>
-          <input
-            type="file"
-            id="fileInput"
-            name="attachment"
-            class="file-input-hidden"
-            accept="image/jpeg,image/png,image/webp"
-          />
-          <div class="upload-preview" id="uploadPreview">
-            <img id="previewImg" src="" alt="Prévia da imagem" />
-            <div class="upload-preview-info">
-              <div class="filename" id="previewFilename"></div>
-              <div class="filesize" id="previewFilesize"></div>
-            </div>
-            <button type="button" class="btn-remove-file" id="removeFileBtn" aria-label="Remover imagem">
-              <i class="fas fa-xmark"></i>
-            </button>
-          </div>
-          <span class="field-error" id="fileError">
-            <i class="fas fa-circle-exclamation"></i> Arquivo inválido.
-          </span>
-        </div>
-
-        <!-- Aviso de prazo -->
-        <div class="modal-deadline-note">
-          <i class="fas fa-clock"></i>
-          Os prazos são estimativas. A entrega poderá ocorrer antes do previsto, mantendo as condições acordadas.
-        </div>
-
-        <!-- Feedback de envio -->
-        <div class="submit-feedback" id="submitFeedback"></div>
-
-        <!-- Botão enviar -->
-        <button type="submit" class="btn-submit" id="submitBtn">
-          <i class="fas fa-paper-plane btn-label"></i>
-          <span class="btn-label">Enviar pedido</span>
-          <i class="fas fa-spinner spinner"></i>
-        </button>
-
-      </form>
-    </div>
+    </form>
   </div>
-
+</div>
   <!-- ============================================================
        FOOTER
        ============================================================ -->
