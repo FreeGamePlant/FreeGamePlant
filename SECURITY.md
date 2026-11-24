@@ -8,7 +8,7 @@ If you discover a potential security vulnerability in this repository or in the 
 
 **Contact:**  
 Free Game Plant (FGP)  
-Email: elaifigueroa@gmail.com
+Email: fgpfreegameplant@gmail.com
 
 ## Responsible Disclosure
 
