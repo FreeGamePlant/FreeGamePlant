@@ -42,7 +42,7 @@ FGP recognizes that not every project may meet every accessibility requirement f
 If you encounter an accessibility barrier in an FGP project, you can report it through:
 
 **Free Game Plant (FGP)**  
-Email: elaifigueroa@gmail.com
+Email: fgpfreegameplant@gmail.com
 
 Please include a description of the issue and, if possible, the affected page or feature.
 
