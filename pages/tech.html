@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="FGP Technologies — aplicativos, sites, sistemas e soluções digitais. Desenvolvimento sob medida com contratação mensal acessível." />
+  <meta name="description" content="FGP Technologies — aplicativos, sites, sistemas e soluções digitais. Preços de referência, prazos transparentes e contratação acessível." />
   <meta name="theme-color" content="#0a0e17" />
   <title>FGP Technologies</title>
 
@@ -522,7 +522,7 @@
     }
 
     /* ============================================================
-       8. COMO FUNCIONA — FLUXO
+       8. COMO FUNCIONA
        ============================================================ */
     .flow-steps {
       display: grid;
@@ -554,16 +554,8 @@
       font-weight: 900;
       margin-bottom: 16px;
     }
-    .flow-step h3 {
-      font-size: 1rem;
-      font-weight: 800;
-      margin-bottom: 8px;
-    }
-    .flow-step p {
-      font-size: 0.86rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
+    .flow-step h3 { font-size: 1rem; font-weight: 800; margin-bottom: 8px; }
+    .flow-step p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.6; }
 
     /* ============================================================
        9. MODELO COMERCIAL
@@ -597,17 +589,8 @@
       font-size: 1.3rem;
       margin-bottom: 16px;
     }
-    .model-info-card h3 {
-      font-size: 1.05rem;
-      font-weight: 800;
-      margin-bottom: 10px;
-    }
-    .model-info-card > p {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin-bottom: 14px;
-    }
+    .model-info-card h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; }
+    .model-info-card > p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px; }
     .model-info-list {
       list-style: none;
       display: flex;
@@ -623,12 +606,7 @@
       gap: 8px;
       line-height: 1.5;
     }
-    .model-info-list li i {
-      color: var(--primary);
-      font-size: 0.7rem;
-      margin-top: 4px;
-      flex-shrink: 0;
-    }
+    .model-info-list li i { color: var(--primary); font-size: 0.7rem; margin-top: 4px; flex-shrink: 0; }
     .model-info-price {
       padding: 14px;
       background: color-mix(in srgb, var(--primary) 8%, transparent);
@@ -639,67 +617,27 @@
       color: var(--primary);
       text-align: center;
       margin: 14px 0;
-      letter-spacing: 0.01em;
     }
-    .model-info-note {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-style: italic;
-      line-height: 1.5;
-      margin-top: auto;
-    }
+    .model-info-note { font-size: 0.75rem; color: var(--text-muted); font-style: italic; line-height: 1.5; margin-top: auto; }
 
     /* ============================================================
-       10. DIFERENCIAIS
+       10. AVISO DE PRAZO
        ============================================================ */
-    .diffs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 18px;
-    }
-
-    .diff-card {
+    .deadline-notice {
+      max-width: 900px;
+      margin: 0 auto;
       padding: 26px 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
       border-radius: var(--radius-md);
-      transition: var(--transition);
     }
-    .diff-card:hover {
-      transform: translateY(-4px);
-      border-color: color-mix(in srgb, var(--primary) 40%, transparent);
-      background: var(--surface-strong);
-    }
-
-    .diff-icon {
-      width: 48px; height: 48px;
-      border-radius: 10px;
-      background: color-mix(in srgb, var(--primary) 15%, transparent);
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      margin-bottom: 16px;
-    }
-
-    .diff-card h3 {
-      font-size: 1.05rem;
-      font-weight: 800;
-      margin-bottom: 8px;
-    }
-    .diff-card p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
+    .deadline-notice h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; color: var(--text); }
+    .deadline-notice p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
 
     /* ============================================================
-       11. CATEGORIAS DE SERVIÇOS
+       11. CATEGORIAS
        ============================================================ */
-    .category-block {
-      margin-bottom: 60px;
-    }
+    .category-block { margin-bottom: 60px; }
     .category-block:last-child { margin-bottom: 0; }
 
     .category-header {
@@ -710,7 +648,6 @@
       padding-bottom: 18px;
       border-bottom: 1px solid var(--border);
     }
-
     .category-icon {
       width: 56px; height: 56px;
       flex-shrink: 0;
@@ -723,18 +660,8 @@
       color: var(--primary);
       border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
     }
-
-    .category-header-text h2 {
-      font-size: clamp(1.2rem, 2.5vw, 1.55rem);
-      font-weight: 900;
-      letter-spacing: -0.01em;
-      margin-bottom: 4px;
-    }
-    .category-header-text p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
+    .category-header-text h2 { font-size: clamp(1.2rem, 2.5vw, 1.55rem); font-weight: 900; letter-spacing: -0.01em; margin-bottom: 4px; }
+    .category-header-text p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
 
     .models-grid {
       display: grid;
@@ -771,12 +698,7 @@
     }
     .model-card:hover::before { opacity: 1; }
 
-    .model-card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
+    .model-card-header { display: flex; align-items: flex-start; gap: 12px; }
     .model-card-icon {
       width: 36px; height: 36px;
       flex-shrink: 0;
@@ -788,42 +710,12 @@
       justify-content: center;
       font-size: 0.95rem;
     }
+    .model-card h3 { font-size: 1rem; font-weight: 800; line-height: 1.35; }
+    .model-card-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; }
+    .model-features { list-style: none; display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+    .model-features li { display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .model-features li i { color: var(--primary); font-size: 0.7rem; margin-top: 4px; flex-shrink: 0; }
 
-    .model-card h3 {
-      font-size: 1rem;
-      font-weight: 800;
-      line-height: 1.35;
-    }
-
-    .model-card-desc {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      line-height: 1.55;
-    }
-
-    .model-features {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin: 4px 0;
-    }
-    .model-features li {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-    .model-features li i {
-      color: var(--primary);
-      font-size: 0.7rem;
-      margin-top: 4px;
-      flex-shrink: 0;
-    }
-
-    /* Bloco de preço */
     .price-block {
       display: flex;
       flex-direction: column;
@@ -834,36 +726,11 @@
       border-radius: 10px;
       margin-top: 6px;
     }
-    .price-value {
-      font-size: 1.15rem;
-      font-weight: 900;
-      color: var(--primary);
-      letter-spacing: 0.01em;
-      line-height: 1.2;
-    }
-    .price-value small {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-left: 4px;
-    }
-    .price-deadline {
-      font-size: 0.76rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      line-height: 1.4;
-    }
+    .price-value { font-size: 1.05rem; font-weight: 900; color: var(--primary); letter-spacing: 0.01em; line-height: 1.3; }
+    .price-value small { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-left: 4px; }
+    .price-deadline { font-size: 0.76rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px; line-height: 1.4; }
     .price-deadline i { color: var(--accent); font-size: 0.7rem; }
-
-    .price-note {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      font-style: italic;
-      line-height: 1.5;
-    }
+    .price-note { font-size: 0.72rem; color: var(--text-muted); font-style: italic; line-height: 1.5; }
 
     .btn-quote {
       display: inline-flex;
@@ -881,30 +748,14 @@
       margin-top: 6px;
       width: 100%;
     }
-    .btn-quote:hover {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-      transform: translateY(-1px);
-    }
+    .btn-quote:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-1px); }
     .btn-quote i { font-size: 0.75rem; }
 
     /* ============================================================
        12. CONTATO
        ============================================================ */
-    .contact-section {
-      background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--primary) 5%, transparent));
-      padding: 80px 0;
-    }
-
-    .contact-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
+    .contact-section { background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--primary) 5%, transparent)); padding: 80px 0; }
+    .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto; }
     .contact-card {
       display: flex;
       align-items: center;
@@ -915,12 +766,7 @@
       border-radius: var(--radius-md);
       transition: var(--transition);
     }
-    .contact-card:hover {
-      background: var(--surface-strong);
-      border-color: var(--primary);
-      transform: translateY(-3px);
-    }
-
+    .contact-card:hover { background: var(--surface-strong); border-color: var(--primary); transform: translateY(-3px); }
     .contact-icon {
       width: 44px; height: 44px;
       flex-shrink: 0;
@@ -932,28 +778,13 @@
       justify-content: center;
       font-size: 1.1rem;
     }
-
     .contact-info { flex: 1; min-width: 0; }
-    .contact-info strong {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 800;
-      margin-bottom: 3px;
-    }
-    .contact-info span {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      word-break: break-all;
-    }
-
-    .contact-card > i:last-child {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      flex-shrink: 0;
-    }
+    .contact-info strong { display: block; font-size: 0.9rem; font-weight: 800; margin-bottom: 3px; }
+    .contact-info span { font-size: 0.8rem; color: var(--text-muted); word-break: break-all; }
+    .contact-card > i:last-child { color: var(--text-muted); font-size: 0.75rem; flex-shrink: 0; }
 
     /* ============================================================
-       13. MODAL ACESSOS
+       13. MODAIS GENÉRICOS
        ============================================================ */
     .modal-overlay {
       position: fixed;
@@ -980,11 +811,10 @@
       position: relative;
       box-shadow: var(--shadow-lg);
       animation: modalIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+      max-height: 90vh;
+      overflow-y: auto;
     }
-    @keyframes modalIn {
-      from { opacity: 0; transform: scale(0.96) translateY(12px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
     .modal-close {
       position: absolute;
@@ -999,121 +829,222 @@
       font-size: 1.15rem;
       transition: var(--transition);
       cursor: pointer;
+      z-index: 10;
     }
-    .modal-close:hover {
-      background: var(--surface-strong);
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: rotate(90deg);
-    }
+    .modal-close:hover { background: var(--surface-strong); border-color: var(--primary); color: var(--primary); transform: rotate(90deg); }
 
-    .modal-box h2 {
-      font-size: 1.4rem;
-      font-weight: 900;
-      margin-bottom: 6px;
-    }
-    .modal-box > p {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 22px;
-      line-height: 1.55;
-    }
+    .modal-box h2 { font-size: 1.4rem; font-weight: 900; margin-bottom: 6px; }
+    .modal-box > p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 22px; line-height: 1.55; }
 
-    .access-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .access-item {
+    /* ============================================================
+       14. MODAL DE SOLICITAÇÃO — ESTILOS ESPECÍFICOS
+       ============================================================ */
+    .request-modal-box { max-width: 680px; }
+
+    .request-form { display: flex; flex-direction: column; gap: 18px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 6px;
+    }
+    .form-group label .required { color: var(--accent); font-size: 0.85rem; }
+    .form-group label .optional { color: var(--text-muted); font-weight: 500; font-size: 0.75rem; }
+
+    .form-group input[type="text"],
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      transition: var(--transition);
+      resize: vertical;
+    }
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent);
+    }
+    .form-group input.error,
+    .form-group textarea.error {
+      border-color: #ef4444;
+    }
+    .form-group .field-error {
+      font-size: 0.75rem;
+      color: #f87171;
+      display: none;
+      align-items: center;
+      gap: 5px;
+    }
+    .form-group .field-error.visible { display: flex; }
+
+    .form-group textarea { min-height: 100px; }
+    .form-group textarea.project-desc { min-height: 140px; }
+
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    /* Tipo de pedido (fixo) */
+    .fixed-type {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+      border-radius: 8px;
+    }
+    .fixed-type i { color: var(--accent); font-size: 1rem; }
+    .fixed-type strong { font-size: 0.85rem; font-weight: 700; }
+    .fixed-type span { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* Preferência de pagamento */
+    .payment-options { display: flex; flex-direction: column; gap: 10px; }
+    .payment-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
       padding: 14px 16px;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
       transition: var(--transition);
     }
-    .access-item:hover {
-      background: var(--surface-strong);
-      border-color: var(--primary);
-      transform: translateX(4px);
+    .payment-option:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
+    .payment-option.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); }
+    .payment-option input[type="radio"] { margin-top: 3px; accent-color: var(--primary); flex-shrink: 0; }
+    .payment-option-info { flex: 1; }
+    .payment-option-info strong { display: block; font-size: 0.88rem; font-weight: 800; margin-bottom: 2px; }
+    .payment-option-info span { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* Upload de imagem */
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 30px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--surface);
     }
-    .access-item-icon {
-      width: 40px; height: 40px;
-      flex-shrink: 0;
-      border-radius: 10px;
-      background: color-mix(in srgb, var(--primary) 15%, transparent);
-      color: var(--primary);
+    .upload-area:hover { border-color: var(--primary); background: var(--surface-strong); }
+    .upload-area.has-file { border-style: solid; border-color: var(--primary); padding: 16px; }
+    .upload-area i.upload-icon { font-size: 2rem; color: var(--text-muted); margin-bottom: 10px; display: block; }
+    .upload-area p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+    .upload-area .formats { font-size: 0.72rem; color: var(--text-muted); opacity: 0.7; }
+
+    .upload-preview {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+    }
+    .upload-preview.visible { display: flex; }
+    .upload-preview img {
+      width: 64px; height: 64px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .upload-preview-info { flex: 1; min-width: 0; }
+    .upload-preview-info .filename { font-size: 0.82rem; font-weight: 700; word-break: break-all; margin-bottom: 4px; }
+    .upload-preview-info .filesize { font-size: 0.72rem; color: var(--text-muted); }
+    .btn-remove-file {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
-    }
-    .access-item-info { flex: 1; min-width: 0; }
-    .access-item-info strong { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 2px; }
-    .access-item-info span { font-size: 0.75rem; color: var(--text-muted); word-break: break-all; }
-    .access-item > i:last-child { color: var(--text-muted); font-size: 0.7rem; }
-
-    /* ============================================================
-       14. FOOTER
-       ============================================================ */
-    .site-footer {
-      border-top: 1px solid var(--border);
-      padding: 50px 0 26px;
-      background: color-mix(in srgb, var(--bg) 95%, black);
-    }
-    .footer-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 34px;
-      margin-bottom: 34px;
-    }
-    .footer-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      font-weight: 800;
-      font-size: 1rem;
-    }
-    .footer-brand img {
-      width: 34px; height: 34px;
-      border-radius: 8px;
-      border: 1.5px solid var(--border);
-      object-fit: cover;
-    }
-    .footer-col p {
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      line-height: 1.65;
-      max-width: 280px;
-    }
-    .footer-col h4 {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      font-weight: 800;
-      margin-bottom: 16px;
-    }
-    .footer-links {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .footer-links a {
       font-size: 0.9rem;
-      color: var(--text-muted);
+      flex-shrink: 0;
       transition: var(--transition);
+    }
+    .btn-remove-file:hover { background: rgba(239, 68, 68, 0.3); transform: scale(1.1); }
+
+    .file-input-hidden { display: none; }
+
+    /* Botão enviar */
+    .btn-submit {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 70%, var(--accent)));
+      color: #fff;
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--primary) 35%, transparent);
+      transition: var(--transition);
+      border: none;
       cursor: pointer;
+      width: 100%;
+      margin-top: 6px;
     }
-    .footer-links a:hover { color: var(--primary); transform: translateX(3px); }
+    .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px color-mix(in srgb, var(--primary) 45%, transparent); }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .btn-submit .spinner { display: none; animation: spin 0.8s linear infinite; }
+    .btn-submit.loading .spinner { display: inline-block; }
+    .btn-submit.loading .btn-label { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Feedback de envio */
+    .submit-feedback {
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+    .submit-feedback.visible { display: flex; }
+    .submit-feedback.success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+    .submit-feedback.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    .submit-feedback i { flex-shrink: 0; margin-top: 2px; }
+
+    /* Aviso de prazo no modal */
+    .modal-deadline-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      padding: 10px 12px;
+      background: color-mix(in srgb, var(--accent) 6%, transparent);
+      border-radius: 6px;
+      border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    .modal-deadline-note i { color: var(--accent); margin-right: 4px; }
+
+    /* ============================================================
+       15. FOOTER
+       ============================================================ */
+    .site-footer { border-top: 1px solid var(--border); padding: 50px 0 26px; background: color-mix(in srgb, var(--bg) 95%, black); }
+    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 34px; margin-bottom: 34px; }
+    .footer-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-weight: 800; font-size: 1rem; }
+    .footer-brand img { width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid var(--border); object-fit: cover; }
+    .footer-col p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; max-width: 280px; }
+    .footer-col h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); font-weight: 800; margin-bottom: 16px; }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a { font-size: 0.9rem; color: var(--text-muted); transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+    .footer-links a:hover { color: var(--primary); transform: translateX(3px); }
     .social-row { display: flex; gap: 10px; }
     .social-row a {
       width: 40px; height: 40px;
@@ -1128,35 +1059,17 @@
       transition: var(--transition);
     }
     .social-row a:hover { color: var(--primary); border-color: var(--primary); transform: translateY(-3px); }
-
-    .footer-bottom {
-      padding-top: 26px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
+    .footer-bottom { padding-top: 26px; border-top: 1px solid var(--border); text-align: center; font-size: 0.82rem; color: var(--text-muted); }
     .footer-bottom i { color: var(--accent); }
 
     /* ============================================================
-       15. ANIMAÇÕES
+       16. ANIMAÇÕES
        ============================================================ */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.65s ease, transform 0.65s ease;
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
     /* ============================================================
-       16. RESPONSIVIDADE
+       17. RESPONSIVIDADE
        ============================================================ */
     @media (max-width: 640px) {
       .container { padding: 0 18px; }
@@ -1166,8 +1079,10 @@
       .category-header { gap: 12px; }
       .category-icon { width: 48px; height: 48px; font-size: 1.3rem; }
       .model-card { padding: 20px; }
-      .modal-box { padding: 28px 22px 22px; }
+      .modal-box { padding: 28px 20px 22px; max-height: 95vh; }
+      .request-modal-box { max-width: 100%; }
       .btn-primary, .btn-outline { width: 100%; justify-content: center; }
+      .payment-options { gap: 8px; }
     }
   </style>
 </head>
@@ -1226,7 +1141,7 @@
 
       <a href="#como-funciona"><i class="fas fa-route"></i> Como funciona</a>
       <a href="#modelo-comercial"><i class="fas fa-receipt"></i> Modelo comercial</a>
-      <a href="#servicos"><i class="fas fa-briefcase"></i> Diferenciais</a>
+      <a href="#prazos"><i class="fas fa-clock"></i> Sobre prazos</a>
       <a href="#categorias"><i class="fas fa-layer-group"></i> Serviços e preços</a>
       <a href="#contato"><i class="fas fa-envelope"></i> Contato</a>
 
@@ -1293,12 +1208,12 @@
             <i class="fas fa-microchip"></i> FGP Technologies
           </span>
 
-          <h1>Tecnologia sob medida, com contratação acessível.</h1>
+          <h1>Tecnologia sob medida, com preços e prazos transparentes.</h1>
 
           <p>
             A FGP Technologies desenvolve aplicativos, sites, sistemas e soluções digitais
-            para pessoas e empresas. Cada projeto é pensado do zero, com pagamento mensal
-            durante o desenvolvimento — sem exigir o valor total de uma só vez.
+            para pessoas e empresas. Apresentamos referências de mercado, prazos estimados
+            e modalidades de pagamento acessíveis — sem surpresas.
           </p>
 
           <div class="hero-actions">
@@ -1311,9 +1226,9 @@
           </div>
 
           <div class="hero-highlights">
-            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Contratação mensal</span>
-            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Escopo transparente</span>
-            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Manutenção opcional</span>
+            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Preços de referência 2026</span>
+            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Prazos estimados</span>
+            <span class="hero-highlight"><i class="fas fa-check-circle"></i> Pagamento mensal ou anual</span>
           </div>
         </div>
       </div>
@@ -1336,31 +1251,26 @@
             <h3>Escolha do serviço</h3>
             <p>Você identifica a solução que deseja contratar entre as categorias disponíveis.</p>
           </div>
-
           <div class="flow-step reveal">
             <div class="flow-number">2</div>
             <h3>Solicitação</h3>
-            <p>Ao clicar em "Solicitar orçamento", uma mensagem de e-mail já preenchida é aberta para você revisar.</p>
+            <p>Preencha o formulário com os detalhes do seu projeto. Você poderá revisar tudo antes de enviar.</p>
           </div>
-
           <div class="flow-step reveal">
             <div class="flow-number">3</div>
             <h3>Análise</h3>
             <p>A FGP avalia as necessidades, a complexidade e o escopo do projeto solicitado.</p>
           </div>
-
           <div class="flow-step reveal">
             <div class="flow-number">4</div>
             <h3>Proposta</h3>
-            <p>Você recebe uma proposta com preço, prazo, escopo detalhado e condições.</p>
+            <p>Você recebe uma proposta com valor total, prazo de desenvolvimento e condições de pagamento.</p>
           </div>
-
           <div class="flow-step reveal">
             <div class="flow-number">5</div>
             <h3>Desenvolvimento</h3>
             <p>Após a aprovação e o pagamento inicial, o projeto começa e segue o planejamento acordado.</p>
           </div>
-
           <div class="flow-step reveal">
             <div class="flow-number">6</div>
             <h3>Entrega e manutenção</h3>
@@ -1377,107 +1287,68 @@
           <span class="section-eyebrow">Modelo comercial</span>
           <h2 class="section-title">Contratação transparente e sustentável</h2>
           <p class="section-desc">
-            A FGP prioriza qualidade e entregas realistas. Por isso, trabalhamos com
-            pagamentos mensais durante o desenvolvimento — sem exigir o valor total de uma só vez.
+            Preços e prazos são referências de mercado. O orçamento definitivo considera
+            o escopo, as funcionalidades e os requisitos técnicos do seu projeto.
           </p>
         </div>
 
         <div class="model-cards">
           <article class="model-info-card reveal">
             <div class="model-info-icon"><i class="fas fa-calendar-check"></i></div>
-            <h3>Desenvolvimento por mensalidade</h3>
-            <p>
-              O cliente paga mensalmente durante um prazo combinado. O desenvolvimento começa
-              após aprovação da proposta e pagamento inicial.
-            </p>
+            <h3>Desenvolvimento</h3>
+            <p>O valor total do projeto é apresentado na proposta. O pagamento pode ser à vista ou parcelado mensalmente durante o prazo combinado.</p>
             <ul class="model-info-list">
-              <li><i class="fas fa-check"></i> Prazo e valor definidos antes do início</li>
-              <li><i class="fas fa-check"></i> Escopo detalhado das funcionalidades contratadas</li>
-              <li><i class="fas fa-check"></i> Entregas seguem o planejamento acordado</li>
+              <li><i class="fas fa-check"></i> Escopo e funcionalidades definidos previamente</li>
+              <li><i class="fas fa-check"></i> Primeira parcela antes do início do trabalho</li>
+              <li><i class="fas fa-check"></i> Parcelamento mensal com quantidade e total claros</li>
+              <li><i class="fas fa-check"></i> Antecipação de parcelas conforme condições acordadas</li>
               <li><i class="fas fa-check"></i> Alterações fora do escopo podem gerar custos adicionais</li>
-              <li><i class="fas fa-check"></i> Não é uma assinatura ilimitada</li>
             </ul>
           </article>
 
           <article class="model-info-card reveal">
             <div class="model-info-icon"><i class="fas fa-screwdriver-wrench"></i></div>
-            <h3>Manutenção após a entrega</h3>
-            <p>
-              Plano opcional e independente do desenvolvimento. Ideal para manter o projeto
-              atualizado e receber suporte técnico contínuo.
-            </p>
-            <div class="model-info-price">R$ 99 – 299 / mês</div>
+            <h3>Manutenção</h3>
+            <p>Plano separado e opcional após a entrega. Ideal para manter o projeto atualizado e receber suporte contínuo.</p>
+            <div class="model-info-price">R$ 70 – 1.290 / mês</div>
             <ul class="model-info-list">
-              <li><i class="fas fa-check"></i> Correções e ajustes</li>
-              <li><i class="fas fa-check"></i> Atualizações periódicas</li>
-              <li><i class="fas fa-check"></i> Suporte técnico conforme escopo</li>
-              <li><i class="fas fa-check"></i> Pequenas melhorias</li>
+              <li><i class="fas fa-check"></i> Básico: R$ 70–200/mês</li>
+              <li><i class="fas fa-check"></i> Intermediário: R$ 197–397/mês</li>
+              <li><i class="fas fa-check"></i> Premium: R$ 797–1.290/mês</li>
+              <li><i class="fas fa-check"></i> Escopo e quantidade de suporte definidos na proposta</li>
             </ul>
             <p class="model-info-note">
-              O valor depende do serviço e da quantidade de suporte necessária.
-              Não oferece trabalho ilimitado.
+              Não oferece trabalho ilimitado. Os valores são referências de planos publicados no Brasil em 2026.
             </p>
           </article>
 
           <article class="model-info-card reveal">
             <div class="model-info-icon"><i class="fas fa-receipt"></i></div>
             <h3>Custos externos</h3>
-            <p>
-              Alguns itens são cobrados separadamente, pois envolvem serviços de terceiros
-              e não fazem parte da mensalidade de desenvolvimento.
-            </p>
+            <p>Itens de terceiros são cobrados separadamente, pois não fazem parte do valor de desenvolvimento.</p>
             <ul class="model-info-list">
-              <li><i class="fas fa-check"></i> Domínio</li>
-              <li><i class="fas fa-check"></i> Hospedagem</li>
-              <li><i class="fas fa-check"></i> Servidores</li>
-              <li><i class="fas fa-check"></i> APIs e serviços pagos</li>
+              <li><i class="fas fa-check"></i> Domínio e hospedagem</li>
+              <li><i class="fas fa-check"></i> Servidores e APIs pagas</li>
               <li><i class="fas fa-check"></i> Taxas de publicação nas lojas</li>
               <li><i class="fas fa-check"></i> Licenças e ferramentas externas</li>
             </ul>
-            <p class="model-info-note">
-              Esses custos não estão incluídos na mensalidade por padrão.
-            </p>
+            <p class="model-info-note">Esses custos não estão incluídos por padrão.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- ===== DIFERENCIAIS ===== -->
-    <section class="section" id="servicos">
+    <!-- ===== AVISO DE PRAZO ===== -->
+    <section class="section" id="prazos">
       <div class="container">
-        <div class="section-header reveal">
-          <span class="section-eyebrow">Como trabalhamos</span>
-          <h2 class="section-title">Desenvolvimento com clareza</h2>
-          <p class="section-desc">
-            Sem números inventados, sem promessas vazias. Escopo definido, orçamento
-            personalizado e comunicação direta.
+        <div class="deadline-notice reveal">
+          <h3><i class="fas fa-clock" style="color:var(--accent);margin-right:8px;"></i> Sobre os prazos de desenvolvimento</h3>
+          <p>
+            Os prazos apresentados são estimativas baseadas no escopo inicial do projeto.
+            Dependendo da complexidade e do andamento da produção, a entrega poderá acontecer
+            antes do período previsto. As condições de pagamento e os compromissos assumidos
+            continuarão seguindo a proposta aprovada, mesmo quando a entrega acontecer antes da previsão.
           </p>
-        </div>
-
-        <div class="diffs-grid">
-          <div class="diff-card reveal">
-            <div class="diff-icon"><i class="fas fa-comments"></i></div>
-            <h3>Comunicação direta</h3>
-            <p>Contato sem intermediários. Você fala diretamente com quem desenvolve.</p>
-          </div>
-
-          <div class="diff-card reveal">
-            <div class="diff-icon"><i class="fas fa-ruler-combined"></i></div>
-            <h3>Sob medida</h3>
-            <p>Nada de modelos engessados. Cada solução é desenhada para o seu contexto.</p>
-          </div>
-
-          <div class="diff-card reveal">
-            <div class="diff-icon"><i class="fas fa-receipt"></i></div>
-            <h3>Orçamento transparente</h3>
-            <p>Escopo, prazo e valor são definidos antes do início de qualquer projeto.</p>
-          </div>
-
-          <div class="diff-card reveal">
-            <div class="diff-icon"><i class="fas fa-handshake"></i></div>
-            <h3>Suporte contínuo</h3>
-            <p>Acompanhamento pós-entrega e possibilidade de manutenção recorrente.</p>
-          </div>
         </div>
       </div>
     </section>
@@ -1487,10 +1358,10 @@
       <div class="container">
         <div class="section-header reveal">
           <span class="section-eyebrow">Catálogo</span>
-          <h2 class="section-title">Serviços e valores estimados</h2>
+          <h2 class="section-title">Serviços e referências de preço</h2>
           <p class="section-desc">
-            Cinco frentes de atuação. Os valores abaixo são faixas mensais de referência —
-            o orçamento final considera complexidade, funcionalidades e prazo do projeto.
+            Os valores abaixo são referências de mercado publicadas no Brasil em 2026.
+            O orçamento definitivo será elaborado após a análise do escopo.
           </p>
         </div>
 
@@ -1589,6 +1460,125 @@
   </div>
 
   <!-- ============================================================
+       MODAL DE SOLICITAÇÃO DE ORÇAMENTO
+       ============================================================ -->
+  <div class="modal-overlay" id="requestModal" role="dialog" aria-modal="true" aria-labelledby="requestModalTitle">
+    <div class="modal-box request-modal-box">
+      <button class="modal-close" id="closeRequestBtn" aria-label="Fechar">
+        <i class="fas fa-xmark"></i>
+      </button>
+
+      <h2 id="requestModalTitle"><i class="fas fa-paper-plane" style="color:var(--primary);margin-right:8px;"></i> Solicitar orçamento</h2>
+      <p>Preencha os detalhes abaixo. Todos os campos marcados com <span style="color:var(--accent);">*</span> são obrigatórios.</p>
+
+      <form class="request-form" id="requestForm" novalidate>
+        <!-- Título do pedido -->
+        <div class="form-group">
+          <label for="requestTitle">Título do pedido <span class="required">*</span></label>
+          <input type="text" id="requestTitle" name="title" required maxlength="150" />
+          <span class="field-error" id="titleError"><i class="fas fa-circle-exclamation"></i> Por favor, preencha o título.</span>
+        </div>
+
+        <!-- Descrição inicial -->
+        <div class="form-group">
+          <label for="initialDescription">Descrição inicial <span class="required">*</span></label>
+          <textarea id="initialDescription" name="initialDescription" required maxlength="500" style="min-height:90px;"></textarea>
+          <span class="field-error" id="initialDescError"><i class="fas fa-circle-exclamation"></i> Por favor, preencha a descrição inicial.</span>
+        </div>
+
+        <!-- Tipo de pedido (fixo) -->
+        <div class="form-group">
+          <label>Tipo de pedido</label>
+          <div class="fixed-type">
+            <i class="fas fa-tag"></i>
+            <strong>Tipo de pedido:</strong>
+            <span id="requestTypeDisplay">—</span>
+          </div>
+          <input type="hidden" id="requestType" name="requestType" value="" />
+        </div>
+
+        <!-- Descrição para o Projeto (obrigatória) -->
+        <div class="form-group">
+          <label for="projectDescription">Descrição para o Projeto <span class="required">*</span></label>
+          <textarea id="projectDescription" name="projectDescription" class="project-desc" required maxlength="3000"
+            placeholder="Conte para nós um pouco mais sobre sua ideia! Como você imagina esse projeto? Quais funcionalidades gostaria de incluir? Quanto mais detalhes compartilhar, melhor poderemos compreender suas necessidades e preparar uma proposta adequada."></textarea>
+          <span class="field-error" id="projectDescError"><i class="fas fa-circle-exclamation"></i> Por favor, descreva seu projeto.</span>
+          <p class="form-hint">
+            <i class="fas fa-lightbulb" style="color:var(--accent);margin-right:4px;"></i>
+            Não precisa utilizar termos técnicos. Explique sua ideia com suas próprias palavras.
+            Nossa equipe analisará as informações e poderá solicitar detalhes adicionais.
+          </p>
+        </div>
+
+        <!-- Preferência de pagamento -->
+        <div class="form-group">
+          <label>Preferência de pagamento <span class="required">*</span></label>
+          <div class="payment-options" id="paymentOptions">
+            <label class="payment-option" data-value="Mensal">
+              <input type="radio" name="paymentPreference" value="Mensal" required />
+              <div class="payment-option-info">
+                <strong>Plano mensal</strong>
+                <span>Pagamento recorrente mensal. Maior flexibilidade, sem desconto por antecipação.</span>
+              </div>
+            </label>
+            <label class="payment-option" data-value="Anual">
+              <input type="radio" name="paymentPreference" value="Anual" required />
+              <div class="payment-option-info">
+                <strong>Plano anual</strong>
+                <span>Pagamento antecipado referente a 12 meses. Desconto estimado de 5% a 10%, quando aplicável. Valor final apresentado na proposta comercial.</span>
+              </div>
+            </label>
+          </div>
+          <span class="field-error" id="paymentError"><i class="fas fa-circle-exclamation"></i> Selecione uma preferência de pagamento.</span>
+          <p class="form-hint">
+            A modalidade selecionada representa sua preferência inicial. As condições definitivas
+            serão apresentadas pela FGP após a análise do projeto.
+          </p>
+        </div>
+
+        <!-- Upload de imagem (opcional) -->
+        <div class="form-group">
+          <label>Imagem de referência <span class="optional">(opcional)</span></label>
+          <div class="upload-area" id="uploadArea">
+            <i class="fas fa-image upload-icon"></i>
+            <p>Clique para selecionar uma imagem</p>
+            <p class="formats">JPEG, PNG ou WebP · máx. 5 MB</p>
+          </div>
+          <input type="file" id="fileInput" name="attachment" class="file-input-hidden"
+                 accept="image/jpeg,image/png,image/webp" />
+          <div class="upload-preview" id="uploadPreview">
+            <img id="previewImg" src="" alt="Prévia da imagem" />
+            <div class="upload-preview-info">
+              <div class="filename" id="previewFilename"></div>
+              <div class="filesize" id="previewFilesize"></div>
+            </div>
+            <button type="button" class="btn-remove-file" id="removeFileBtn" aria-label="Remover imagem">
+              <i class="fas fa-xmark"></i>
+            </button>
+          </div>
+          <span class="field-error" id="fileError"><i class="fas fa-circle-exclamation"></i> Arquivo inválido.</span>
+        </div>
+
+        <!-- Aviso de prazo -->
+        <div class="modal-deadline-note">
+          <i class="fas fa-clock"></i>
+          Os prazos são estimativas. A entrega poderá ocorrer antes do previsto, mantendo as condições acordadas.
+        </div>
+
+        <!-- Feedback -->
+        <div class="submit-feedback" id="submitFeedback"></div>
+
+        <!-- Botão enviar -->
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <i class="fas fa-paper-plane btn-label"></i>
+          <span class="btn-label">Enviar pedido</span>
+          <i class="fas fa-spinner spinner"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
        FOOTER
        ============================================================ -->
   <footer class="site-footer">
@@ -1607,6 +1597,7 @@
           <ul class="footer-links">
             <li><a href="#como-funciona"><i class="fas fa-arrow-right"></i> Como funciona</a></li>
             <li><a href="#modelo-comercial"><i class="fas fa-arrow-right"></i> Modelo comercial</a></li>
+            <li><a href="#prazos"><i class="fas fa-arrow-right"></i> Sobre prazos</a></li>
             <li><a href="#categorias"><i class="fas fa-arrow-right"></i> Serviços e preços</a></li>
             <li><a href="#contato"><i class="fas fa-arrow-right"></i> Contato</a></li>
           </ul>
@@ -1644,14 +1635,8 @@
     /* ============================================================
        1. BASE DE DADOS DE SERVIÇOS
        ------------------------------------------------------------
-       Estrutura de cada modelo:
-         name        — nome do serviço
-         icon        — classe FontAwesome
-         description — descrição curta
-         features[]  — lista de características
-         priceRange  — faixa de mensalidade (ex.: "R$ 199 – 349")
-         deadline    — texto do prazo/modalidade
-       Para adicionar novos modelos: basta incluí-los em "models".
+       Preços e prazos baseados em referências de mercado
+       publicadas no Brasil em 2026. NÃO são valores fixos da FGP.
        ============================================================ */
     const SERVICES_DB = [
       {
@@ -1659,44 +1644,42 @@
         icon: 'fa-mobile-screen-button',
         title: 'Aplicativos',
         description: 'Apps para Android, iOS e web — do MVP ao produto final.',
-        questions: [
-          'Plataforma desejada (Android, iOS, web ou multiplataforma)',
-          'Funcionalidades desejadas',
-          'Integrações necessárias',
-          'Público-alvo'
-        ],
         models: [
           {
             name: 'App Android',
             icon: 'fa-android',
-            description: 'Aplicativo nativo para a plataforma Android, publicado na Play Store.',
+            description: 'Desenvolvimento nativo para Android. Publicação na Play Store.',
             features: ['Desenvolvimento nativo', 'Publicação na Play Store', 'Suporte pós-lançamento conforme contratação'],
-            priceRange: 'R$ 499 – 899',
-            deadline: 'Prazo estimado: 12 a 18 meses'
+            priceRange: 'R$ 30.000 – 60.000',
+            priceNote: 'Referência para MVP empresarial',
+            deadline: 'Prazo definido após levantamento de funcionalidades'
           },
           {
             name: 'App iOS',
             icon: 'fa-apple',
-            description: 'Aplicativo nativo para iPhone e iPad, publicado na App Store.',
+            description: 'Desenvolvimento nativo para iPhone e iPad. Publicação na App Store.',
             features: ['Desenvolvimento nativo', 'Publicação na App Store', 'Suporte pós-lançamento conforme contratação'],
-            priceRange: 'R$ 699 – 1.199',
-            deadline: 'Prazo estimado: 12 a 18 meses'
+            priceRange: 'Sob avaliação técnica',
+            priceNote: 'Mesma cautela do Android: escopo define o valor',
+            deadline: 'Prazo definido após análise do projeto'
           },
           {
             name: 'App multiplataforma',
             icon: 'fa-layer-group',
             description: 'Uma única base de código para Android, iOS e web.',
             features: ['Código compartilhado', 'Android, iOS e web', 'Atualizações centralizadas'],
-            priceRange: 'R$ 799 – 1.399',
-            deadline: 'Prazo estimado: 12 a 18 meses'
+            priceRange: 'A partir de R$ 14.900',
+            priceNote: 'Referência para MVP multiplataforma',
+            deadline: 'Prazo de referência: 45 a 90 dias'
           },
           {
             name: 'App sob medida',
             icon: 'fa-sliders',
             description: 'Aplicativo empresarial ou de uso interno, com funcionalidades customizadas.',
             features: ['Escopo personalizado', 'Integrações específicas', 'Design dedicado'],
-            priceRange: 'R$ 999 – 1.799',
-            deadline: 'Prazo estimado: 12 a 24 meses'
+            priceRange: 'R$ 30.000 – 120.000',
+            priceNote: 'Projetos avançados podem superar R$ 150.000',
+            deadline: 'Prazo de referência: 2 a 5 meses para MVP'
           }
         ]
       },
@@ -1705,44 +1688,42 @@
         icon: 'fa-globe',
         title: 'Sites',
         description: 'Do cartão de visitas digital à loja virtual completa.',
-        questions: [
-          'Finalidade do site',
-          'Quantidade aproximada de páginas',
-          'Recursos necessários (formulário, blog, catálogo etc.)',
-          'Necessita painel administrativo?'
-        ],
         models: [
           {
             name: 'Landing page',
             icon: 'fa-bullseye',
-            description: 'Página única focada em conversão para um produto, serviço ou campanha.',
+            description: 'Página única focada em conversão para produto, serviço ou campanha.',
             features: ['Design focado em conversão', 'Layout responsivo', 'Formulário de contato'],
-            priceRange: 'R$ 99 – 179',
-            deadline: 'Prazo estimado: 12 meses'
+            priceRange: 'R$ 800 – 2.000',
+            priceNote: 'Valor total do projeto',
+            deadline: 'Prazo estimado: 1 a 2 semanas'
           },
           {
             name: 'Site institucional',
             icon: 'fa-building',
             description: 'Site de apresentação da empresa, com múltiplas seções e páginas.',
             features: ['Múltiplas páginas', 'Design responsivo', 'Otimização básica de SEO'],
-            priceRange: 'R$ 199 – 349',
-            deadline: 'Prazo estimado: 12 meses'
+            priceRange: 'R$ 1.500 – 8.000',
+            priceNote: 'Projetos com mais recursos recebem orçamento próprio',
+            deadline: 'Prazo estimado: 3 a 6 semanas'
           },
           {
             name: 'Loja virtual',
             icon: 'fa-cart-shopping',
             description: 'E-commerce completo com catálogo, carrinho e checkout.',
             features: ['Catálogo de produtos', 'Carrinho e checkout', 'Painel administrativo'],
-            priceRange: 'R$ 399 – 799',
-            deadline: 'Prazo estimado: 18 a 24 meses'
+            priceRange: 'R$ 3.000 – 15.000',
+            priceNote: 'Referência para e-commerce básico',
+            deadline: 'Prazo estimado: 6 a 12 semanas'
           },
           {
             name: 'Site personalizado / Web app',
             icon: 'fa-code',
             description: 'Site com funcionalidades sob medida, integrações e área restrita.',
             features: ['Lógica personalizada', 'Integrações com APIs', 'Área de usuário'],
-            priceRange: 'R$ 499 – 999',
-            deadline: 'Prazo estimado: 12 a 24 meses'
+            priceRange: 'R$ 10.000 – 25.000',
+            priceNote: 'Referência para aplicações web leves',
+            deadline: 'Prazo definido conforme escopo e integrações'
           }
         ]
       },
@@ -1751,44 +1732,42 @@
         icon: 'fa-server',
         title: 'Sistemas',
         description: 'Sistemas internos, painéis e automação de processos.',
-        questions: [
-          'Processo que será automatizado ou gerenciado',
-          'Tipos de usuários que vão utilizar o sistema',
-          'Dados que serão administrados',
-          'Funcionalidades necessárias'
-        ],
         models: [
           {
             name: 'Sistema de gestão',
             icon: 'fa-clipboard-list',
             description: 'Sistema para organizar clientes, produtos, pedidos ou operações internas.',
             features: ['Cadastros e relatórios', 'Controle de usuários', 'Painel personalizado'],
-            priceRange: 'R$ 399 – 699',
-            deadline: 'Prazo estimado: 12 a 18 meses'
+            priceRange: 'R$ 18.000 – 45.000',
+            priceNote: 'Referência para sistema simples (CRUD)',
+            deadline: 'Prazo estimado: 6 a 10 semanas'
           },
           {
             name: 'Painel administrativo',
             icon: 'fa-gauge-high',
             description: 'Dashboard para visualizar métricas e administrar dados.',
             features: ['Visualização de dados', 'Gestão de conteúdo', 'Controle de permissões'],
-            priceRange: 'R$ 299 – 599',
-            deadline: 'Prazo estimado: 12 meses'
+            priceRange: 'Orçamento após análise',
+            priceNote: 'Indicadores, fontes de dados e permissões influenciam o valor',
+            deadline: 'Prazo definido após escopo'
           },
           {
             name: 'Automação e integrações',
             icon: 'fa-robot',
             description: 'Automação de tarefas repetitivas e integração entre sistemas.',
             features: ['Automação de tarefas', 'Integração com APIs', 'Agendamento'],
-            priceRange: 'R$ 249 – 599',
-            deadline: 'Prazo estimado: 6 a 12 meses'
+            priceRange: 'R$ 5.000 – 15.000',
+            priceNote: 'APIs simples. Integrações complexas: R$ 30.000–50.000+',
+            deadline: 'Prazo de referência: 8 a 24 semanas'
           },
           {
             name: 'Sistema sob medida',
             icon: 'fa-cogs',
             description: 'Sistema construído do zero para um processo específico do seu negócio.',
             features: ['Escopo dedicado', 'Banco de dados próprio', 'Possibilidade de evolução contínua'],
-            priceRange: 'R$ 699 – 1.299',
-            deadline: 'Prazo estimado: 18 a 24 meses'
+            priceRange: 'R$ 45.000 – 150.000',
+            priceNote: 'Sistemas multiusuário complexos podem superar R$ 150.000',
+            deadline: 'Prazo de referência: 10 a 20 semanas'
           }
         ]
       },
@@ -1797,35 +1776,32 @@
         icon: 'fa-wand-magic-sparkles',
         title: 'Soluções Digitais',
         description: 'Consultoria, identidade digital e suporte técnico.',
-        questions: [
-          'Problema identificado',
-          'Objetivo a ser alcançado',
-          'Situação atual do projeto ou negócio',
-          'Resultado esperado'
-        ],
         models: [
           {
             name: 'Identidade digital',
             icon: 'fa-fingerprint',
             description: 'Presença digital completa: site, redes sociais e comunicação visual.',
             features: ['Diretrizes visuais', 'Presença nas redes', 'Materiais de apoio'],
-            priceRange: 'R$ 149 – 299',
-            deadline: 'Prazo estimado: 6 a 12 meses'
+            priceRange: 'Orçamento personalizado',
+            priceNote: 'Depende dos elementos incluídos (design, materiais, redes)',
+            deadline: 'Prazo definido conforme escopo'
           },
           {
             name: 'Consultoria técnica',
             icon: 'fa-lightbulb',
             description: 'Análise, diagnóstico e recomendação para projetos digitais.',
             features: ['Diagnóstico', 'Recomendações práticas', 'Plano de ação'],
-            priceRange: 'R$ 149 – 299',
-            deadline: 'Modalidade: contratação mensal'
+            priceRange: 'R$ 60 – 150 / hora',
+            priceNote: 'Referência para profissionais iniciantes. Pacotes sob consulta.',
+            deadline: 'Modalidade: por hora ou pacote'
           },
           {
             name: 'Manutenção e suporte',
             icon: 'fa-screwdriver-wrench',
             description: 'Manutenção contínua de sites, apps ou sistemas já existentes.',
             features: ['Atualizações periódicas', 'Correções conforme escopo', 'Relatórios'],
-            priceRange: 'R$ 99 – 299',
+            priceRange: 'R$ 70 – 1.290 / mês',
+            priceNote: 'Básico R$70–200 · Intermediário R$197–397 · Premium R$797–1.290',
             deadline: 'Modalidade: contratação mensal'
           },
           {
@@ -1833,8 +1809,9 @@
             icon: 'fa-plug',
             description: 'Conexão entre sistemas via APIs e integrações específicas.',
             features: ['APIs REST', 'Webhooks', 'Documentação'],
-            priceRange: 'R$ 299 – 699',
-            deadline: 'Prazo estimado: 6 a 12 meses'
+            priceRange: 'R$ 5.000 – 50.000+',
+            priceNote: 'APIs simples: R$5–15k. Complexas: R$30–50k+',
+            deadline: 'Prazo de referência: 8 a 24 semanas'
           }
         ]
       },
@@ -1843,35 +1820,32 @@
         icon: 'fa-briefcase',
         title: 'Serviços e Negócios da FGP',
         description: 'Parcerias, publicação de jogos e desenvolvimento de mods.',
-        questions: [
-          'Projeto que deseja desenvolver',
-          'Plataforma de interesse',
-          'Tipo de parceria desejada',
-          'Objetivo da contratação'
-        ],
         models: [
           {
             name: 'Publicação de jogos',
             icon: 'fa-gamepad',
             description: 'Apoio na publicação de jogos independentes em lojas digitais.',
             features: ['Play Store / itch.io', 'Ajustes de build', 'Suporte ao lançamento'],
-            priceRange: 'R$ 149 – 399',
-            deadline: 'Modalidade: por projeto ou período'
+            priceRange: 'Orçamento após avaliação',
+            priceNote: 'Taxas de lojas e custos de terceiros separados',
+            deadline: 'Prazo definido conforme projeto'
           },
           {
             name: 'Mods e add-ons (Minecraft)',
             icon: 'fa-cubes',
             description: 'Desenvolvimento de mods ou add-ons para Minecraft Bedrock sob demanda.',
             features: ['Comportamentos e itens', 'Compatibilidade Bedrock', 'Pacote .mcaddon'],
-            priceRange: 'R$ 199 – 499',
-            deadline: 'Prazo estimado: 6 a 12 meses'
+            priceRange: 'Orçamento personalizado',
+            priceNote: 'Considera itens, comportamentos, texturas e complexidade',
+            deadline: 'Prazo definido após escopo detalhado'
           },
           {
             name: 'Parceria de desenvolvimento',
             icon: 'fa-handshake-angle',
             description: 'Colaboração contínua em projetos de longo prazo.',
             features: ['Escopo recorrente', 'Comunicação direta', 'Acompanhamento'],
-            priceRange: 'R$ 399 – 899',
+            priceRange: 'Proposta personalizada',
+            priceNote: 'Horas, responsabilidades e frequência definem o valor',
             deadline: 'Modalidade: contratação recorrente'
           },
           {
@@ -1879,41 +1853,23 @@
             icon: 'fa-compass',
             description: 'Orientação sobre escopo, viabilidade e roadmap de um projeto.',
             features: ['Análise de escopo', 'Viabilidade técnica', 'Roadmap sugerido'],
-            priceRange: 'R$ 149 – 299',
-            deadline: 'Modalidade: contratação mensal'
+            priceRange: 'R$ 60 – 150 / hora',
+            priceNote: 'Referência para profissionais iniciantes. Valor final depende da experiência.',
+            deadline: 'Modalidade: por hora ou pacote'
           }
         ]
       }
     ];
 
     /* ============================================================
-       2. GERADOR DE MAILTO POR SERVIÇO
+       2. CONFIGURAÇÃO DO FORMINIT
        ------------------------------------------------------------
-       Constrói um link mailto: com assunto e corpo já preenchidos,
-       incluindo perguntas específicas para cada categoria.
+       Substitua 'YOUR_FORMINIT_FORM_ID' pelo ID do seu formulário
+       criado em https://forminit.com.
+       O endpoint será: https://forminit.com/f/{form_id}
        ============================================================ */
-    const CONTACT_EMAIL = 'fgpfreegameplant@gmail.com';
-
-    function buildMailto(category, model) {
-      const subject = `Solicitação de orçamento — ${model.name} | FGP Technologies`;
-
-      let body = '';
-      body += 'Olá, equipe FGP Technologies!\n\n';
-      body += `Tenho interesse no serviço de ${model.name}.\n\n`;
-      body += 'Gostaria de apresentar algumas informações sobre meu projeto:\n\n';
-      body += 'Nome:\n';
-      body += 'Empresa (se aplicável):\n';
-      (category.questions || []).forEach(q => {
-        body += `${q}:\n`;
-      });
-      body += '\nGostaria de receber informações sobre valores, prazos e condições de desenvolvimento.\n\n';
-      body += 'Atenciosamente,\n[Seu nome]';
-
-      const encodedSubject = encodeURIComponent(subject);
-      const encodedBody = encodeURIComponent(body);
-
-      return `mailto:${CONTACT_EMAIL}?subject=${encodedSubject}&body=${encodedBody}`;
-    }
+    const FORMINIT_FORM_ID = 'YOUR_FORMINIT_FORM_ID'; // <-- CONFIGURAR AQUI
+    const FORMINIT_ENDPOINT = `https://forminit.com/f/${FORMINIT_FORM_ID}`;
 
     /* ============================================================
        3. RENDERIZAÇÃO DE CATEGORIAS
@@ -1933,39 +1889,41 @@
           </div>
 
           <div class="models-grid">
-            ${cat.models.map(model => {
-              const mailto = buildMailto(cat, model);
-              return `
-                <article class="model-card">
-                  <div class="model-card-header">
-                    <div class="model-card-icon"><i class="fas ${model.icon}"></i></div>
-                    <h3>${model.name}</h3>
+            ${cat.models.map(model => `
+              <article class="model-card">
+                <div class="model-card-header">
+                  <div class="model-card-icon"><i class="fas ${model.icon}"></i></div>
+                  <h3>${model.name}</h3>
+                </div>
+                <p class="model-card-desc">${model.description}</p>
+                <ul class="model-features">
+                  ${model.features.map(f => `<li><i class="fas fa-check"></i> ${f}</li>`).join('')}
+                </ul>
+
+                <div class="price-block">
+                  <div class="price-value">${model.priceRange}</div>
+                  <div class="price-deadline">
+                    <i class="fas fa-clock"></i> ${model.deadline}
                   </div>
-                  <p class="model-card-desc">${model.description}</p>
-                  <ul class="model-features">
-                    ${model.features.map(f => `<li><i class="fas fa-check"></i> ${f}</li>`).join('')}
-                  </ul>
+                </div>
 
-                  <div class="price-block">
-                    <div class="price-value">
-                      ${model.priceRange}<small>/mês</small>
-                    </div>
-                    <div class="price-deadline">
-                      <i class="fas fa-clock"></i> ${model.deadline}
-                    </div>
-                  </div>
+                <p class="price-note">${model.priceNote || 'Valor final sujeito ao escopo.'}</p>
 
-                  <p class="price-note">Valor final definido após avaliação do projeto.</p>
-
-                  <a href="${mailto}" class="btn-quote">
-                    <i class="fas fa-paper-plane"></i> Solicitar orçamento
-                  </a>
-                </article>
-              `;
-            }).join('')}
+                <button class="btn-quote" data-service="${model.name}" data-category="${cat.title}">
+                  <i class="fas fa-paper-plane"></i> Solicitar orçamento
+                </button>
+              </article>
+            `).join('')}
           </div>
         </div>
       `).join('');
+
+      // Delegação de clique nos botões
+      container.querySelectorAll('.btn-quote').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openRequestModal(btn.dataset.service, btn.dataset.category);
+        });
+      });
     }
 
     /* ============================================================
@@ -1989,33 +1947,25 @@
 
     function hexToRgb(hex) {
       const h = hex.replace('#', '');
-      return {
-        r: parseInt(h.substr(0, 2), 16),
-        g: parseInt(h.substr(2, 2), 16),
-        b: parseInt(h.substr(4, 2), 16)
-      };
+      return { r: parseInt(h.substr(0,2),16), g: parseInt(h.substr(2,2),16), b: parseInt(h.substr(4,2),16) };
     }
-
     function mixHex(a, b, t) {
-      const A = hexToRgb(a);
-      const B = hexToRgb(b);
+      const A = hexToRgb(a), B = hexToRgb(b);
       const r = Math.round(A.r + (B.r - A.r) * t);
       const g = Math.round(A.g + (B.g - A.g) * t);
       const bl = Math.round(A.b + (B.b - A.b) * t);
       return `rgb(${r}, ${g}, ${bl})`;
     }
-
     function applyPalette(p) {
       const root = document.documentElement;
       root.style.setProperty('--primary', p.primary);
       root.style.setProperty('--accent', p.accent);
       root.style.setProperty('--bg', p.bg);
       root.style.setProperty('--text', p.text);
-
-      root.style.setProperty('--surface',        mixHex(p.bg, p.text, 0.06));
+      root.style.setProperty('--surface', mixHex(p.bg, p.text, 0.06));
       root.style.setProperty('--surface-strong', mixHex(p.bg, p.text, 0.10));
-      root.style.setProperty('--border',         mixHex(p.bg, p.text, 0.16));
-      root.style.setProperty('--text-muted',     mixHex(p.text, p.bg, 0.42));
+      root.style.setProperty('--border', mixHex(p.bg, p.text, 0.16));
+      root.style.setProperty('--text-muted', mixHex(p.text, p.bg, 0.42));
 
       const $p = document.getElementById('primaryColor');
       const $a = document.getElementById('accentColor');
@@ -2025,21 +1975,14 @@
       if ($a) $a.value = p.accent;
       if ($b) $b.value = p.bg;
       if ($t) $t.value = p.text;
-
-      const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', p.bg);
     }
-
-    function savePalette(p) {
-      try { localStorage.setItem(COLOR_STORAGE_KEY, JSON.stringify(p)); } catch (_) {}
-    }
-
+    function savePalette(p) { try { localStorage.setItem(COLOR_STORAGE_KEY, JSON.stringify(p)); } catch(_){} }
     function loadPalette() {
       try {
         const raw = localStorage.getItem(COLOR_STORAGE_KEY);
         if (!raw) return { ...DEFAULT_PALETTE };
         return { ...DEFAULT_PALETTE, ...JSON.parse(raw) };
-      } catch (_) { return { ...DEFAULT_PALETTE }; }
+      } catch(_) { return { ...DEFAULT_PALETTE }; }
     }
 
     function setupColorPanel() {
@@ -2049,7 +1992,6 @@
       const closeBtn = document.getElementById('closeColorBtn');
       const resetBtn = document.getElementById('resetColors');
       const presetsBox = document.getElementById('colorPresets');
-
       const inputPrimary = document.getElementById('primaryColor');
       const inputAccent = document.getElementById('accentColor');
       const inputBg = document.getElementById('bgColor');
@@ -2067,10 +2009,7 @@
           </div>
           ${preset.name}
         `;
-        btn.addEventListener('click', () => {
-          applyPalette(preset.palette);
-          savePalette(preset.palette);
-        });
+        btn.addEventListener('click', () => { applyPalette(preset.palette); savePalette(preset.palette); });
         presetsBox.appendChild(btn);
       });
 
@@ -2084,31 +2023,18 @@
 
       function closePanel() {
         panel.classList.remove('open');
-        if (!document.getElementById('sideMenu').classList.contains('open')) {
-          overlay.classList.remove('open');
-        }
+        if (!document.getElementById('sideMenu').classList.contains('open')) overlay.classList.remove('open');
         panel.setAttribute('aria-hidden', 'true');
       }
       closeBtn.addEventListener('click', closePanel);
 
       function liveUpdate() {
-        const p = {
-          primary: inputPrimary.value,
-          accent:  inputAccent.value,
-          bg:      inputBg.value,
-          text:    inputText.value
-        };
-        applyPalette(p);
-        savePalette(p);
+        const p = { primary: inputPrimary.value, accent: inputAccent.value, bg: inputBg.value, text: inputText.value };
+        applyPalette(p); savePalette(p);
       }
-      [inputPrimary, inputAccent, inputBg, inputText].forEach(inp => {
-        inp.addEventListener('input', liveUpdate);
-      });
+      [inputPrimary, inputAccent, inputBg, inputText].forEach(inp => inp.addEventListener('input', liveUpdate));
 
-      resetBtn.addEventListener('click', () => {
-        applyPalette(DEFAULT_PALETTE);
-        savePalette(DEFAULT_PALETTE);
-      });
+      resetBtn.addEventListener('click', () => { applyPalette(DEFAULT_PALETTE); savePalette(DEFAULT_PALETTE); });
     }
 
     /* ============================================================
@@ -2120,9 +2046,7 @@
       const colorPanel = document.getElementById('colorPanel');
       menu.classList.remove('open');
       menu.setAttribute('aria-hidden', 'true');
-      if (!colorPanel.classList.contains('open')) {
-        overlay.classList.remove('open');
-      }
+      if (!colorPanel.classList.contains('open')) overlay.classList.remove('open');
     }
 
     function setupSideMenu() {
@@ -2138,34 +2062,25 @@
 
       overlay.addEventListener('click', () => {
         closeSideMenu();
-        const colorPanel = document.getElementById('colorPanel');
-        if (colorPanel.classList.contains('open')) {
-          colorPanel.classList.remove('open');
-          colorPanel.setAttribute('aria-hidden', 'true');
-        }
+        const cp = document.getElementById('colorPanel');
+        if (cp.classList.contains('open')) { cp.classList.remove('open'); cp.setAttribute('aria-hidden', 'true'); }
       });
 
       menu.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', () => {
-          if (a.id !== 'accessosSideBtn') closeSideMenu();
-        });
+        a.addEventListener('click', () => { if (a.id !== 'accessosSideBtn') closeSideMenu(); });
       });
 
       document.getElementById('accessosSideBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        closeSideMenu();
-        openAccessosModal();
+        e.preventDefault(); closeSideMenu(); openAccessosModal();
       });
 
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           closeSideMenu();
           const cp = document.getElementById('colorPanel');
-          if (cp.classList.contains('open')) {
-            cp.classList.remove('open');
-            cp.setAttribute('aria-hidden', 'true');
-          }
+          if (cp.classList.contains('open')) { cp.classList.remove('open'); cp.setAttribute('aria-hidden', 'true'); }
           closeAccessosModal();
+          closeRequestModal();
         }
       });
     }
@@ -2180,22 +2095,296 @@
     }
     function closeAccessosModal() {
       const modal = document.getElementById('accessosModal');
-      if (modal.classList.contains('open')) {
-        modal.classList.remove('open');
-        document.body.style.overflow = '';
-      }
+      if (modal.classList.contains('open')) { modal.classList.remove('open'); document.body.style.overflow = ''; }
     }
     function setupAccessosModal() {
       const modal = document.getElementById('accessosModal');
       document.getElementById('closeAccessosBtn').addEventListener('click', closeAccessosModal);
       document.getElementById('accessosFooterBtn').addEventListener('click', openAccessosModal);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeAccessosModal();
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeAccessosModal(); });
+    }
+
+    /* ============================================================
+       7. MODAL DE SOLICITAÇÃO — LÓGICA
+       ============================================================ */
+    let currentFile = null;
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    const MAX_TITLE_LENGTH = 150;
+    const MAX_INITIAL_DESC = 500;
+    const MAX_PROJECT_DESC = 3000;
+
+    function openRequestModal(serviceName, categoryName) {
+      const modal = document.getElementById('requestModal');
+      const titleInput = document.getElementById('requestTitle');
+      const initialDesc = document.getElementById('initialDescription');
+      const typeDisplay = document.getElementById('requestTypeDisplay');
+      const typeHidden = document.getElementById('requestType');
+
+      // Preenche automaticamente
+      const autoTitle = `Solicitação de desenvolvimento — ${serviceName}`;
+      titleInput.value = autoTitle;
+      initialDesc.value = `Olá! Tenho interesse no desenvolvimento de ${serviceName.toLowerCase()} (${categoryName}) e gostaria de conhecer as condições de contratação.`;
+      typeDisplay.textContent = serviceName;
+      typeHidden.value = serviceName;
+
+      // Limpa campos
+      document.getElementById('projectDescription').value = '';
+      document.querySelectorAll('input[name="paymentPreference"]').forEach(r => r.checked = false);
+      document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+      resetFileUpload();
+      clearErrors();
+      document.getElementById('submitFeedback').classList.remove('visible');
+
+      // Abre
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      // Foco no primeiro campo editável
+      setTimeout(() => titleInput.focus(), 100);
+
+      // Restaura o foco ao fechar
+      modal._previousFocus = document.activeElement;
+    }
+
+    function closeRequestModal() {
+      const modal = document.getElementById('requestModal');
+      if (!modal.classList.contains('open')) return;
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      if (modal._previousFocus && typeof modal._previousFocus.focus === 'function') {
+        modal._previousFocus.focus();
+      }
+    }
+
+    function resetFileUpload() {
+      currentFile = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('uploadPreview').classList.remove('visible');
+      document.getElementById('uploadArea').style.display = '';
+      document.getElementById('uploadArea').classList.remove('has-file');
+      document.getElementById('previewImg').src = '';
+      document.getElementById('previewFilename').textContent = '';
+      document.getElementById('previewFilesize').textContent = '';
+      document.getElementById('fileError').classList.remove('visible');
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function handleFileSelect(file) {
+      const fileError = document.getElementById('fileError');
+      fileError.classList.remove('visible');
+
+      // Validação de tipo
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        fileError.innerHTML = '<i class="fas fa-circle-exclamation"></i> Formato inválido. Envie apenas JPEG, PNG ou WebP.';
+        fileError.classList.add('visible');
+        resetFileUpload();
+        return;
+      }
+
+      // Validação de tamanho
+      if (file.size > MAX_FILE_SIZE) {
+        fileError.innerHTML = `<i class="fas fa-circle-exclamation"></i> Arquivo muito grande. Máximo: 5 MB (seu arquivo: ${formatFileSize(file.size)}).`;
+        fileError.classList.add('visible');
+        resetFileUpload();
+        return;
+      }
+
+      // Prévia
+      currentFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('previewImg').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      document.getElementById('previewFilename').textContent = file.name;
+      document.getElementById('previewFilesize').textContent = formatFileSize(file.size);
+
+      document.getElementById('uploadArea').style.display = 'none';
+      document.getElementById('uploadPreview').classList.add('visible');
+    }
+
+    function setupFileUpload() {
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const removeBtn = document.getElementById('removeFileBtn');
+
+      uploadArea.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          handleFileSelect(e.target.files[0]);
+        }
+      });
+
+      removeBtn.addEventListener('click', () => {
+        resetFileUpload();
+        fileInput.value = '';
+      });
+
+      // Drag & drop
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--primary)';
+      });
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '';
+      });
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '';
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          handleFileSelect(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.field-error').forEach(el => el.classList.remove('visible'));
+      document.querySelectorAll('.form-group input, .form-group textarea').forEach(el => el.classList.remove('error'));
+    }
+
+    function validateForm() {
+      clearErrors();
+      let valid = true;
+
+      const title = document.getElementById('requestTitle');
+      const initialDesc = document.getElementById('initialDescription');
+      const projectDesc = document.getElementById('projectDescription');
+      const paymentSelected = document.querySelector('input[name="paymentPreference"]:checked');
+
+      // Título
+      if (!title.value.trim()) {
+        title.classList.add('error');
+        document.getElementById('titleError').classList.add('visible');
+        valid = false;
+      }
+
+      // Descrição inicial
+      if (!initialDesc.value.trim()) {
+        initialDesc.classList.add('error');
+        document.getElementById('initialDescError').classList.add('visible');
+        valid = false;
+      }
+
+      // Descrição do projeto (não apenas espaços)
+      if (!projectDesc.value.trim()) {
+        projectDesc.classList.add('error');
+        document.getElementById('projectDescError').classList.add('visible');
+        valid = false;
+      }
+
+      // Pagamento
+      if (!paymentSelected) {
+        document.getElementById('paymentError').classList.add('visible');
+        valid = false;
+      }
+
+      return valid;
+    }
+
+    async function submitRequest(e) {
+      e.preventDefault();
+
+      if (!validateForm()) {
+        // Rola até o primeiro erro
+        const firstError = document.querySelector('.field-error.visible');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      const feedback = document.getElementById('submitFeedback');
+
+      // Proteção contra envio repetido
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      feedback.classList.remove('visible', 'success', 'error');
+
+      // Coleta de dados
+      const formData = new FormData();
+      formData.append('title', document.getElementById('requestTitle').value.trim());
+      formData.append('initialDescription', document.getElementById('initialDescription').value.trim());
+      formData.append('requestType', document.getElementById('requestType').value);
+      formData.append('projectDescription', document.getElementById('projectDescription').value.trim());
+
+      const payment = document.querySelector('input[name="paymentPreference"]:checked');
+      formData.append('paymentPreference', payment ? payment.value : '');
+
+      if (currentFile) {
+        formData.append('attachment', currentFile, currentFile.name);
+      }
+
+      // Metadados
+      formData.append('_subject', `Nova solicitação de orçamento — ${document.getElementById('requestType').value} | FGP Technologies`);
+      formData.append('_captcha', 'false');
+
+      try {
+        const response = await fetch(FORMINIT_ENDPOINT, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          feedback.className = 'submit-feedback success visible';
+          feedback.innerHTML = '<i class="fas fa-circle-check"></i> Pedido enviado com sucesso! A FGP Technologies entrará em contato pelos canais informados.';
+          feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          // Limpa após 5 segundos e fecha
+          setTimeout(() => {
+            closeRequestModal();
+          }, 5000);
+        } else {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.message || 'Falha no envio. Tente novamente.');
+        }
+      } catch (error) {
+        feedback.className = 'submit-feedback error visible';
+        feedback.innerHTML = `<i class="fas fa-circle-exclamation"></i> Não foi possível enviar sua solicitação. ${error.message || 'Verifique sua conexão e tente novamente.'}`;
+        feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+      }
+    }
+
+    function setupRequestModal() {
+      const modal = document.getElementById('requestModal');
+      const form = document.getElementById('requestForm');
+      const closeBtn = document.getElementById('closeRequestBtn');
+
+      closeBtn.addEventListener('click', closeRequestModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeRequestModal(); });
+
+      // Pagamento — seleção visual
+      document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', () => {
+          document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+          option.classList.add('selected');
+          option.querySelector('input[type="radio"]').checked = true;
+        });
+      });
+
+      form.addEventListener('submit', submitRequest);
+
+      // Contador de caracteres (opcional)
+      const projectDesc = document.getElementById('projectDescription');
+      projectDesc.addEventListener('input', () => {
+        if (projectDesc.value.length > MAX_PROJECT_DESC) {
+          projectDesc.value = projectDesc.value.slice(0, MAX_PROJECT_DESC);
+        }
       });
     }
 
     /* ============================================================
-       7. HEADER SHADOW
+       8. HEADER SHADOW + REVEAL
        ============================================================ */
     function setupHeaderScroll() {
       const header = document.getElementById('siteHeader');
@@ -2207,24 +2396,14 @@
       onScroll();
     }
 
-    /* ============================================================
-       8. REVEAL ON SCROLL
-       ============================================================ */
     function setupReveal() {
       const items = document.querySelectorAll('.reveal');
-      if (!('IntersectionObserver' in window)) {
-        items.forEach(el => el.classList.add('visible'));
-        return;
-      }
+      if (!('IntersectionObserver' in window)) { items.forEach(el => el.classList.add('visible')); return; }
       const io = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            io.unobserve(entry.target);
-          }
+          if (entry.isIntersecting) { entry.target.classList.add('visible'); io.unobserve(entry.target); }
         });
       }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
       items.forEach(el => io.observe(el));
     }
 
@@ -2235,6 +2414,8 @@
       setupColorPanel();
       setupSideMenu();
       setupAccessosModal();
+      setupRequestModal();
+      setupFileUpload();
       renderCategories();
       setupReveal();
       setupHeaderScroll();
