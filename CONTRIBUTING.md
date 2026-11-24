@@ -55,6 +55,6 @@ Submitting a contribution does not automatically grant permission to use FGP bra
 For questions about contributing, contact:
 
 **Free Game Plant (FGP)**  
-Email: elaifigueroa@gmail.com
+Email: fgpfreegameplant@gmail.com
 
 Thank you for helping Free Game Plant grow!
