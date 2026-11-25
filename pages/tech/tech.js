@@ -1,7 +1,7 @@
 /* ============================================================
    FGP TECHNOLOGIES — tech.js
-   Sistema hierárquico de categorias, subcategorias e detalhes,
-   painel de cores, modais e integração com Forminit.
+   Catálogo hierárquico, painel de cores, modais,
+   integração com Forminit e jornada guiada de orçamento.
    ============================================================ */
 
 /* ============================================================
@@ -19,27 +19,8 @@ const FORMINIT_ENDPOINT = `https://forminit.com/f/${FORMINIT_FORM_ID}`;
 
 /* ============================================================
    2. BASE DE DADOS HIERÁRQUICA
-   ------------------------------------------------------------
-   Estrutura:
-     category {
-       id, icon, title, description, features[],
-       subcategories: [
-         {
-           id, icon, title, description,
-           priceRange, priceNote, deadline, status,
-           longDescription, features[],
-           projectTypes[], paymentTerms[], additionalCosts[],
-           observations[]
-         }
-       ]
-     }
-   ------------------------------------------------------------
-   status: 'available' | 'evaluation' | 'expansion'
    ============================================================ */
 const CATEGORIES_DB = [
-  /* ==========================================================
-     CATEGORIA 1 — APLICATIVOS
-     ========================================================== */
   {
     id: 'apps',
     icon: 'fa-mobile-screen-button',
@@ -199,10 +180,6 @@ const CATEGORIES_DB = [
       }
     ]
   },
-
-  /* ==========================================================
-     CATEGORIA 2 — SITES
-     ========================================================== */
   {
     id: 'sites',
     icon: 'fa-globe',
@@ -393,10 +370,6 @@ const CATEGORIES_DB = [
       }
     ]
   },
-
-  /* ==========================================================
-     CATEGORIA 3 — SISTEMAS
-     ========================================================== */
   {
     id: 'sistemas',
     icon: 'fa-server',
@@ -555,10 +528,6 @@ const CATEGORIES_DB = [
       }
     ]
   },
-
-  /* ==========================================================
-     CATEGORIA 4 — SOLUÇÕES DIGITAIS
-     ========================================================== */
   {
     id: 'solucoes',
     icon: 'fa-wand-magic-sparkles',
@@ -713,10 +682,6 @@ const CATEGORIES_DB = [
       }
     ]
   },
-
-  /* ==========================================================
-     CATEGORIA 5 — SERVIÇOS E NEGÓCIOS DA FGP
-     ========================================================== */
   {
     id: 'business',
     icon: 'fa-briefcase',
@@ -875,35 +840,49 @@ const CATEGORIES_DB = [
 ];
 
 /* ============================================================
-   3. ESTADO DE NAVEGAÇÃO
+   3. UTILITÁRIOS
+   ============================================================ */
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = String(str == null ? '' : str);
+  return div.innerHTML;
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+/* ============================================================
+   4. ESTADO DE NAVEGAÇÃO (catálogo)
    ============================================================ */
 const NavState = {
-  currentCategory: null,    // id da categoria
-  currentSubcategory: null  // id da subcategoria
+  currentCategory: null,
+  currentSubcategory: null
 };
 
 /* ============================================================
-   4. REFERÊNCIAS DOM
+   5. REFERÊNCIAS DOM
    ============================================================ */
 const dom = {
-  categoriesIntro:      () => document.getElementById('categoriesIntro'),
-  breadcrumb:           () => document.getElementById('breadcrumb'),
-  categoriesContainer:  () => document.getElementById('categoriesContainer'),
+  categoriesIntro:        () => document.getElementById('categoriesIntro'),
+  breadcrumb:             () => document.getElementById('breadcrumb'),
+  categoriesContainer:    () => document.getElementById('categoriesContainer'),
   subcategoriesContainer: () => document.getElementById('subcategoriesContainer'),
-  detailsContainer:     () => document.getElementById('detailsContainer'),
-  siteHeader:           () => document.getElementById('siteHeader'),
-  colorPanel:           () => document.getElementById('colorPanel'),
-  sideMenu:             () => document.getElementById('sideMenu'),
-  sideOverlay:          () => document.getElementById('sideOverlay'),
-  requestModal:         () => document.getElementById('requestModal'),
-  accessosModal:        () => document.getElementById('accessosModal')
+  detailsContainer:       () => document.getElementById('detailsContainer'),
+  siteHeader:             () => document.getElementById('siteHeader'),
+  colorPanel:             () => document.getElementById('colorPanel'),
+  sideMenu:               () => document.getElementById('sideMenu'),
+  sideOverlay:            () => document.getElementById('sideOverlay'),
+  requestModal:           () => document.getElementById('requestModal'),
+  accessosModal:          () => document.getElementById('accessosModal'),
+  journeyModal:           () => document.getElementById('journeyModal')
 };
 
 /* ============================================================
-   5. NAVEGAÇÃO ENTRE NÍVEIS
+   6. NAVEGAÇÃO ENTRE NÍVEIS (catálogo)
    ============================================================ */
-
-/* Mostra/oculta containers conforme nível */
 function showLevel(level) {
   const intro = dom.categoriesIntro();
   const breadcrumb = dom.breadcrumb();
@@ -911,24 +890,19 @@ function showLevel(level) {
   const subs = dom.subcategoriesContainer();
   const dets = dom.detailsContainer();
 
-  // Nível 1 — categorias
   if (level === 1) {
     intro.classList.remove('hidden');
     breadcrumb.classList.add('hidden');
     cats.classList.remove('hidden');
     subs.classList.add('hidden');
     dets.classList.add('hidden');
-  }
-  // Nível 2 — subcategorias
-  else if (level === 2) {
+  } else if (level === 2) {
     intro.classList.add('hidden');
     breadcrumb.classList.remove('hidden');
     cats.classList.add('hidden');
     subs.classList.remove('hidden');
     dets.classList.add('hidden');
-  }
-  // Nível 3 — detalhes
-  else if (level === 3) {
+  } else if (level === 3) {
     intro.classList.add('hidden');
     breadcrumb.classList.remove('hidden');
     cats.classList.add('hidden');
@@ -937,7 +911,6 @@ function showLevel(level) {
   }
 }
 
-/* Scroll suave para a seção de categorias */
 function scrollToCategories() {
   const el = document.getElementById('categorias');
   if (el) {
@@ -947,37 +920,29 @@ function scrollToCategories() {
   }
 }
 
-/* Abre categoria (Nível 2) */
 function openCategory(categoryId) {
   const cat = CATEGORIES_DB.find(c => c.id === categoryId);
   if (!cat) return;
-
   NavState.currentCategory = categoryId;
   NavState.currentSubcategory = null;
-
   renderSubcategories(cat);
   renderBreadcrumb();
   showLevel(2);
   scrollToCategories();
 }
 
-/* Abre subcategoria (Nível 3) */
 function openSubcategory(subcategoryId) {
   const cat = CATEGORIES_DB.find(c => c.id === NavState.currentCategory);
   if (!cat) return;
-
   const sub = cat.subcategories.find(s => s.id === subcategoryId);
   if (!sub) return;
-
   NavState.currentSubcategory = subcategoryId;
-
   renderDetails(cat, sub);
   renderBreadcrumb();
   showLevel(3);
   scrollToCategories();
 }
 
-/* Volta para o nível 1 */
 function backToCategories() {
   NavState.currentCategory = null;
   NavState.currentSubcategory = null;
@@ -986,7 +951,6 @@ function backToCategories() {
   scrollToCategories();
 }
 
-/* Volta para o nível 2 */
 function backToSubcategories() {
   NavState.currentSubcategory = null;
   renderBreadcrumb();
@@ -995,7 +959,7 @@ function backToSubcategories() {
 }
 
 /* ============================================================
-   6. RENDERIZAÇÃO — NÍVEL 1 (categorias)
+   7. RENDERIZAÇÃO — NÍVEL 1 (categorias)
    ============================================================ */
 function renderCategories() {
   const container = dom.categoriesContainer();
@@ -1029,7 +993,7 @@ function renderCategories() {
 }
 
 /* ============================================================
-   7. RENDERIZAÇÃO — NÍVEL 2 (subcategorias)
+   8. RENDERIZAÇÃO — NÍVEL 2 (subcategorias)
    ============================================================ */
 function renderSubcategories(cat) {
   const container = dom.subcategoriesContainer();
@@ -1071,7 +1035,6 @@ function renderSubcategories(cat) {
 
   container.querySelectorAll('.subcategory-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      // Evita duplicação quando o botão também é clicado
       if (e.target.closest('.btn-view-details')) return;
       openSubcategory(card.dataset.subcategory);
     });
@@ -1086,13 +1049,13 @@ function renderSubcategories(cat) {
 }
 
 /* ============================================================
-   8. RENDERIZAÇÃO — NÍVEL 3 (detalhes)
+   9. RENDERIZAÇÃO — NÍVEL 3 (detalhes)
    ============================================================ */
 function getStatusBadge(status) {
   const map = {
-    available:  { label: 'Disponível',          icon: 'fa-circle-check',       cls: 'available' },
+    available:  { label: 'Disponível',            icon: 'fa-circle-check',         cls: 'available' },
     evaluation: { label: 'Sob avaliação técnica', icon: 'fa-triangle-exclamation', cls: 'evaluation' },
-    expansion:  { label: 'Em expansão',          icon: 'fa-seedling',           cls: 'expansion' }
+    expansion:  { label: 'Em expansão',           icon: 'fa-seedling',             cls: 'expansion' }
   };
   const info = map[status] || map.evaluation;
   return `<span class="status-badge ${info.cls}"><i class="fas ${info.icon}"></i> ${info.label}</span>`;
@@ -1187,7 +1150,7 @@ function renderDetails(cat, sub) {
           elaborado após a análise do escopo, das funcionalidades e dos requisitos técnicos.
         </p>
         <button class="btn-request-large" data-subcategory="${sub.id}">
-          <i class="fas fa-paper-plane"></i> Solicitar orçamento
+          <i class="fas fa-wand-magic-sparkles"></i> Começar com este serviço
         </button>
       </div>
     </div>
@@ -1196,12 +1159,12 @@ function renderDetails(cat, sub) {
   container.querySelector('#backToSubsBtn').addEventListener('click', backToSubcategories);
 
   container.querySelector('.btn-request-large').addEventListener('click', () => {
-    openRequestModal(cat, sub);
+    openJourneyFromCatalog(cat.id, sub.id);
   });
 }
 
 /* ============================================================
-   9. BREADCRUMB
+   10. BREADCRUMB
    ============================================================ */
 function renderBreadcrumb() {
   const container = dom.breadcrumb();
@@ -1221,13 +1184,10 @@ function renderBreadcrumb() {
   }
 
   const items = [];
-
-  // Item 1 — Catálogo (raiz)
   items.push(`<button class="breadcrumb-item" data-crumb="root">
     <i class="fas fa-layer-group"></i> Catálogo
   </button>`);
 
-  // Item 2 — Categoria
   if (!sub) {
     items.push(`<span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>`);
     items.push(`<span class="breadcrumb-item current">${cat.title}</span>`);
@@ -1240,25 +1200,22 @@ function renderBreadcrumb() {
 
   container.innerHTML = items.join('');
 
-  // Handlers
   container.querySelector('[data-crumb="root"]')?.addEventListener('click', backToCategories);
   container.querySelector('[data-crumb="category"]')?.addEventListener('click', backToSubcategories);
 }
 
 /* ============================================================
-   10. MODAL DE SOLICITAÇÃO — ABERTURA E PREENCHIMENTO
+   11. MODAL DE SOLICITAÇÃO (legado — preservado)
    ============================================================ */
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 let currentFile = null;
 
-/* Popula os selects de parcelas e vencimento */
 function populateInstallmentOptions() {
   const selCount = document.getElementById('installmentCount');
   const selDay = document.getElementById('dueDay');
   if (!selCount || !selDay) return;
 
-  // Quantidade de parcelas: 3 a 27 + "Outra"
   const countOpts = ['<option value="">Selecione...</option>'];
   for (let i = 3; i <= 27; i++) {
     countOpts.push(`<option value="${i}">${i}x</option>`);
@@ -1266,7 +1223,6 @@ function populateInstallmentOptions() {
   countOpts.push('<option value="outra">Outra quantidade — avaliar</option>');
   selCount.innerHTML = countOpts.join('');
 
-  // Dia de vencimento: 1 a 28
   const dayOpts = ['<option value="">Selecione...</option>'];
   for (let i = 1; i <= 28; i++) {
     dayOpts.push(`<option value="${i}">Dia ${i}</option>`);
@@ -1274,7 +1230,6 @@ function populateInstallmentOptions() {
   selDay.innerHTML = dayOpts.join('');
 }
 
-/* Mostra/oculta os campos de parcelamento conforme a escolha */
 function updateInstallmentVisibility() {
   const selected = document.querySelector('input[name="productionPayment"]:checked');
   const isParcelado = selected && selected.value === 'Parcelado';
@@ -1285,72 +1240,10 @@ function updateInstallmentVisibility() {
     fields.classList.add('visible');
   } else {
     fields.classList.remove('visible');
-    // Não limpa os valores — preserva as escolhas do cliente
-    // (mas limpa classes de erro para não persistirem ocultas)
     document.getElementById('installmentCount')?.classList.remove('error');
     document.getElementById('dueDay')?.classList.remove('error');
     document.getElementById('installmentCountError')?.classList.remove('visible');
     document.getElementById('dueDayError')?.classList.remove('visible');
-  }
-}
-
-function openRequestModal(cat, sub) {
-  const modal = dom.requestModal();
-  if (!modal) return;
-
-  // Tipo de pedido (fixo)
-  const typeText = `${cat.title} > ${sub.title}`;
-  document.getElementById('requestTypeDisplay').textContent = typeText;
-  document.getElementById('requestType').value = typeText;
-
-  // Título automático
-  document.getElementById('requestTitle').value =
-    `Solicitação de desenvolvimento — ${sub.title}`;
-
-  // Descrição inicial automática
-  document.getElementById('initialDescription').value =
-    `Olá! Tenho interesse no desenvolvimento de ${sub.title.toLowerCase()} (${cat.title}) e gostaria de conhecer as condições de contratação.`;
-
-  // Limpa campos do projeto
-  document.getElementById('projectDescription').value = '';
-
-  // Limpa as duas seções de preferência (A e B)
-  document.querySelectorAll('input[name="productionPayment"]').forEach(r => r.checked = false);
-  document.querySelectorAll('input[name="maintenancePreference"]').forEach(r => r.checked = false);
-  document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-
-  // Reseta selects de parcelamento (mas mantém opções populadas)
-  const instCount = document.getElementById('installmentCount');
-  const dueDay = document.getElementById('dueDay');
-  if (instCount) instCount.value = '';
-  if (dueDay) dueDay.value = '';
-
-  // Oculta campos condicionais
-  updateInstallmentVisibility();
-
-  // Reseta upload e erros
-  resetFileUpload();
-  clearErrors();
-
-  const feedback = document.getElementById('submitFeedback');
-  feedback.classList.remove('visible', 'success', 'error');
-
-  // Abre
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-
-  setTimeout(() => document.getElementById('requestTitle').focus(), 100);
-
-  modal._previousFocus = document.activeElement;
-}
-
-function closeRequestModal() {
-  const modal = dom.requestModal();
-  if (!modal || !modal.classList.contains('open')) return;
-  modal.classList.remove('open');
-  document.body.style.overflow = '';
-  if (modal._previousFocus && typeof modal._previousFocus.focus === 'function') {
-    modal._previousFocus.focus();
   }
 }
 
@@ -1360,9 +1253,6 @@ function clearErrors() {
     .forEach(el => el.classList.remove('error'));
 }
 
-/* ============================================================
-   11. UPLOAD DE IMAGEM
-   ============================================================ */
 function resetFileUpload() {
   currentFile = null;
   const fileInput = document.getElementById('fileInput');
@@ -1380,12 +1270,6 @@ function resetFileUpload() {
   document.getElementById('fileError').classList.remove('visible');
 }
 
-function formatFileSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-
 function handleFileSelect(file) {
   const fileError = document.getElementById('fileError');
   fileError.classList.remove('visible');
@@ -1396,7 +1280,6 @@ function handleFileSelect(file) {
     resetFileUpload();
     return;
   }
-
   if (file.size > MAX_FILE_SIZE) {
     fileError.innerHTML = `<i class="fas fa-circle-exclamation"></i> Arquivo muito grande. Máximo: 5 MB (seu arquivo: ${formatFileSize(file.size)}).`;
     fileError.classList.add('visible');
@@ -1406,14 +1289,11 @@ function handleFileSelect(file) {
 
   currentFile = file;
   const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById('previewImg').src = e.target.result;
-  };
+  reader.onload = (e) => { document.getElementById('previewImg').src = e.target.result; };
   reader.readAsDataURL(file);
 
   document.getElementById('previewFilename').textContent = file.name;
   document.getElementById('previewFilesize').textContent = formatFileSize(file.size);
-
   document.getElementById('uploadArea').style.display = 'none';
   document.getElementById('uploadPreview').classList.add('visible');
 }
@@ -1427,9 +1307,7 @@ function setupFileUpload() {
   uploadArea.addEventListener('click', () => fileInput.click());
 
   fileInput.addEventListener('change', (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFileSelect(e.target.files[0]);
-    }
+    if (e.target.files && e.target.files.length > 0) handleFileSelect(e.target.files[0]);
   });
 
   removeBtn.addEventListener('click', () => {
@@ -1441,21 +1319,60 @@ function setupFileUpload() {
     e.preventDefault();
     uploadArea.style.borderColor = 'var(--primary)';
   });
-  uploadArea.addEventListener('dragleave', () => {
-    uploadArea.style.borderColor = '';
-  });
+  uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
   uploadArea.addEventListener('drop', (e) => {
     e.preventDefault();
     uploadArea.style.borderColor = '';
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileSelect(e.dataTransfer.files[0]);
-    }
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
   });
 }
 
-/* ============================================================
-   12. VALIDAÇÃO E ENVIO DO FORMULÁRIO
-   ============================================================ */
+function openRequestModal(cat, sub) {
+  const modal = dom.requestModal();
+  if (!modal) return;
+
+  const typeText = `${cat.title} > ${sub.title}`;
+  document.getElementById('requestTypeDisplay').textContent = typeText;
+  document.getElementById('requestType').value = typeText;
+
+  document.getElementById('requestTitle').value = `Solicitação de desenvolvimento — ${sub.title}`;
+  document.getElementById('initialDescription').value =
+    `Olá! Tenho interesse no desenvolvimento de ${sub.title.toLowerCase()} (${cat.title}) e gostaria de conhecer as condições de contratação.`;
+  document.getElementById('projectDescription').value = '';
+
+  document.querySelectorAll('input[name="productionPayment"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="maintenancePreference"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+
+  const instCount = document.getElementById('installmentCount');
+  const dueDay = document.getElementById('dueDay');
+  if (instCount) instCount.value = '';
+  if (dueDay) dueDay.value = '';
+
+  updateInstallmentVisibility();
+  resetFileUpload();
+  clearErrors();
+
+  const feedback = document.getElementById('submitFeedback');
+  feedback.classList.remove('visible', 'success', 'error');
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(() => document.getElementById('requestTitle').focus(), 100);
+  modal._previousFocus = document.activeElement;
+}
+
+function closeRequestModal() {
+  const modal = dom.requestModal();
+  if (!modal || !modal.classList.contains('open')) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+  if (modal._previousFocus && typeof modal._previousFocus.focus === 'function') {
+    modal._previousFocus.focus();
+  }
+}
+
 function validateForm() {
   clearErrors();
   let valid = true;
@@ -1464,28 +1381,22 @@ function validateForm() {
   const initialDesc = document.getElementById('initialDescription');
   const projectDesc = document.getElementById('projectDescription');
 
-  // Título
   if (!title.value.trim()) {
     title.classList.add('error');
     document.getElementById('titleError').classList.add('visible');
     valid = false;
   }
-
-  // Descrição inicial
   if (!initialDesc.value.trim()) {
     initialDesc.classList.add('error');
     document.getElementById('initialDescError').classList.add('visible');
     valid = false;
   }
-
-  // Descrição do projeto
   if (!projectDesc.value.trim()) {
     projectDesc.classList.add('error');
     document.getElementById('projectDescError').classList.add('visible');
     valid = false;
   }
 
-  // ===== SEÇÃO A: Produção =====
   const production = document.querySelector('input[name="productionPayment"]:checked');
   if (!production) {
     document.getElementById('productionPaymentError').classList.add('visible');
@@ -1493,7 +1404,6 @@ function validateForm() {
   } else if (production.value === 'Parcelado') {
     const instCount = document.getElementById('installmentCount');
     const dueDay = document.getElementById('dueDay');
-
     if (!instCount.value) {
       instCount.classList.add('error');
       document.getElementById('installmentCountError').classList.add('visible');
@@ -1505,9 +1415,7 @@ function validateForm() {
       valid = false;
     }
   }
-  // Se "À vista": os campos ocultos NÃO bloqueiam o envio
 
-  // ===== SEÇÃO B: Manutenção =====
   const maintenance = document.querySelector('input[name="maintenancePreference"]:checked');
   if (!maintenance) {
     document.getElementById('maintenanceError').classList.add('visible');
@@ -1542,37 +1450,26 @@ async function submitRequest(e) {
   feedback.classList.remove('visible', 'success', 'error');
 
   const formData = new FormData();
-
-  // Campos básicos
   formData.append('title', document.getElementById('requestTitle').value.trim());
   formData.append('initialDescription', document.getElementById('initialDescription').value.trim());
   formData.append('requestType', document.getElementById('requestType').value);
   formData.append('projectDescription', document.getElementById('projectDescription').value.trim());
 
-  // ===== SEÇÃO A: Produção =====
   const prodPayment = document.querySelector('input[name="productionPayment"]:checked');
   let productionText = prodPayment ? prodPayment.value : '';
-
   if (prodPayment && prodPayment.value === 'Parcelado') {
     const countEl = document.getElementById('installmentCount');
     const dueEl = document.getElementById('dueDay');
-    const countText = countEl.value === 'outra'
-      ? 'Outra quantidade — avaliar'
-      : `${countEl.value} parcelas`;
+    const countText = countEl.value === 'outra' ? 'Outra quantidade — avaliar' : `${countEl.value} parcelas`;
     productionText += ` — ${countText}, vencimento dia ${dueEl.value}`;
   }
   formData.append('productionPayment', productionText);
 
-  // ===== SEÇÃO B: Manutenção =====
   const maintPref = document.querySelector('input[name="maintenancePreference"]:checked');
   formData.append('maintenancePreference', maintPref ? maintPref.value : '');
 
-  // Anexo
-  if (currentFile) {
-    formData.append('attachment', currentFile, currentFile.name);
-  }
+  if (currentFile) formData.append('attachment', currentFile, currentFile.name);
 
-  // Metadados Forminit
   formData.append('_subject',
     `Nova solicitação de orçamento — ${document.getElementById('requestType').value} | FGP Technologies`);
   formData.append('_captcha', 'false');
@@ -1603,8 +1500,49 @@ async function submitRequest(e) {
   }
 }
 
+function setupRequestModal() {
+  const modal = dom.requestModal();
+  const form = document.getElementById('requestForm');
+  const closeBtn = document.getElementById('closeRequestBtn');
+  if (!modal || !form) return;
+
+  populateInstallmentOptions();
+
+  closeBtn.addEventListener('click', closeRequestModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeRequestModal(); });
+
+  document.querySelectorAll('.payment-options').forEach(group => {
+    group.querySelectorAll('.payment-option').forEach(option => {
+      option.addEventListener('click', () => {
+        group.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        const radio = option.querySelector('input[type="radio"]');
+        if (radio) {
+          radio.checked = true;
+          if (radio.name === 'productionPayment') updateInstallmentVisibility();
+        }
+      });
+    });
+  });
+
+  document.getElementById('installmentCount')?.addEventListener('change', (e) => {
+    if (e.target.value) {
+      e.target.classList.remove('error');
+      document.getElementById('installmentCountError').classList.remove('visible');
+    }
+  });
+  document.getElementById('dueDay')?.addEventListener('change', (e) => {
+    if (e.target.value) {
+      e.target.classList.remove('error');
+      document.getElementById('dueDayError').classList.remove('visible');
+    }
+  });
+
+  form.addEventListener('submit', submitRequest);
+}
+
 /* ============================================================
-   13. PAINEL DE CORES
+   12. PAINEL DE CORES
    ============================================================ */
 const COLOR_STORAGE_KEY = 'fgp_tech_palette';
 
@@ -1693,7 +1631,6 @@ function setupColorPanel() {
 
   if (!panel || !openBtn) return;
 
-  // Renderiza presets
   COLOR_PRESETS.forEach(preset => {
     const btn = document.createElement('button');
     btn.className = 'preset-btn';
@@ -1728,7 +1665,6 @@ function setupColorPanel() {
     }
     panel.setAttribute('aria-hidden', 'true');
   }
-
   closeBtn.addEventListener('click', closePanel);
 
   function liveUpdate() {
@@ -1752,7 +1688,7 @@ function setupColorPanel() {
 }
 
 /* ============================================================
-   14. SIDE MENU
+   13. SIDE MENU
    ============================================================ */
 function closeSideMenu() {
   const menu = dom.sideMenu();
@@ -1761,9 +1697,7 @@ function closeSideMenu() {
   if (!menu) return;
   menu.classList.remove('open');
   menu.setAttribute('aria-hidden', 'true');
-  if (!colorPanel.classList.contains('open')) {
-    overlay.classList.remove('open');
-  }
+  if (!colorPanel.classList.contains('open')) overlay.classList.remove('open');
 }
 
 function setupSideMenu() {
@@ -1789,7 +1723,7 @@ function setupSideMenu() {
 
   menu.querySelectorAll('a').forEach(a => {
     a.addEventListener('click', () => {
-      if (a.id !== 'accessosSideBtn') closeSideMenu();
+      if (a.id !== 'accessosSideBtn' && a.id !== 'sideMenuStartBtn') closeSideMenu();
     });
   });
 
@@ -1799,6 +1733,16 @@ function setupSideMenu() {
       e.preventDefault();
       closeSideMenu();
       openAccessosModal();
+    });
+  }
+
+  // Botão "Começar" do side menu
+  const sideStartBtn = document.getElementById('sideMenuStartBtn');
+  if (sideStartBtn) {
+    sideStartBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeSideMenu();
+      openJourney();
     });
   }
 
@@ -1813,12 +1757,17 @@ function setupSideMenu() {
       }
       closeAccessosModal();
       closeRequestModal();
+      // Fecha jornada somente se não houver modal por cima
+      const journeyModal = dom.journeyModal();
+      if (journeyModal && journeyModal.classList.contains('open')) {
+        closeJourneyWithConfirm();
+      }
     }
   });
 }
 
 /* ============================================================
-   15. MODAL ACESSOS
+   14. MODAL ACESSOS
    ============================================================ */
 function openAccessosModal() {
   const modal = dom.accessosModal();
@@ -1847,61 +1796,7 @@ function setupAccessosModal() {
 }
 
 /* ============================================================
-   16. SETUP DO MODAL DE SOLICITAÇÃO
-   ============================================================ */
-function setupRequestModal() {
-  const modal = dom.requestModal();
-  const form = document.getElementById('requestForm');
-  const closeBtn = document.getElementById('closeRequestBtn');
-  if (!modal || !form) return;
-
-  // Popula selects
-  populateInstallmentOptions();
-
-  closeBtn.addEventListener('click', closeRequestModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeRequestModal();
-  });
-
-  // ===== Radio groups — trata cada grupo separadamente =====
-  document.querySelectorAll('.payment-options').forEach(group => {
-    group.querySelectorAll('.payment-option').forEach(option => {
-      option.addEventListener('click', () => {
-        // Remove 'selected' apenas deste grupo
-        group.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-        option.classList.add('selected');
-
-        const radio = option.querySelector('input[type="radio"]');
-        if (radio) {
-          radio.checked = true;
-          // Se for o grupo de produção, atualiza campos condicionais
-          if (radio.name === 'productionPayment') {
-            updateInstallmentVisibility();
-          }
-        }
-      });
-    });
-  });
-
-  // Ao alterar selects, remove estado de erro se preenchidos
-  document.getElementById('installmentCount')?.addEventListener('change', (e) => {
-    if (e.target.value) {
-      e.target.classList.remove('error');
-      document.getElementById('installmentCountError').classList.remove('visible');
-    }
-  });
-  document.getElementById('dueDay')?.addEventListener('change', (e) => {
-    if (e.target.value) {
-      e.target.classList.remove('error');
-      document.getElementById('dueDayError').classList.remove('visible');
-    }
-  });
-
-  form.addEventListener('submit', submitRequest);
-}
-
-/* ============================================================
-   17. HEADER SHADOW + REVEAL ON SCROLL
+   15. HEADER SHADOW + REVEAL ON SCROLL
    ============================================================ */
 function setupHeaderScroll() {
   const header = dom.siteHeader();
@@ -1932,7 +1827,751 @@ function setupReveal() {
 }
 
 /* ============================================================
-   18. INIT
+   16. JORNADA GUIADA — ESTADO E CONFIGURAÇÃO
+   ============================================================ */
+const JourneyState = {
+  step: 1,
+  category: null,
+  subcategory: null,
+  projectType: null,     // string original do projectTypes
+  title: '',
+  description: '',
+  payment: null,         // 'À vista' | 'Parcelado'
+  maintenance: null,     // 'Mensal' | 'Anual' | 'Não desejo contratar agora'
+  file: null
+};
+
+const ASSISTANT_MESSAGES = {
+  1: 'Olá! Vamos encontrar a solução ideal para seu projeto? Escolha uma das categorias abaixo para começar.',
+  2: 'Ótimo! Agora escolha o serviço que mais combina com sua necessidade.',
+  3: 'Estamos avançando! Qual modalidade de projeto você deseja?',
+  4: 'Conte um pouco sobre sua ideia. Não precisa utilizar termos técnicos!',
+  5: 'Agora vamos conhecer sua preferência de pagamento.',
+  6: 'Você também pode informar se deseja serviços de manutenção.',
+  7: 'Tudo pronto! Confira suas escolhas antes de enviar.'
+};
+
+const JOURNEY_TOTAL_BASE_STEPS = 7;
+
+/* ------------------------------------------------------------
+   Helpers de jornada
+   ------------------------------------------------------------ */
+function getJourneyCategory() {
+  return JourneyState.category
+    ? CATEGORIES_DB.find(c => c.id === JourneyState.category)
+    : null;
+}
+
+function getJourneySubcategory() {
+  const cat = getJourneyCategory();
+  if (!cat || !JourneyState.subcategory) return null;
+  return cat.subcategories.find(s => s.id === JourneyState.subcategory) || null;
+}
+
+function parseProjectTypeName(raw) {
+  if (!raw) return '';
+  const parts = raw.split(/\s+—\s+/);
+  return parts[0] || raw;
+}
+
+function parseProjectTypeDesc(raw) {
+  if (!raw) return '';
+  const parts = raw.split(/\s+—\s+/);
+  return parts[1] || '';
+}
+
+/* Retorna a lista de etapas ativas (pode pular a 3) */
+function getActiveJourneySteps() {
+  const steps = [1, 2];
+  const sub = getJourneySubcategory();
+  if (!JourneyState.subcategory) {
+    // Ainda não escolheu serviço: considerar etapa 3 como potencial
+    steps.push(3);
+  } else if (sub && sub.projectTypes && sub.projectTypes.length > 0) {
+    steps.push(3);
+  }
+  steps.push(4, 5, 6, 7);
+  return steps;
+}
+
+/* ------------------------------------------------------------
+   Reset
+   ------------------------------------------------------------ */
+function resetJourneyState() {
+  JourneyState.step = 1;
+  JourneyState.category = null;
+  JourneyState.subcategory = null;
+  JourneyState.projectType = null;
+  JourneyState.title = '';
+  JourneyState.description = '';
+  JourneyState.payment = null;
+  JourneyState.maintenance = null;
+  JourneyState.file = null;
+  resetJourneyFile();
+}
+
+function resetJourneyFile() {
+  const fileInput = document.getElementById('journeyFileInput');
+  const uploadArea = document.getElementById('journeyUploadArea');
+  const preview = document.getElementById('journeyUploadPreview');
+  if (!fileInput || !uploadArea || !preview) return;
+
+  fileInput.value = '';
+  preview.classList.remove('visible');
+  uploadArea.style.display = '';
+  document.getElementById('journeyPreviewImg').src = '';
+  document.getElementById('journeyPreviewFilename').textContent = '';
+  document.getElementById('journeyPreviewFilesize').textContent = '';
+  document.getElementById('journeyFileError').classList.remove('visible');
+}
+
+/* ------------------------------------------------------------
+   Abrir / fechar
+   ------------------------------------------------------------ */
+function openJourney() {
+  resetJourneyState();
+  JourneyState.step = 1;
+  openJourneyModal();
+  renderJourneyStep();
+}
+
+function openJourneyFromCatalog(catId, subId) {
+  resetJourneyState();
+  JourneyState.category = catId;
+  JourneyState.subcategory = subId;
+
+  const cat = getJourneyCategory();
+  const sub = getJourneySubcategory();
+
+  if (cat && sub) {
+    JourneyState.title = `Solicitação de desenvolvimento — ${sub.title}`;
+    JourneyState.description =
+      `Olá! Tenho interesse no desenvolvimento de ${sub.title.toLowerCase()} (${cat.title}) e gostaria de conhecer as condições de contratação.`;
+  }
+
+  if (sub && sub.projectTypes && sub.projectTypes.length > 0) {
+    JourneyState.step = 3;
+  } else {
+    JourneyState.step = 4;
+  }
+
+  openJourneyModal();
+  renderJourneyStep();
+}
+
+function openJourneyModal() {
+  const modal = dom.journeyModal();
+  if (!modal) return;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeJourneyWithConfirm() {
+  const modal = dom.journeyModal();
+  if (!modal || !modal.classList.contains('open')) return;
+
+  const hasData = JourneyState.category || JourneyState.subcategory ||
+                  JourneyState.title || JourneyState.description ||
+                  JourneyState.payment || JourneyState.maintenance || JourneyState.file;
+
+  if (hasData) {
+    if (!window.confirm('Você tem informações preenchidas. Deseja realmente sair da jornada?')) {
+      return;
+    }
+  }
+
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  resetJourneyState();
+}
+
+/* ------------------------------------------------------------
+   Navegação entre etapas
+   ------------------------------------------------------------ */
+function handleJourneyNext() {
+  const step = JourneyState.step;
+
+  // Validação por etapa
+  if (step === 1) {
+    if (!JourneyState.category) {
+      showJourneyAlert('Escolha uma categoria para continuar.');
+      return;
+    }
+  } else if (step === 2) {
+    if (!JourneyState.subcategory) {
+      showJourneyAlert('Escolha um serviço para continuar.');
+      return;
+    }
+  } else if (step === 3) {
+    if (!JourneyState.projectType) {
+      showJourneyAlert('Escolha o tipo de projeto para continuar.');
+      return;
+    }
+  } else if (step === 4) {
+    const titleEl = document.getElementById('journeyTitleField');
+    const descEl = document.getElementById('journeyDescField');
+    const title = (titleEl?.value || '').trim();
+    const desc = (descEl?.value || '').trim();
+
+    if (!title) {
+      document.getElementById('journeyTitleError').classList.add('visible');
+      titleEl?.classList.add('error');
+      titleEl?.focus();
+      return;
+    }
+    if (!desc) {
+      document.getElementById('journeyDescError').classList.add('visible');
+      descEl?.classList.add('error');
+      descEl?.focus();
+      return;
+    }
+    JourneyState.title = title;
+    JourneyState.description = desc;
+  } else if (step === 5) {
+    if (!JourneyState.payment) {
+      showJourneyAlert('Escolha uma forma de pagamento para continuar.');
+      return;
+    }
+  } else if (step === 6) {
+    if (!JourneyState.maintenance) {
+      showJourneyAlert('Escolha uma preferência de manutenção para continuar.');
+      return;
+    }
+  } else if (step === 7) {
+    submitJourney();
+    return;
+  }
+
+  const activeSteps = getActiveJourneySteps();
+  const idx = activeSteps.indexOf(step);
+  if (idx < activeSteps.length - 1) {
+    JourneyState.step = activeSteps[idx + 1];
+    renderJourneyStep();
+  }
+}
+
+function handleJourneyBack() {
+  const activeSteps = getActiveJourneySteps();
+  const idx = activeSteps.indexOf(JourneyState.step);
+  if (idx > 0) {
+    JourneyState.step = activeSteps[idx - 1];
+    renderJourneyStep();
+  }
+}
+
+/* ------------------------------------------------------------
+   Feedback visual via balão do assistente
+   ------------------------------------------------------------ */
+let journeyAlertTimer = null;
+function showJourneyAlert(msg) {
+  const bubble = document.getElementById('journeyAssistantText');
+  if (!bubble) return;
+  const originalText = ASSISTANT_MESSAGES[JourneyState.step] || bubble.textContent;
+
+  if (journeyAlertTimer) clearTimeout(journeyAlertTimer);
+  bubble.textContent = '⚠ ' + msg;
+  bubble.classList.add('journey-assistant-bubble-alert');
+
+  journeyAlertTimer = setTimeout(() => {
+    bubble.textContent = originalText;
+    bubble.classList.remove('journey-assistant-bubble-alert');
+  }, 2800);
+}
+
+/* ------------------------------------------------------------
+   Render geral da etapa atual
+   ------------------------------------------------------------ */
+function renderJourneyStep() {
+  // Oculta todos
+  document.querySelectorAll('.journey-step').forEach(el => el.style.display = 'none');
+
+  // Mostra a atual
+  const current = document.querySelector(`.journey-step[data-step="${JourneyState.step}"]`);
+  if (current) current.style.display = '';
+
+  // Atualiza assistente
+  const assistant = document.getElementById('journeyAssistantText');
+  if (assistant) {
+    assistant.textContent = ASSISTANT_MESSAGES[JourneyState.step] || '';
+    assistant.classList.remove('journey-assistant-bubble-alert');
+  }
+
+  // Atualiza progresso
+  updateJourneyProgress();
+
+  // Atualiza botões
+  const backBtn = document.getElementById('journeyBackBtn');
+  const nextBtn = document.getElementById('journeyNextBtn');
+  const activeSteps = getActiveJourneySteps();
+  const idx = activeSteps.indexOf(JourneyState.step);
+
+  if (backBtn) backBtn.style.display = idx > 0 ? '' : 'none';
+  if (nextBtn) {
+    if (JourneyState.step === 7) {
+      nextBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
+    } else {
+      nextBtn.innerHTML = 'Continuar <i class="fas fa-arrow-right"></i>';
+    }
+  }
+
+  // Render específico por etapa
+  if (JourneyState.step === 1) renderJourneyCategories();
+  else if (JourneyState.step === 2) renderJourneyServices();
+  else if (JourneyState.step === 3) renderJourneyTypes();
+  else if (JourneyState.step === 4) renderJourneyForm();
+  else if (JourneyState.step === 5) renderJourneyPayment();
+  else if (JourneyState.step === 6) renderJourneyMaintenance();
+  else if (JourneyState.step === 7) renderJourneyReview();
+}
+
+/* ------------------------------------------------------------
+   Progresso
+   ------------------------------------------------------------ */
+function updateJourneyProgress() {
+  const fill = document.getElementById('journeyProgressFill');
+  const text = document.getElementById('journeyProgressText');
+  if (!fill || !text) return;
+
+  const activeSteps = getActiveJourneySteps();
+  const idx = activeSteps.indexOf(JourneyState.step);
+  const total = activeSteps.length;
+  const current = idx >= 0 ? idx + 1 : 1;
+  const percent = Math.min(100, (current / total) * 100);
+
+  fill.style.width = percent + '%';
+  text.textContent = `Etapa ${current} de ${total}`;
+}
+
+/* ------------------------------------------------------------
+   ETAPA 1 — Categorias
+   ------------------------------------------------------------ */
+function renderJourneyCategories() {
+  const grid = document.getElementById('journeyCategoriesGrid');
+  if (!grid) return;
+
+  grid.innerHTML = CATEGORIES_DB.map(cat => `
+    <button
+      class="journey-card ${JourneyState.category === cat.id ? 'selected' : ''}"
+      data-category="${cat.id}"
+      type="button"
+    >
+      <div class="journey-card-icon">
+        <i class="fas ${cat.icon}"></i>
+      </div>
+      <div class="journey-card-title">${cat.title}</div>
+      <div class="journey-card-desc">${cat.description}</div>
+      <div class="journey-card-meta">
+        <i class="fas fa-layer-group"></i>
+        ${cat.subcategories.length} ${cat.subcategories.length === 1 ? 'serviço' : 'serviços'}
+      </div>
+    </button>
+  `).join('');
+
+  grid.querySelectorAll('[data-category]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newCat = btn.dataset.category;
+      if (newCat !== JourneyState.category) {
+        JourneyState.category = newCat;
+        JourneyState.subcategory = null;
+        JourneyState.projectType = null;
+      }
+      renderJourneyCategories();
+    });
+  });
+}
+
+/* ------------------------------------------------------------
+   ETAPA 2 — Serviços
+   ------------------------------------------------------------ */
+function renderJourneyServices() {
+  const grid = document.getElementById('journeyServicesGrid');
+  if (!grid) return;
+
+  const cat = getJourneyCategory();
+  if (!cat) {
+    grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">Selecione uma categoria primeiro.</p>';
+    return;
+  }
+
+  grid.innerHTML = cat.subcategories.map(sub => `
+    <button
+      class="journey-card ${JourneyState.subcategory === sub.id ? 'selected' : ''}"
+      data-subcategory="${sub.id}"
+      type="button"
+    >
+      <div class="journey-card-icon">
+        <i class="fas ${sub.icon}"></i>
+      </div>
+      <div class="journey-card-title">${sub.title}</div>
+      <div class="journey-card-desc">${sub.description}</div>
+      ${sub.priceRange ? `<div class="journey-card-price">${sub.priceRange}</div>` : ''}
+    </button>
+  `).join('');
+
+  grid.querySelectorAll('[data-subcategory]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newSub = btn.dataset.subcategory;
+      if (newSub !== JourneyState.subcategory) {
+        JourneyState.subcategory = newSub;
+        JourneyState.projectType = null;
+      }
+      renderJourneyServices();
+    });
+  });
+}
+
+/* ------------------------------------------------------------
+   ETAPA 3 — Tipos de projeto
+   ------------------------------------------------------------ */
+function renderJourneyTypes() {
+  const grid = document.getElementById('journeyTypesGrid');
+  if (!grid) return;
+
+  const sub = getJourneySubcategory();
+  if (!sub || !sub.projectTypes || sub.projectTypes.length === 0) {
+    grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">Este serviço não possui subdivisões. Continue para a próxima etapa.</p>';
+    return;
+  }
+
+  grid.innerHTML = sub.projectTypes.map((raw, idx) => {
+    const name = parseProjectTypeName(raw);
+    const desc = parseProjectTypeDesc(raw);
+    return `
+      <button
+        class="journey-card ${JourneyState.projectType === raw ? 'selected' : ''}"
+        data-type-index="${idx}"
+        type="button"
+      >
+        <div class="journey-card-title">${escapeHtml(name)}</div>
+        ${desc ? `<div class="journey-card-desc">${escapeHtml(desc)}</div>` : ''}
+      </button>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('[data-type-index]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.typeIndex, 10);
+      const s = getJourneySubcategory();
+      if (s && s.projectTypes[idx] !== undefined) {
+        JourneyState.projectType = s.projectTypes[idx];
+        renderJourneyTypes();
+      }
+    });
+  });
+}
+
+/* ------------------------------------------------------------
+   ETAPA 4 — Formulário (título + descrição)
+   ------------------------------------------------------------ */
+function renderJourneyForm() {
+  const titleEl = document.getElementById('journeyTitleField');
+  const descEl = document.getElementById('journeyDescField');
+  if (!titleEl || !descEl) return;
+
+  titleEl.value = JourneyState.title || '';
+  descEl.value = JourneyState.description || '';
+
+  document.getElementById('journeyTitleError').classList.remove('visible');
+  document.getElementById('journeyDescError').classList.remove('visible');
+  titleEl.classList.remove('error');
+  descEl.classList.remove('error');
+}
+
+/* ------------------------------------------------------------
+   ETAPA 5 — Pagamento da produção
+   ------------------------------------------------------------ */
+function renderJourneyPayment() {
+  const grid = document.getElementById('journeyPaymentGrid');
+  if (!grid) return;
+  grid.querySelectorAll('[data-payment]').forEach(card => {
+    card.classList.toggle('selected', card.dataset.payment === JourneyState.payment);
+  });
+}
+
+/* ------------------------------------------------------------
+   ETAPA 6 — Manutenção
+   ------------------------------------------------------------ */
+function renderJourneyMaintenance() {
+  const grid = document.getElementById('journeyMaintenanceGrid');
+  if (!grid) return;
+  grid.querySelectorAll('[data-maintenance]').forEach(card => {
+    card.classList.toggle('selected', card.dataset.maintenance === JourneyState.maintenance);
+  });
+}
+
+/* ------------------------------------------------------------
+   ETAPA 7 — Revisão
+   ------------------------------------------------------------ */
+function renderJourneyReview() {
+  const summary = document.getElementById('journeyReviewSummary');
+  if (!summary) return;
+
+  const cat = getJourneyCategory();
+  const sub = getJourneySubcategory();
+  const typeName = JourneyState.projectType ? parseProjectTypeName(JourneyState.projectType) : '';
+
+  const items = [];
+  items.push({ label: 'Categoria', value: cat ? cat.title : '—' });
+  items.push({ label: 'Serviço', value: sub ? sub.title : '—' });
+  if (typeName) items.push({ label: 'Tipo de projeto', value: typeName });
+  items.push({ label: 'Título do pedido', value: JourneyState.title || '—' });
+  items.push({ label: 'Descrição inicial', value: JourneyState.description || '—' });
+  items.push({ label: 'Pagamento da produção', value: JourneyState.payment || '—' });
+  items.push({ label: 'Preferência de manutenção', value: JourneyState.maintenance || '—' });
+
+  summary.innerHTML = items.map(item => `
+    <div class="journey-review-item">
+      <div class="journey-review-label">${escapeHtml(item.label)}</div>
+      <div class="journey-review-value">${escapeHtml(item.value)}</div>
+    </div>
+  `).join('');
+
+  // Atualiza visibilidade do preview de arquivo
+  const preview = document.getElementById('journeyUploadPreview');
+  const uploadArea = document.getElementById('journeyUploadArea');
+  if (JourneyState.file) {
+    if (preview) preview.classList.add('visible');
+    if (uploadArea) uploadArea.style.display = 'none';
+  } else {
+    if (preview) preview.classList.remove('visible');
+    if (uploadArea) uploadArea.style.display = '';
+  }
+
+  // Limpa feedback anterior
+  const feedback = document.getElementById('journeySubmitFeedback');
+  if (feedback) feedback.classList.remove('visible', 'success', 'error');
+}
+
+/* ------------------------------------------------------------
+   Upload de imagem na jornada
+   ------------------------------------------------------------ */
+function handleJourneyFileSelect(file) {
+  const errorEl = document.getElementById('journeyFileError');
+  errorEl.classList.remove('visible');
+
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Formato inválido. Envie apenas JPEG, PNG ou WebP.';
+    errorEl.classList.add('visible');
+    JourneyState.file = null;
+    resetJourneyFile();
+    return;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    errorEl.innerHTML = `<i class="fas fa-circle-exclamation"></i> Arquivo muito grande. Máximo: 5 MB (${formatFileSize(file.size)}).`;
+    errorEl.classList.add('visible');
+    JourneyState.file = null;
+    resetJourneyFile();
+    return;
+  }
+
+  JourneyState.file = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('journeyPreviewImg').src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+
+  document.getElementById('journeyPreviewFilename').textContent = file.name;
+  document.getElementById('journeyPreviewFilesize').textContent = formatFileSize(file.size);
+  document.getElementById('journeyUploadArea').style.display = 'none';
+  document.getElementById('journeyUploadPreview').classList.add('visible');
+}
+
+function setupJourneyUpload() {
+  const uploadArea = document.getElementById('journeyUploadArea');
+  const fileInput = document.getElementById('journeyFileInput');
+  const removeBtn = document.getElementById('journeyRemoveFileBtn');
+  if (!uploadArea || !fileInput || !removeBtn) return;
+
+  uploadArea.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleJourneyFileSelect(e.target.files[0]);
+    }
+  });
+  removeBtn.addEventListener('click', () => {
+    JourneyState.file = null;
+    resetJourneyFile();
+    fileInput.value = '';
+  });
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = 'var(--primary)';
+  });
+  uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = '';
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleJourneyFileSelect(e.dataTransfer.files[0]);
+    }
+  });
+}
+
+/* ------------------------------------------------------------
+   Submit da jornada
+   ------------------------------------------------------------ */
+async function submitJourney() {
+  const submitFeedback = document.getElementById('journeySubmitFeedback');
+  const nextBtn = document.getElementById('journeyNextBtn');
+
+  // Revalida tudo
+  if (!JourneyState.category || !JourneyState.subcategory) {
+    showJourneyAlert('Escolha categoria e serviço antes de enviar.');
+    return;
+  }
+  if (!JourneyState.title || !JourneyState.description) {
+    showJourneyAlert('Preencha título e descrição antes de enviar.');
+    return;
+  }
+  if (!JourneyState.payment) {
+    showJourneyAlert('Escolha uma forma de pagamento.');
+    return;
+  }
+  if (!JourneyState.maintenance) {
+    showJourneyAlert('Escolha uma preferência de manutenção.');
+    return;
+  }
+
+  if (FORMINIT_FORM_ID === 'YOUR_FORMINIT_FORM_ID' || !FORMINIT_FORM_ID) {
+    submitFeedback.className = 'journey-submit-feedback error visible';
+    submitFeedback.innerHTML = '<i class="fas fa-triangle-exclamation"></i> O serviço de envio ainda não foi configurado. Configure o Forminit e tente novamente.';
+    submitFeedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  const cat = getJourneyCategory();
+  const sub = getJourneySubcategory();
+  const typeName = JourneyState.projectType ? parseProjectTypeName(JourneyState.projectType) : '';
+
+  const fullType = typeName
+    ? `${cat.title} > ${sub.title} > ${typeName}`
+    : `${cat.title} > ${sub.title}`;
+
+  const formData = new FormData();
+  formData.append('title', JourneyState.title);
+  formData.append('requestType', fullType);
+  formData.append('category', cat.title);
+  formData.append('subcategory', sub.title);
+  formData.append('projectType', JourneyState.projectType || '');
+  formData.append('projectDescription', JourneyState.description);
+  formData.append('productionPayment', JourneyState.payment);
+  formData.append('maintenancePreference', JourneyState.maintenance);
+
+  if (JourneyState.file) {
+    formData.append('attachment', JourneyState.file, JourneyState.file.name);
+  }
+
+  formData.append('_subject', `Nova solicitação de orçamento — ${fullType} | FGP Technologies`);
+  formData.append('_captcha', 'false');
+
+  nextBtn.disabled = true;
+  const originalBtnHtml = nextBtn.innerHTML;
+  nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+  submitFeedback.classList.remove('visible', 'success', 'error');
+
+  try {
+    const response = await fetch(FORMINIT_ENDPOINT, {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (response.ok) {
+      submitFeedback.className = 'journey-submit-feedback success visible';
+      submitFeedback.innerHTML = '<i class="fas fa-circle-check"></i> Pedido enviado com sucesso! A FGP Technologies entrará em contato pelos canais informados.';
+      submitFeedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      setTimeout(() => {
+        const modal = dom.journeyModal();
+        if (modal) {
+          modal.classList.remove('open');
+          modal.setAttribute('aria-hidden', 'true');
+        }
+        document.body.style.overflow = '';
+        resetJourneyState();
+      }, 3500);
+    } else {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || 'Falha no envio. Tente novamente.');
+    }
+  } catch (error) {
+    submitFeedback.className = 'journey-submit-feedback error visible';
+    submitFeedback.innerHTML = `<i class="fas fa-circle-exclamation"></i> Não foi possível enviar. ${error.message || 'Verifique sua conexão e tente novamente.'}`;
+    submitFeedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } finally {
+    nextBtn.disabled = false;
+    nextBtn.innerHTML = originalBtnHtml;
+  }
+}
+
+/* ------------------------------------------------------------
+   Setup da jornada
+   ------------------------------------------------------------ */
+function setupJourney() {
+  // Triggers de abertura
+  document.getElementById('heroStartBtn')?.addEventListener('click', openJourney);
+  document.getElementById('sideMenuStartBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeSideMenu();
+    openJourney();
+  });
+
+  // Botões de navegação
+  document.getElementById('journeyNextBtn')?.addEventListener('click', handleJourneyNext);
+  document.getElementById('journeyBackBtn')?.addEventListener('click', handleJourneyBack);
+  document.getElementById('closeJourneyBtn')?.addEventListener('click', closeJourneyWithConfirm);
+
+  // Fechar clicando fora do container
+  const journeyModal = dom.journeyModal();
+  if (journeyModal) {
+    journeyModal.addEventListener('click', (e) => {
+      if (e.target === journeyModal) closeJourneyWithConfirm();
+    });
+  }
+
+  // Etapa 4 — campos
+  const titleEl = document.getElementById('journeyTitleField');
+  const descEl = document.getElementById('journeyDescField');
+  titleEl?.addEventListener('input', (e) => {
+    JourneyState.title = e.target.value;
+    if (e.target.value.trim()) {
+      document.getElementById('journeyTitleError').classList.remove('visible');
+      e.target.classList.remove('error');
+    }
+  });
+  descEl?.addEventListener('input', (e) => {
+    JourneyState.description = e.target.value;
+    if (e.target.value.trim()) {
+      document.getElementById('journeyDescError').classList.remove('visible');
+      e.target.classList.remove('error');
+    }
+  });
+
+  // Etapa 5 — cards de pagamento
+  document.querySelectorAll('#journeyPaymentGrid [data-payment]').forEach(card => {
+    card.addEventListener('click', () => {
+      JourneyState.payment = card.dataset.payment;
+      renderJourneyPayment();
+    });
+  });
+
+  // Etapa 6 — cards de manutenção
+  document.querySelectorAll('#journeyMaintenanceGrid [data-maintenance]').forEach(card => {
+    card.addEventListener('click', () => {
+      JourneyState.maintenance = card.dataset.maintenance;
+      renderJourneyMaintenance();
+    });
+  });
+
+  // Upload
+  setupJourneyUpload();
+}
+
+/* ============================================================
+   17. INIT
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   setupColorPanel();
@@ -1942,8 +2581,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupFileUpload();
   setupHeaderScroll();
   setupReveal();
+  setupJourney();
 
-  // Renderiza nível 1
+  // Renderiza nível 1 do catálogo
   renderCategories();
   showLevel(1);
 });
