@@ -2641,3 +2641,107 @@ img { display: block; max-width: 100%; }
     text-align: center;
   }
 }
+
+
+/* Adicionar ao final do tech.css */
+
+/* Toggle de Tipo de Cliente */
+.client-type-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeUp 0.3s ease;
+}
+
+/* Cards de Ativos (Materiais) */
+.asset-toggle.selected {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+.asset-toggle.selected .journey-card-title {
+  color: var(--primary);
+}
+
+/* Briefing Dinâmico */
+.dynamic-question-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.dynamic-question-block label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.dynamic-question-block select,
+.dynamic-question-block input[type="text"],
+.dynamic-question-block textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+.dynamic-question-block select:focus,
+.dynamic-question-block input[type="text"]:focus,
+.dynamic-question-block textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+/* Revisão Final Aprimorada */
+.journey-review-section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed var(--border);
+}
+.journey-review-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.journey-review-section-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.journey-review-value.long-text {
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* Ajustes Mobile para Jornada */
+@media (max-width: 640px) {
+  .journey-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .journey-review-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .journey-review-label {
+    min-width: 0;
+    font-size: 0.72rem;
+  }
+  .journey-review-value {
+    text-align: left;
+  }
+}
