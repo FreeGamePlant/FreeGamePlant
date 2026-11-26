@@ -15,7 +15,7 @@
    freegameplantplaystory@gmail.com
    ============================================================ */
 const FORMINIT_FORM_ID = 'l6ts8syb4td';
-const FORMINIT_ENDPOINT = `https://forminit.com/f/${l6ts8syb4td}`;
+const FORMINIT_ENDPOINT = `https://forminit.com/f/${FORMINIT_FORM_ID}`;
 
 /* ============================================================
    2. BASE DE DADOS HIERÁRQUICA
