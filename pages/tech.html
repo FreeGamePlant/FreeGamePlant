@@ -527,218 +527,243 @@
   <!-- ============================================================
        MODAL DA JORNADA GUIADA (novo)
        ============================================================ -->
-<!-- Substitua o conteúdo do modal de jornada guiada existente por esta estrutura expandida -->
-<div class="journey-modal-overlay" id="journeyModal" aria-hidden="true">
-  <div class="journey-container">
-    <div class="journey-header">
-      <div class="journey-header-title">
-        <i class="fas fa-wand-magic-sparkles"></i>
-        <span>Assistente FGP</span>
-      </div>
-      <button class="icon-btn" id="closeJourneyBtn" aria-label="Fechar assistente">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
+  <div class="journey-modal-overlay" id="journeyModal" role="dialog" aria-modal="true" aria-labelledby="journeyTitle" aria-hidden="true">
+    <div class="journey-container">
 
-    <div class="journey-assistant">
-      <div class="journey-assistant-avatar">
-        <i class="fas fa-robot"></i>
-      </div>
-      <div class="journey-assistant-bubble" id="journeyAssistantText">
-        Olá! Vamos encontrar a solução ideal para seu projeto? Escolha uma das categorias abaixo para começar.
-      </div>
-    </div>
-
-    <div class="journey-progress-wrap">
-      <div class="journey-progress-bar">
-        <div class="journey-progress-fill" id="journeyProgressFill" style="width: 0%"></div>
-      </div>
-      <div class="journey-progress-text" id="journeyProgressText">Etapa 1 de 9</div>
-    </div>
-
-    <div class="journey-content">
-      <!-- ETAPA 1: Categoria -->
-      <div class="journey-step" data-step="1" style="display: none;">
-        <h3 class="journey-step-title">Escolha uma categoria</h3>
-        <p class="journey-step-desc">Selecione o tipo de serviço que mais combina com o que você procura.</p>
-        <div class="journey-cards-grid" id="journeyCategoriesGrid"></div>
-      </div>
-
-      <!-- ETAPA 2: Subcategoria -->
-      <div class="journey-step" data-step="2" style="display: none;">
-        <h3 class="journey-step-title">Qual serviço específico?</h3>
-        <p class="journey-step-desc">Estas são as opções disponíveis na categoria selecionada.</p>
-        <div class="journey-cards-grid" id="journeyServicesGrid"></div>
-      </div>
-
-      <!-- ETAPA 3: Identificação do Cliente -->
-      <div class="journey-step" data-step="3" style="display: none;">
-        <h3 class="journey-step-title">Quem está solicitando?</h3>
-        <p class="journey-step-desc">Isso nos ajuda a personalizar a proposta e a comunicação.</p>
-        <div class="journey-cards-grid" id="journeyClientTypeGrid">
-          <button class="journey-card" data-client-type="pf" type="button">
-            <div class="journey-card-icon"><i class="fas fa-user"></i></div>
-            <div class="journey-card-title">Pessoa Física</div>
-            <div class="journey-card-desc">Profissional autônomo, criador ou indivíduo.</div>
-          </button>
-          <button class="journey-card" data-client-type="pj" type="button">
-            <div class="journey-card-icon"><i class="fas fa-building"></i></div>
-            <div class="journey-card-title">Pessoa Jurídica</div>
-            <div class="journey-card-desc">Empresa, startup, loja ou organização.</div>
-          </button>
+      <!-- Header -->
+      <div class="journey-header">
+        <div class="journey-header-title" id="journeyTitle">
+          <i class="fas fa-wand-magic-sparkles"></i>
+          <span>Assistente FGP</span>
         </div>
-        <div id="journeyClientFields" class="conditional-fields" style="display: none; margin-top: 20px;">
-          <!-- Campos injetados via JS -->
+        <button class="icon-btn" id="closeJourneyBtn" aria-label="Sair da jornada" title="Sair">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Assistente -->
+      <div class="journey-assistant">
+        <div class="journey-assistant-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="journey-assistant-bubble" id="journeyAssistantText">
+          Olá! Vamos encontrar a solução ideal para seu projeto? Escolha uma das categorias abaixo para começar.
         </div>
       </div>
 
-      <!-- ETAPA 4: Contexto do Projeto -->
-      <div class="journey-step" data-step="4" style="display: none;">
-        <h3 class="journey-step-title">Sobre o seu projeto</h3>
-        <p class="journey-step-desc">Conte um pouco sobre a ideia, o objetivo e para quem é este projeto.</p>
-        <div class="journey-form-group">
-          <label>Nome do projeto ou ideia <span class="required">*</span></label>
-          <input type="text" class="journey-input" id="journeyProjectName" placeholder="Ex: App de Delivery Local">
-          <div class="journey-field-error" id="journeyProjectNameError"><i class="fas fa-circle-exclamation"></i> Por favor, informe o nome do projeto.</div>
+      <!-- Progresso -->
+      <div class="journey-progress-wrap">
+        <div class="journey-progress-bar">
+          <div class="journey-progress-fill" id="journeyProgressFill" style="width: 0%;"></div>
         </div>
-        <div class="journey-form-group">
-          <label>Objetivo principal e público-alvo <span class="required">*</span></label>
-          <textarea class="journey-textarea" id="journeyProjectGoal" placeholder="Ex: Facilitar a compra de produtos locais para moradores do bairro X."></textarea>
-          <div class="journey-field-error" id="journeyProjectGoalError"><i class="fas fa-circle-exclamation"></i> Por favor, descreva o objetivo.</div>
-        </div>
+        <div class="journey-progress-text" id="journeyProgressText">Etapa 1 de 7</div>
       </div>
 
-      <!-- ETAPA 5: Briefing Dinâmico (Específico por Categoria) -->
-      <div class="journey-step" data-step="5" style="display: none;">
-        <h3 class="journey-step-title">Detalhes técnicos e funcionais</h3>
-        <p class="journey-step-desc">Perguntas específicas para entender melhor o escopo do serviço escolhido.</p>
-        <div id="journeyDynamicBriefing"></div>
-      </div>
+      <!-- Conteúdo das etapas -->
+      <div class="journey-content" id="journeyContent">
 
-      <!-- ETAPA 6: Identidade Visual e Materiais -->
-      <div class="journey-step" data-step="6" style="display: none;">
-        <h3 class="journey-step-title">Materiais e Identidade Visual</h3>
-        <p class="journey-step-desc">Você já possui alguns desses materiais? (Opcional)</p>
-        <div class="journey-form-group">
-          <label>O que você já possui?</label>
-          <div class="journey-cards-grid" id="journeyAssetsGrid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));">
-            <button class="journey-card asset-toggle" data-asset="logo" type="button"><div class="journey-card-title">Logotipo</div></button>
-            <button class="journey-card asset-toggle" data-asset="colors" type="button"><div class="journey-card-title">Cores/Marca</div></button>
-            <button class="journey-card asset-toggle" data-asset="texts" type="button"><div class="journey-card-title">Textos</div></button>
-            <button class="journey-card asset-toggle" data-asset="images" type="button"><div class="journey-card-title">Imagens</div></button>
-            <button class="journey-card asset-toggle" data-asset="nothing" type="button"><div class="journey-card-title">Nada ainda</div></button>
+        <!-- ETAPA 1 — Categoria -->
+        <div class="journey-step" data-step="1">
+          <h2 class="journey-step-title">Escolha uma categoria</h2>
+          <p class="journey-step-desc">Selecione o tipo de serviço que mais combina com o que você procura.</p>
+          <div class="journey-cards-grid" id="journeyCategoriesGrid">
+            <!-- Preenchido por JS -->
           </div>
         </div>
-        <div class="journey-form-group" style="margin-top: 20px;">
-          <label>Anexar referência ou material (Opcional)</label>
-          <div class="journey-upload-area" id="journeyUploadArea">
-            <i class="fas fa-cloud-upload-alt journey-upload-icon"></i>
-            <p>Clique para selecionar uma imagem ou documento</p>
-            <span class="journey-formats">JPEG, PNG, WebP ou PDF · máx. 5 MB</span>
-          </div>
-          <input type="file" id="journeyFileInput" class="file-input-hidden" accept="image/jpeg,image/png,image/webp,application/pdf">
-          <div class="journey-upload-preview" id="journeyUploadPreview">
-            <img id="journeyPreviewImg" src="" alt="Prévia">
-            <div class="journey-upload-preview-info">
-              <div class="journey-filename" id="journeyPreviewFilename"></div>
-              <div class="journey-filesize" id="journeyPreviewFilesize"></div>
-            </div>
-            <button class="btn-remove-file" id="journeyRemoveFileBtn" type="button" aria-label="Remover arquivo">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div class="journey-field-error" id="journeyFileError" style="margin-top: 8px;"></div>
-        </div>
-      </div>
 
-      <!-- ETAPA 7: Prazos e Infraestrutura -->
-      <div class="journey-step" data-step="7" style="display: none;">
-        <h3 class="journey-step-title">Prazos e Infraestrutura</h3>
-        <p class="journey-step-desc">Ajude-nos a planejar a viabilidade do seu projeto.</p>
-        <div class="journey-form-group">
-          <label>Prazo desejado para conclusão</label>
-          <select class="journey-input" id="journeyDeadline" style="background-image: url(&quot;data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E&quot;);">
-            <option value="">Selecione uma opção...</option>
-            <option value="Urgente (menos de 1 mês)">Urgente (menos de 1 mês)</option>
-            <option value="Curto prazo (1 a 2 meses)">Curto prazo (1 a 2 meses)</option>
-            <option value="Médio prazo (2 a 4 meses)">Médio prazo (2 a 4 meses)</option>
-            <option value="Longo prazo (mais de 4 meses)">Longo prazo (mais de 4 meses)</option>
-            <option value="Flexível / Sem pressa">Flexível / Sem pressa</option>
-          </select>
+        <!-- ETAPA 2 — Serviço -->
+        <div class="journey-step" data-step="2">
+          <h2 class="journey-step-title">Escolha um serviço</h2>
+          <p class="journey-step-desc">Estas são as opções disponíveis na categoria selecionada.</p>
+          <div class="journey-cards-grid" id="journeyServicesGrid">
+            <!-- Preenchido por JS -->
+          </div>
         </div>
-        <div class="journey-form-group">
-          <label>Infraestrutura (Domínio/Hospedagem/Lojas)</label>
-          <select class="journey-input" id="journeyInfrastructure" style="background-image: url(&quot;data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E&quot;);">
-            <option value="">Selecione uma opção...</option>
-            <option value="Já possuo tudo contratado">Já possuo tudo contratado</option>
-            <option value="Possuo parcialmente, preciso de ajuda">Possuo parcialmente, preciso de ajuda</option>
-            <option value="Não possuo, desejo que a FGP oriente/contrate">Não possuo, desejo que a FGP oriente/contrate</option>
-            <option value="Não se aplica ao projeto">Não se aplica ao projeto</option>
-          </select>
-        </div>
-      </div>
 
-      <!-- ETAPA 8: Condições Comerciais -->
-      <div class="journey-step" data-step="8" style="display: none;">
-        <h3 class="journey-step-title">Condições Comerciais</h3>
-        <p class="journey-step-desc">Como você prefere estruturar o investimento?</p>
-        
-        <div class="journey-form-group">
-          <label>Pagamento da produção (Desenvolvimento)</label>
-          <div class="journey-cards-grid" id="journeyPaymentGrid" style="grid-template-columns: 1fr 1fr;">
+        <!-- ETAPA 3 — Tipo de projeto -->
+        <div class="journey-step" data-step="3">
+          <h2 class="journey-step-title">Qual o tipo de projeto?</h2>
+          <p class="journey-step-desc">Escolha a modalidade que melhor descreve sua necessidade.</p>
+          <div class="journey-cards-grid" id="journeyTypesGrid">
+            <!-- Preenchido por JS -->
+          </div>
+        </div>
+
+        <!-- ETAPA 4 — Descrição -->
+        <div class="journey-step" data-step="4">
+          <h2 class="journey-step-title">Sobre o seu projeto</h2>
+          <p class="journey-step-desc">
+            Não precisa utilizar termos técnicos. Explique sua ideia com suas próprias palavras.
+          </p>
+
+          <div class="journey-form-group">
+            <label for="journeyTitleField">Título do pedido <span class="required">*</span></label>
+            <input
+              type="text"
+              id="journeyTitleField"
+              class="journey-input"
+              maxlength="150"
+              placeholder="Ex.: Aplicativo de agendamento para meu salão"
+            />
+            <span class="journey-field-error" id="journeyTitleError">
+              <i class="fas fa-circle-exclamation"></i> Por favor, preencha o título.
+            </span>
+          </div>
+
+          <div class="journey-form-group">
+            <label for="journeyDescField">Descrição inicial <span class="required">*</span></label>
+            <textarea
+              id="journeyDescField"
+              class="journey-textarea"
+              maxlength="3000"
+              rows="5"
+              placeholder="Conte para nós um pouco mais sobre sua ideia! Como você imagina esse projeto? Quais funcionalidades gostaria de incluir? Quanto mais detalhes compartilhar, melhor poderemos compreender suas necessidades e preparar uma proposta adequada."
+            ></textarea>
+            <span class="journey-field-error" id="journeyDescError">
+              <i class="fas fa-circle-exclamation"></i> Por favor, descreva seu projeto.
+            </span>
+            <p class="journey-hint">
+              <i class="fas fa-lightbulb"></i>
+              Quanto mais detalhes você compartilhar, melhor poderemos preparar uma proposta adequada.
+            </p>
+          </div>
+        </div>
+
+        <!-- ETAPA 5 — Pagamento da produção -->
+        <div class="journey-step" data-step="5">
+          <h2 class="journey-step-title">Pagamento da produção</h2>
+          <p class="journey-step-desc">
+            Como você prefere realizar o pagamento pelo desenvolvimento inicial do projeto?
+          </p>
+
+          <div class="journey-cards-grid" id="journeyPaymentGrid">
             <button class="journey-card" data-payment="À vista" type="button">
+              <div class="journey-card-icon"><i class="fas fa-money-bill-wave"></i></div>
               <div class="journey-card-title">À vista</div>
-              <div class="journey-card-desc">Pagamento integral (desconto negociável).</div>
+              <div class="journey-card-desc">Pagamento integral do investimento de desenvolvimento.</div>
             </button>
+
             <button class="journey-card" data-payment="Parcelado" type="button">
+              <div class="journey-card-icon"><i class="fas fa-calendar-days"></i></div>
               <div class="journey-card-title">Parcelado</div>
-              <div class="journey-card-desc">Dividido conforme cronograma de entregas.</div>
+              <div class="journey-card-desc">Pagamento dividido em parcelas, conforme condições aprovadas na proposta.</div>
             </button>
           </div>
+
+          <p class="journey-hint">
+            <i class="fas fa-info-circle"></i>
+            A quantidade de parcelas, os valores e as condições definitivas serão estabelecidos
+            pela FGP após analisar o escopo, o investimento necessário, os custos e a viabilidade
+            financeira do projeto.
+          </p>
         </div>
 
-        <div class="journey-form-group" style="margin-top: 20px;">
-          <label>Preferência de manutenção pós-entrega</label>
-          <div class="journey-cards-grid" id="journeyMaintenanceGrid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));">
-            <button class="journey-card" data-maintenance="Plano mensal" type="button">
+        <!-- ETAPA 6 — Manutenção -->
+        <div class="journey-step" data-step="6">
+          <h2 class="journey-step-title">Preferência de manutenção</h2>
+          <p class="journey-step-desc">
+            Serviços posteriores de manutenção são opcionais e independentes do pagamento
+            da produção.
+          </p>
+
+          <div class="journey-cards-grid" id="journeyMaintenanceGrid">
+            <button class="journey-card" data-maintenance="Mensal" type="button">
+              <div class="journey-card-icon"><i class="fas fa-calendar"></i></div>
               <div class="journey-card-title">Plano mensal</div>
-              <div class="journey-card-desc">Suporte e atualizações recorrentes.</div>
+              <div class="journey-card-desc">Pagamento recorrente mensal. Maior flexibilidade, sem desconto por antecipação.</div>
             </button>
-            <button class="journey-card" data-maintenance="Plano anual" type="button">
+
+            <button class="journey-card" data-maintenance="Anual" type="button">
+              <div class="journey-card-icon"><i class="fas fa-calendar-check"></i></div>
               <div class="journey-card-title">Plano anual</div>
-              <div class="journey-card-desc">Antecipado, com desconto estimado.</div>
+              <div class="journey-card-desc">Pagamento antecipado referente a 12 meses. Desconto estimado de 5% a 10%, quando aplicável.</div>
             </button>
-            <button class="journey-card" data-maintenance="Sem manutenção agora" type="button">
-              <div class="journey-card-title">Avaliar depois</div>
-              <div class="journey-card-desc">Contratarei apenas o desenvolvimento.</div>
+
+            <button class="journey-card" data-maintenance="Não desejo contratar agora" type="button">
+              <div class="journey-card-icon"><i class="fas fa-circle-xmark"></i></div>
+              <div class="journey-card-title">Não desejo contratar manutenção agora</div>
+              <div class="journey-card-desc">Você pode solicitar o orçamento sem contratar manutenção inicialmente.</div>
             </button>
           </div>
+
+          <p class="journey-hint">
+            <i class="fas fa-info-circle"></i>
+            A preferência mensal ou anual não representa uma contratação automática. A FGP
+            avaliará quais atividades de manutenção são necessárias e quais serviços serão
+            efetivamente oferecidos.
+          </p>
         </div>
+
+        <!-- ETAPA 7 — Revisão e envio -->
+        <div class="journey-step" data-step="7">
+          <h2 class="journey-step-title">Revisão do pedido</h2>
+          <p class="journey-step-desc">
+            Confira suas escolhas antes de enviar. Você pode voltar a qualquer etapa para ajustar.
+          </p>
+
+          <div class="journey-review" id="journeyReviewSummary">
+            <!-- Preenchido por JS -->
+          </div>
+
+          <!-- Imagem de referência -->
+          <div class="journey-form-group">
+            <label>Imagem de referência <span class="optional">(opcional)</span></label>
+            <div class="journey-upload-area" id="journeyUploadArea">
+              <i class="fas fa-image journey-upload-icon"></i>
+              <p>Clique para selecionar uma imagem</p>
+              <p class="journey-formats">JPEG, PNG ou WebP · máx. 5 MB</p>
+            </div>
+            <input
+              type="file"
+              id="journeyFileInput"
+              name="journeyAttachment"
+              class="file-input-hidden"
+              accept="image/jpeg,image/png,image/webp"
+            />
+            <div class="journey-upload-preview" id="journeyUploadPreview">
+              <img id="journeyPreviewImg" src="" alt="Prévia da imagem" />
+              <div class="journey-upload-preview-info">
+                <div class="journey-filename" id="journeyPreviewFilename"></div>
+                <div class="journey-filesize" id="journeyPreviewFilesize"></div>
+              </div>
+              <button type="button" class="btn-remove-file" id="journeyRemoveFileBtn" aria-label="Remover imagem">
+                <i class="fas fa-xmark"></i>
+              </button>
+            </div>
+            <span class="journey-field-error" id="journeyFileError">
+              <i class="fas fa-circle-exclamation"></i> Arquivo inválido.
+            </span>
+          </div>
+
+          <!-- Aviso de despesas externas -->
+          <div class="journey-external-notice">
+            <i class="fas fa-circle-info"></i>
+            <p>
+              Alguns projetos podem exigir serviços e recursos de fornecedores externos.
+              Quando aplicáveis, esses custos serão identificados e apresentados separadamente
+              na proposta comercial.
+            </p>
+          </div>
+
+          <!-- Feedback de envio -->
+          <div class="journey-submit-feedback" id="journeySubmitFeedback"></div>
+        </div>
+
       </div>
 
-      <!-- ETAPA 9: Revisão Final -->
-      <div class="journey-step" data-step="9" style="display: none;">
-        <h3 class="journey-step-title">Revisão do Pedido</h3>
-        <p class="journey-step-desc">Confira suas escolhas antes de enviar. Você pode voltar para ajustar.</p>
-        <div class="journey-review" id="journeyReviewSummary"></div>
-        <div class="journey-external-notice">
-          <i class="fas fa-info-circle"></i>
-          <p>Alguns projetos podem exigir serviços e recursos de fornecedores externos. Quando aplicáveis, esses custos serão identificados e apresentados separadamente na proposta comercial.</p>
-        </div>
-        <div class="journey-submit-feedback" id="journeySubmitFeedback"></div>
+      <!-- Footer -->
+      <div class="journey-footer">
+        <button class="btn-outline" id="journeyBackBtn" type="button" style="display:none;">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </button>
+        <button class="btn-primary" id="journeyNextBtn" type="button">
+          Continuar <i class="fas fa-arrow-right"></i>
+        </button>
       </div>
-    </div>
 
-    <div class="journey-footer">
-      <button class="btn-outline" id="journeyBackBtn" style="display: none;">
-        <i class="fas fa-arrow-left"></i> Voltar
-      </button>
-      <button class="btn-primary" id="journeyNextBtn">
-        Continuar <i class="fas fa-arrow-right"></i>
-      </button>
     </div>
   </div>
-</div>
+
   <!-- ============================================================
        FOOTER
        ============================================================ -->
@@ -795,7 +820,7 @@
     </div>
   </footer>
 
-  <!-- JS externo do módulo Tech -->
-<script type="module" src="tech/index.js"></script>
+  <!-- JS externo do módulo Tech (ATUALIZADO PARA ES MODULES) -->
+  <script type="module" src="tech/index.js"></script>
 </body>
 </html>
