@@ -14,8 +14,8 @@
    Destino configurado no painel do Forminit:
    freegameplantplaystory@gmail.com
    ============================================================ */
-const FORMINIT_FORM_ID = 'YOUR_FORMINIT_FORM_ID'; // <-- CONFIGURAR AQUI
-const FORMINIT_ENDPOINT = `https://forminit.com/f/${FORMINIT_FORM_ID}`;
+const FORMINIT_FORM_ID = 'l6ts8syb4td';
+const FORMINIT_ENDPOINT = `https://forminit.com/f/${l6ts8syb4td}`;
 
 /* ============================================================
    2. BASE DE DADOS HIERÁRQUICA
