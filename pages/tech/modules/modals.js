@@ -1,8 +1,12 @@
 /* ============================================================
    FGP TECHNOLOGIES — modals.js
    Gerencia os modais legados (#accessosModal e #requestModal).
-   O #journeyModal é controlado pelo assistant.js e não é
-   manipulador aqui, exceto por delegação genérica de ESC.
+   O #journeyModal é controlado pelo assistant.js.
+
+   A11y: usa hideSafely/showSafely (utils.js) para mover o foco
+   antes de aplicar aria-hidden + inert, eliminando o warning
+   "Blocked aria-hidden on an element because its descendant
+   retained focus".
 
    EXPORTA:
    - initModals()
@@ -12,79 +16,107 @@
 
 import { dom } from './state.js';
 import { submitRequest } from './forminit.js';
+import {
+  hideSafely,
+  showSafely,
+  validateFile,
+  formatFileSize,
+  isValidEmail
+} from './utils.js';
 
 /* ============================================================
-   1. HELPERS
+   1. HELPERS LOCAIS
    ============================================================ */
 
-function $(id) { return document.getElementById(id); }
-
-function openOverlay(el) {
-  if (!el) return;
-  el.classList.add('open');
-  el.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
+function $id(id) {
+  return document.getElementById(id);
 }
 
-function closeOverlay(el) {
-  if (!el) return;
-  el.classList.remove('open');
-  el.setAttribute('aria-hidden', 'true');
-  // Só remove o lock se nenhum outro overlay estiver aberto
-  if (!document.querySelector('.modal-overlay.open, .journey-modal-overlay.open')) {
-    document.body.classList.remove('modal-open');
+function isOpen(el) {
+  return !!el && el.classList.contains('open');
+}
+
+function hasAnyOpenOverlay() {
+  return Boolean(document.querySelector(
+    '.side-menu.open, .color-panel.open, .modal-overlay.open, .journey-modal-overlay.open'
+  ));
+}
+
+function releaseBodyLockIfClear() {
+  if (!hasAnyOpenOverlay()) {
+    document.body.classList.remove('menu-open', 'modal-open');
   }
 }
 
-function escapeHtml(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+/**
+ * Abre qualquer modal-overlay de forma segura.
+ * - Adiciona .open
+ * - Remove inert e ajusta aria-hidden (via showSafely)
+ * - Trava o scroll do body
+ * - Registra o trigger para devolver o foco ao fechar
+ */
+function openOverlaySafe(overlay, trigger) {
+  if (!overlay) return;
+
+  overlay.classList.add('open');
+  document.body.classList.add('modal-open');
+
+  showSafely(overlay, { focusFirst: true });
+
+  overlay._focusReturn = trigger || null;
 }
 
-function formatFileSize(bytes) {
-  if (!bytes || bytes < 1024) return `${bytes || 0} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-}
+/**
+ * Fecha qualquer modal-overlay de forma segura.
+ * - Remove .open
+ * - Devolve o foco ao trigger e aplica inert/aria-hidden (via hideSafely)
+ * - Libera o scroll apenas se nenhum outro overlay estiver aberto
+ */
+function closeOverlaySafe(overlay, fallbackTriggerId) {
+  if (!overlay) return;
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ACCEPTED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+  const focusFallback =
+    overlay._focusReturn ||
+    (fallbackTriggerId ? $id(fallbackTriggerId) : null);
+
+  overlay.classList.remove('open');
+  hideSafely(overlay, { focusFallback });
+
+  releaseBodyLockIfClear();
+  overlay._focusReturn = null;
+}
 
 /* ============================================================
    2. ACCESSOS MODAL
    ============================================================ */
 
-export function openAccessosModal() {
-  openOverlay(dom.accessosModal());
+export function openAccessosModal(trigger) {
+  const modal = dom.accessosModal();
+  if (!modal) return;
+  openOverlaySafe(modal, trigger || $id('accessosSideBtn') || $id('accessosFooterBtn'));
 }
 
 export function closeAccessosModal() {
-  closeOverlay(dom.accessosModal());
+  const modal = dom.accessosModal();
+  if (!modal) return;
+  closeOverlaySafe(modal, 'accessosSideBtn');
 }
 
 function bindAccessosModal() {
   const modal = dom.accessosModal();
   if (!modal) return;
 
-  // Botões que abrem (side menu + footer)
-  $('accessosSideBtn')?.addEventListener('click', (e) => {
+  $id('accessosSideBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
-    openAccessosModal();
+    openAccessosModal(e.currentTarget);
   });
-  $('accessosFooterBtn')?.addEventListener('click', (e) => {
+  $id('accessosFooterBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
-    openAccessosModal();
+    openAccessosModal(e.currentTarget);
   });
 
-  // Fechar
-  $('closeAccessosBtn')?.addEventListener('click', closeAccessosModal);
+  $id('closeAccessosBtn')?.addEventListener('click', closeAccessosModal);
 
-  // Clique no backdrop
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeAccessosModal();
   });
@@ -100,25 +132,32 @@ export function openRequestModal(opts = {}) {
   const modal = dom.requestModal();
   if (!modal) return;
 
-  // Preenchimento opcional vindo do catálogo ou de um CTA externo
-  const titleEl = $('requestTitle');
-  const initialDescEl = $('initialDescription');
-  const typeDisplayEl = $('requestTypeDisplay');
-  const typeHiddenEl = $('requestType');
+  const trigger =
+    opts.trigger ||
+    (typeof opts.triggerId === 'string' ? $id(opts.triggerId) : null) ||
+    document.activeElement;
+
+  // Pré-preenchimento opcional (usado pelo catálogo)
+  const titleEl = $id('requestTitle');
+  const initialDescEl = $id('initialDescription');
+  const typeDisplayEl = $id('requestTypeDisplay');
+  const typeHiddenEl = $id('requestType');
 
   if (titleEl && opts.title) titleEl.value = opts.title;
   if (initialDescEl && opts.description) initialDescEl.value = opts.description;
   if (typeDisplayEl) typeDisplayEl.textContent = opts.type || '—';
   if (typeHiddenEl) typeHiddenEl.value = opts.type || '';
 
-  openOverlay(modal);
+  openOverlaySafe(modal, trigger);
 
-  // Foco no primeiro campo após abrir
-  setTimeout(() => titleEl?.focus(), 80);
+  // Foco no primeiro campo após a transição
+  setTimeout(() => titleEl?.focus(), 100);
 }
 
 export function closeRequestModal() {
-  closeOverlay(dom.requestModal());
+  const modal = dom.requestModal();
+  if (!modal) return;
+  closeOverlaySafe(modal, 'submitBtn');
 }
 
 /* ============================================================
@@ -126,8 +165,8 @@ export function closeRequestModal() {
    ============================================================ */
 
 function populateInstallmentOptions() {
-  const countSel = $('installmentCount');
-  const daySel = $('dueDay');
+  const countSel = $id('installmentCount');
+  const daySel = $id('dueDay');
 
   if (countSel && countSel.options.length === 0) {
     for (let i = 2; i <= 12; i++) {
@@ -149,8 +188,9 @@ function populateInstallmentOptions() {
 }
 
 function setInstallmentVisibility(visible) {
-  const fields = $('installmentFields');
+  const fields = $id('installmentFields');
   if (!fields) return;
+  fields.classList.toggle('visible', visible);
   fields.classList.toggle('hidden', !visible);
   fields.style.display = visible ? '' : 'none';
 }
@@ -158,8 +198,8 @@ function setInstallmentVisibility(visible) {
 function bindPaymentOptions() {
   document.querySelectorAll('input[name="productionPayment"]').forEach(radio => {
     radio.addEventListener('change', () => {
-      setInstallmentVisibility(radio.value === 'Parcelado' && radio.checked);
-      // Atualiza visual da label
+      setInstallmentVisibility(radio.checked && radio.value === 'Parcelado');
+
       document.querySelectorAll('#productionPaymentOptions .payment-option').forEach(lbl => {
         const input = lbl.querySelector('input[type="radio"]');
         lbl.classList.toggle('selected', !!input?.checked);
@@ -182,13 +222,13 @@ function bindPaymentOptions() {
    ============================================================ */
 
 function setupUpload() {
-  const area = $('uploadArea');
-  const input = $('fileInput');
-  const preview = $('uploadPreview');
-  const previewImg = $('previewImg');
-  const nameEl = $('previewFilename');
-  const sizeEl = $('previewFilesize');
-  const removeBtn = $('removeFileBtn');
+  const area = $id('uploadArea');
+  const input = $id('fileInput');
+  const preview = $id('uploadPreview');
+  const previewImg = $id('previewImg');
+  const nameEl = $id('previewFilename');
+  const sizeEl = $id('previewFilesize');
+  const removeBtn = $id('removeFileBtn');
 
   if (!area || !input) return;
 
@@ -198,14 +238,12 @@ function setupUpload() {
     const file = input.files && input.files[0];
     if (!file) return;
 
-    if (file.size > MAX_FILE_SIZE) {
-      alert(`Arquivo muito grande (${formatFileSize(file.size)}). Máximo: 5 MB.`);
+    const check = validateFile(file);
+    if (!check.ok) {
+      alert(check.error);
       input.value = '';
-      return;
-    }
-    if (!ACCEPTED_MIME.includes(file.type)) {
-      alert('Formato inválido. Envie JPEG, PNG ou WebP.');
-      input.value = '';
+      currentFile = null;
+      preview?.classList.remove('visible');
       return;
     }
 
@@ -232,60 +270,50 @@ function setupUpload() {
 }
 
 /* ============================================================
-   6. VALIDAÇÃO E SUBMISSÃO DO REQUEST MODAL
+   6. VALIDAÇÃO E SUBMISSÃO
    ============================================================ */
 
 function showFeedback(message, type = 'error') {
-  const fb = $('submitFeedback');
+  const fb = $id('submitFeedback');
   if (!fb) return;
   fb.textContent = message;
   fb.className = `submit-feedback visible ${type}`;
 }
 
 function clearFeedback() {
-  const fb = $('submitFeedback');
+  const fb = $id('submitFeedback');
   if (!fb) return;
   fb.textContent = '';
   fb.className = 'submit-feedback';
 }
 
 function collectRequestForm() {
-  const title = $('requestTitle')?.value.trim() || '';
-  const initialDescription = $('initialDescription')?.value.trim() || '';
-  const requestType = $('requestType')?.value || '';
-  const projectDescription = $('projectDescription')?.value.trim() || '';
-
-  const payment = document.querySelector('input[name="productionPayment"]:checked')?.value || '';
-  const installments = $('installmentCount')?.value || '';
-  const dueDay = $('dueDay')?.value || '';
-  const maintenance = document.querySelector('input[name="maintenancePreference"]:checked')?.value || '';
-
   return {
-    title,
-    initialDescription,
-    requestType,
-    projectDescription,
-    productionPayment: payment,
-    installmentCount: payment === 'Parcelado' ? installments : '',
-    dueDay: payment === 'Parcelado' ? dueDay : '',
-    maintenancePreference: maintenance
+    title: ($id('requestTitle')?.value || '').trim(),
+    initialDescription: ($id('initialDescription')?.value || '').trim(),
+    requestType: $id('requestType')?.value || '',
+    projectDescription: ($id('projectDescription')?.value || '').trim(),
+    productionPayment: document.querySelector('input[name="productionPayment"]:checked')?.value || '',
+    installmentCount: $id('installmentCount')?.value || '',
+    dueDay: $id('dueDay')?.value || '',
+    maintenancePreference: document.querySelector('input[name="maintenancePreference"]:checked')?.value || ''
   };
 }
 
 function validateRequestForm(data) {
   if (!data.title) {
     showFeedback('Por favor, informe o título do pedido.');
-    $('requestTitle')?.focus();
+    $id('requestTitle')?.focus();
     return false;
   }
   if (!data.initialDescription) {
     showFeedback('Por favor, preencha a descrição inicial.');
-    $('initialDescription')?.focus();
+    $id('initialDescription')?.focus();
     return false;
   }
   if (!data.projectDescription) {
     showFeedback('Por favor, descreva o projeto.');
-    $('projectDescription')?.focus();
+    $id('projectDescription')?.focus();
     return false;
   }
   if (data.productionPayment === 'Parcelado') {
@@ -304,14 +332,14 @@ function validateRequestForm(data) {
 let submitting = false;
 
 async function handleRequestSubmit(e) {
-  e.preventDefault();
+  e?.preventDefault?.();
   if (submitting) return;
 
   clearFeedback();
   const data = collectRequestForm();
   if (!validateRequestForm(data)) return;
 
-  const btn = $('submitBtn');
+  const btn = $id('submitBtn');
   if (btn) {
     btn.disabled = true;
     btn.classList.add('loading');
@@ -321,22 +349,23 @@ async function handleRequestSubmit(e) {
   try {
     const result = await submitRequest(data, currentFile);
 
-    if (!result.ok) {
-      showFeedback(result.error || 'Não foi possível enviar. Tente novamente.');
+    if (!result || result.ok === false) {
+      showFeedback(
+        (result && result.error) || 'Não foi possível enviar. Tente novamente.',
+        'error'
+      );
       return;
     }
 
     showFeedback('Pedido enviado com sucesso! Entraremos em contato em breve.', 'success');
 
-    // Reset após 1.8s e fecha
     setTimeout(() => {
       resetRequestForm();
       closeRequestModal();
     }, 1800);
-
   } catch (err) {
     console.error('[FGP][modals] Erro no envio do requestModal:', err);
-    showFeedback('Erro inesperado ao enviar. Tente novamente.');
+    showFeedback('Erro inesperado ao enviar. Tente novamente.', 'error');
   } finally {
     submitting = false;
     if (btn) {
@@ -347,20 +376,21 @@ async function handleRequestSubmit(e) {
 }
 
 function resetRequestForm() {
-  $('requestForm')?.reset();
+  $('requestForm')?.reset?.();
   currentFile = null;
 
-  const preview = $('uploadPreview');
+  const preview = $id('uploadPreview');
   preview?.classList.remove('visible');
-  const previewImg = $('previewImg');
+  const previewImg = $id('previewImg');
   if (previewImg) previewImg.src = '';
 
-  const typeDisplay = $('requestTypeDisplay');
+  const typeDisplay = $id('requestTypeDisplay');
   if (typeDisplay) typeDisplay.textContent = '—';
-  const typeHidden = $('requestType');
+  const typeHidden = $id('requestType');
   if (typeHidden) typeHidden.value = '';
 
-  document.querySelectorAll('#productionPaymentOptions .payment-option, #maintenanceOptions .payment-option')
+  document
+    .querySelectorAll('#productionPaymentOptions .payment-option, #maintenanceOptions .payment-option')
     .forEach(lbl => lbl.classList.remove('selected'));
 
   setInstallmentVisibility(false);
@@ -369,38 +399,28 @@ function resetRequestForm() {
 
 function bindRequestModal() {
   const modal = dom.requestModal();
-  const form = $('requestForm');
+  const form = $id('requestForm');
   if (!modal) return;
 
-  // Preencher selects (idempotente)
   populateInstallmentOptions();
   setInstallmentVisibility(false);
-
-  // Bind payment + maintenance
   bindPaymentOptions();
-
-  // Upload
   setupUpload();
 
-  // Submit
   form?.addEventListener('submit', handleRequestSubmit);
-  $('submitBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    handleRequestSubmit(e);
+  $id('submitBtn')?.addEventListener('click', (e) => {
+    // Se o botão não for type="submit" (caso o HTML mude),
+    // garantimos o disparo aqui.
+    if (form && !$('submitBtn')?.getAttribute('type')) {
+      e.preventDefault();
+      handleRequestSubmit(e);
+    }
   });
 
-  // Fechar
-  $('closeRequestBtn')?.addEventListener('click', closeRequestModal);
+  $id('closeRequestBtn')?.addEventListener('click', closeRequestModal);
 
-  // Backdrop
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeRequestModal();
-  });
-
-  // ESC
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (modal.classList.contains('open')) closeRequestModal();
   });
 }
 
@@ -415,6 +435,12 @@ export function initModals() {
 
   bindAccessosModal();
   bindRequestModal();
+
+  // Garante estado inicial de a11y (modais vêm inert+aria-hidden do HTML)
+  const accessos = dom.accessosModal();
+  const request = dom.requestModal();
+  if (accessos && !accessos.classList.contains('open')) hideSafely(accessos);
+  if (request && !request.classList.contains('open')) hideSafely(request);
 
   initialized = true;
 }
