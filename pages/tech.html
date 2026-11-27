@@ -51,7 +51,7 @@
        ============================================================ -->
   <div class="side-overlay" id="sideOverlay"></div>
 
-  <aside class="side-menu" id="sideMenu" aria-hidden="true">
+  <aside class="side-menu" id="sideMenu" aria-hidden="true" inert>
     <div class="side-menu-header">
       <img src="../assets/img/lOGOFGP.png" alt="" onerror="this.style.display='none'" />
       <div>
@@ -87,7 +87,7 @@
   <!-- ============================================================
        COLOR PANEL
        ============================================================ -->
-  <aside class="color-panel" id="colorPanel" aria-hidden="true">
+  <aside class="color-panel" id="colorPanel" aria-hidden="true" inert>
     <div class="color-panel-header">
       <h3><i class="fas fa-palette"></i> Personalizar</h3>
       <button class="icon-btn" id="closeColorBtn" aria-label="Fechar">
@@ -380,7 +380,7 @@
   <!-- ============================================================
        MODAL ACESSOS
        ============================================================ -->
-  <div class="modal-overlay" id="accessosModal" role="dialog" aria-modal="true">
+  <div class="modal-overlay" id="accessosModal" role="dialog" aria-modal="true" aria-hidden="true" inert>
     <div class="modal-box">
       <button class="modal-close" id="closeAccessosBtn" aria-label="Fechar">
         <i class="fas fa-xmark"></i>
@@ -422,10 +422,8 @@
 
   <!-- ============================================================
        MODAL DE SOLICITAÇÃO (fallback legado — preservado)
-       Mantido para compatibilidade. O fluxo principal agora é o
-       journeyModal (13 etapas). Pode ser removido em versão futura.
        ============================================================ -->
-  <div class="modal-overlay" id="requestModal" role="dialog" aria-modal="true" aria-labelledby="requestModalTitle">
+  <div class="modal-overlay" id="requestModal" role="dialog" aria-modal="true" aria-hidden="true" inert>
     <div class="modal-box request-modal-box">
       <button class="modal-close" id="closeRequestBtn" aria-label="Fechar">
         <i class="fas fa-xmark"></i>
@@ -541,7 +539,7 @@
        Etapa 12: Preferências comerciais
        Etapa 13: Revisão e envio
        ============================================================ -->
-  <div class="journey-modal-overlay" id="journeyModal" role="dialog" aria-modal="true" aria-labelledby="journeyTitle" aria-hidden="true">
+  <div class="journey-modal-overlay" id="journeyModal" role="dialog" aria-modal="true" aria-labelledby="journeyTitle" aria-hidden="true" inert>
     <div class="journey-container">
 
       <!-- Header -->
@@ -552,6 +550,15 @@
         </div>
         <button class="icon-btn" id="closeJourneyBtn" aria-label="Sair da jornada" title="Sair">
           <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Banner de rascunho retomado (mostrado via JS se houver rascunho) -->
+      <div class="journey-draft-banner" id="journeyDraftBanner" role="status" aria-live="polite" style="display:none;">
+        <i class="fas fa-clock-rotate-left"></i>
+        <span class="journey-draft-text">Retomamos o rascunho da sua solicitação anterior.</span>
+        <button type="button" class="journey-draft-discard" id="journeyDiscardDraftBtn">
+          Começar do zero
         </button>
       </div>
 
@@ -604,7 +611,7 @@
           <div class="journey-client-fields" id="journeyIndividualFields" style="display:none;">
             <div class="journey-form-group">
               <label for="journeyClientName">Nome completo <span class="required">*</span></label>
-              <input type="text" id="journeyClientName" class="journey-input" maxlength="120" placeholder="Seu nome completo" />
+              <input type="text" id="journeyClientName" class="journey-input" maxlength="120" placeholder="Seu nome completo" autocomplete="name" />
               <span class="journey-field-error" id="journeyClientNameError">
                 <i class="fas fa-circle-exclamation"></i> Por favor, informe seu nome.
               </span>
@@ -612,15 +619,42 @@
 
             <div class="journey-form-group">
               <label for="journeyClientEmail">E-mail <span class="required">*</span></label>
-              <input type="email" id="journeyClientEmail" class="journey-input" maxlength="150" placeholder="seu@email.com" />
+              <input type="email" id="journeyClientEmail" class="journey-input" maxlength="150" placeholder="seu@email.com" autocomplete="email" />
               <span class="journey-field-error" id="journeyClientEmailError">
                 <i class="fas fa-circle-exclamation"></i> Por favor, informe um e-mail válido.
               </span>
             </div>
 
+            <!-- Telefone internacional (pessoa física) -->
             <div class="journey-form-group">
-              <label for="journeyClientPhone">Telefone / WhatsApp <span class="optional">(recomendado)</span></label>
-              <input type="tel" id="journeyClientPhone" class="journey-input" maxlength="20" placeholder="(00) 00000-0000" />
+              <label for="journeyClientPhoneNational">Telefone / WhatsApp <span class="optional">(recomendado)</span></label>
+              <div class="journey-phone-group">
+                <select id="journeyClientPhoneCountry" class="journey-phone-country" aria-label="Código do país">
+                  <option value="55" selected>🇧🇷 +55</option>
+                  <option value="1">🇺🇸 +1</option>
+                  <option value="351">🇵🇹 +351</option>
+                  <option value="54">🇦🇷 +54</option>
+                  <option value="56">🇨🇱 +56</option>
+                  <option value="57">🇨🇴 +57</option>
+                  <option value="52">🇲🇽 +52</option>
+                  <option value="44">🇬🇧 +44</option>
+                  <option value="49">🇩🇪 +49</option>
+                  <option value="33">🇫🇷 +33</option>
+                  <option value="34">🇪🇸 +34</option>
+                  <option value="39">🇮🇹 +39</option>
+                  <option value="81">🇯🇵 +81</option>
+                  <option value="86">🇨🇳 +86</option>
+                  <option value="91">🇮🇳 +91</option>
+                  <option value="61">🇦🇺 +61</option>
+                </select>
+                <input type="tel" id="journeyClientPhoneNational" class="journey-input journey-phone-input"
+                       inputmode="numeric" autocomplete="tel-national" maxlength="20"
+                       placeholder="(11) 98765-4321" />
+              </div>
+              <span class="journey-hint">
+                <i class="fas fa-info-circle"></i>
+                Digite apenas os números — a formatação é aplicada automaticamente.
+              </span>
             </div>
           </div>
 
@@ -628,7 +662,7 @@
           <div class="journey-client-fields" id="journeyCompanyFields" style="display:none;">
             <div class="journey-form-group">
               <label for="journeyCompanyName">Nome da empresa / organização <span class="required">*</span></label>
-              <input type="text" id="journeyCompanyName" class="journey-input" maxlength="150" placeholder="Razão social ou nome fantasia" />
+              <input type="text" id="journeyCompanyName" class="journey-input" maxlength="150" placeholder="Razão social ou nome fantasia" autocomplete="organization" />
               <span class="journey-field-error" id="journeyCompanyNameError">
                 <i class="fas fa-circle-exclamation"></i> Por favor, informe o nome da empresa.
               </span>
@@ -636,7 +670,7 @@
 
             <div class="journey-form-group">
               <label for="journeyContactName">Nome do responsável <span class="required">*</span></label>
-              <input type="text" id="journeyContactName" class="journey-input" maxlength="120" placeholder="Pessoa de contato" />
+              <input type="text" id="journeyContactName" class="journey-input" maxlength="120" placeholder="Pessoa de contato" autocomplete="name" />
               <span class="journey-field-error" id="journeyContactNameError">
                 <i class="fas fa-circle-exclamation"></i> Por favor, informe o nome do responsável.
               </span>
@@ -644,15 +678,42 @@
 
             <div class="journey-form-group">
               <label for="journeyCompanyEmail">E-mail <span class="required">*</span></label>
-              <input type="email" id="journeyCompanyEmail" class="journey-input" maxlength="150" placeholder="empresa@dominio.com" />
+              <input type="email" id="journeyCompanyEmail" class="journey-input" maxlength="150" placeholder="empresa@dominio.com" autocomplete="email" />
               <span class="journey-field-error" id="journeyCompanyEmailError">
                 <i class="fas fa-circle-exclamation"></i> Por favor, informe um e-mail válido.
               </span>
             </div>
 
+            <!-- Telefone internacional (empresa) -->
             <div class="journey-form-group">
-              <label for="journeyCompanyPhone">Telefone / WhatsApp <span class="optional">(recomendado)</span></label>
-              <input type="tel" id="journeyCompanyPhone" class="journey-input" maxlength="20" placeholder="(00) 00000-0000" />
+              <label for="journeyCompanyPhoneNational">Telefone / WhatsApp <span class="optional">(recomendado)</span></label>
+              <div class="journey-phone-group">
+                <select id="journeyCompanyPhoneCountry" class="journey-phone-country" aria-label="Código do país">
+                  <option value="55" selected>🇧🇷 +55</option>
+                  <option value="1">🇺🇸 +1</option>
+                  <option value="351">🇵🇹 +351</option>
+                  <option value="54">🇦🇷 +54</option>
+                  <option value="56">🇨🇱 +56</option>
+                  <option value="57">🇨🇴 +57</option>
+                  <option value="52">🇲🇽 +52</option>
+                  <option value="44">🇬🇧 +44</option>
+                  <option value="49">🇩🇪 +49</option>
+                  <option value="33">🇫🇷 +33</option>
+                  <option value="34">🇪🇸 +34</option>
+                  <option value="39">🇮🇹 +39</option>
+                  <option value="81">🇯🇵 +81</option>
+                  <option value="86">🇨🇳 +86</option>
+                  <option value="91">🇮🇳 +91</option>
+                  <option value="61">🇦🇺 +61</option>
+                </select>
+                <input type="tel" id="journeyCompanyPhoneNational" class="journey-input journey-phone-input"
+                       inputmode="numeric" autocomplete="tel-national" maxlength="20"
+                       placeholder="(11) 98765-4321" />
+              </div>
+              <span class="journey-hint">
+                <i class="fas fa-info-circle"></i>
+                Digite apenas os números — a formatação é aplicada automaticamente.
+              </span>
             </div>
 
             <div class="journey-form-group">
