@@ -83,14 +83,22 @@ export function showSafely(el, options = {}) {
   if (!el) return;
   const { focusFirst = false } = options;
 
-  // 1) Remove inert
-  try { el.inert = false; } catch (_) {}
+  // 1) Remove inert — attribute E property, na ordem certa.
+  //    removeAttribute primeiro é mais confiável porque alguns
+  //    navegadores tratam `el.inert = false` de forma assíncrona.
   el.removeAttribute('inert');
+  try { el.inert = false; } catch (_) {}
 
   // 2) Expõe para AT
   el.setAttribute('aria-hidden', 'false');
 
-  // 3) Opcionalmente foca o primeiro elemento focável
+  // 3) Fallback de interatividade — se algo externo tiver
+  //    setado pointer-events inline, limpamos.
+  if (el.style.pointerEvents === 'none') {
+    el.style.pointerEvents = '';
+  }
+
+  // 4) Foco opcional
   if (focusFirst) {
     requestAnimationFrame(() => {
       const first = el.querySelector(
@@ -100,7 +108,9 @@ export function showSafely(el, options = {}) {
         'button:not([disabled]), ' +
         '[tabindex]:not([tabindex="-1"])'
       );
-      if (first && typeof first.focus === 'function') first.focus();
+      if (first && typeof first.focus === 'function') {
+        try { first.focus({ preventScroll: true }); } catch (_) {}
+      }
     });
   }
 }
