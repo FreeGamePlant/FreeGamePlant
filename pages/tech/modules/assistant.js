@@ -1,711 +1,197 @@
 /* ============================================================
    FGP TECHNOLOGIES — assistant.js
-   Assistente de 13 etapas: renderização, navegação, validação
-   e preparação do payload para o Forminit.
-
-   Dependências:
-   - state.js (CATEGORIES_DB, JourneyState, ASSISTANT_MESSAGES)
-   - forminit.js (submissão — chamado via import dinâmico)
+   Assistente de 13 etapas: renderização, navegação, validação,
+   telefone internacional, rascunho automático e envio ao Forminit.
    ============================================================ */
 
 import {
   CATEGORIES_DB,
   JourneyState,
-  ASSISTANT_MESSAGES
+  ASSISTANT_MESSAGES,
+  JOURNEY_DRAFT_KEY
 } from './state.js';
+
+import {
+  hideSafely,
+  showSafely,
+  formatPhone,
+  composePhone,
+  getCountryByCode,
+  extractDigits,
+  safeGetJSON,
+  safeSetJSON,
+  safeRemove,
+  debounce
+} from './utils.js';
 
 /* ============================================================
    1. REQUISITOS POR CATEGORIA / SUBCATEGORIA
-   ------------------------------------------------------------
-   Prioridade:
-     1) REQUIREMENTS_BY_SUBCATEGORY[subcategoria]
-     2) REQUIREMENTS_BY_CATEGORY[categoria]
-     3) [] (etapa 7 é pulada)
    ============================================================ */
 
 const REQUIREMENTS_BY_SUBCATEGORY = {
   /* ---------- APLICATIVOS ---------- */
   'app-android': [
-    {
-      id: 'app_purpose',
-      label: 'Qual será a finalidade principal do aplicativo?',
-      type: 'textarea',
-      required: true,
-      placeholder: 'Ex.: agendamento, delivery, catálogo, rede social...'
-    },
-    {
-      id: 'app_features',
-      label: 'Quais funcionalidades principais devem existir?',
-      type: 'textarea',
-      placeholder: 'Ex.: login, cadastro, notificações, pagamento...'
-    },
-    {
-      id: 'app_auth',
-      label: 'Será necessário cadastro e autenticação?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_database',
-      label: 'Será necessário banco de dados?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_admin',
-      label: 'Será necessário painel administrativo?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_maps',
-      label: 'Será necessário GPS ou mapas?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_offline',
-      label: 'O app precisa funcionar offline?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_store',
-      label: 'Será necessário publicar na Play Store?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'app_purpose', label: 'Qual será a finalidade principal do aplicativo?', type: 'textarea', required: true, placeholder: 'Ex.: agendamento, delivery, catálogo, rede social...' },
+    { id: 'app_features', label: 'Quais funcionalidades principais devem existir?', type: 'textarea', placeholder: 'Ex.: login, cadastro, notificações, pagamento...' },
+    { id: 'app_auth', label: 'Será necessário cadastro e autenticação?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_database', label: 'Será necessário banco de dados?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_admin', label: 'Será necessário painel administrativo?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_maps', label: 'Será necessário GPS ou mapas?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_offline', label: 'O app precisa funcionar offline?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_store', label: 'Será necessário publicar na Play Store?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
   'app-ios': [
-    {
-      id: 'app_purpose',
-      label: 'Qual será a finalidade principal do aplicativo?',
-      type: 'textarea',
-      required: true,
-      placeholder: 'Ex.: agendamento, delivery, catálogo...'
-    },
-    {
-      id: 'app_features',
-      label: 'Quais funcionalidades principais devem existir?',
-      type: 'textarea'
-    },
-    {
-      id: 'app_auth',
-      label: 'Será necessário cadastro e autenticação?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_database',
-      label: 'Será necessário banco de dados?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_maps',
-      label: 'Será necessário GPS ou mapas?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_store',
-      label: 'O cliente já possui conta Apple Developer?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'app_purpose', label: 'Qual será a finalidade principal do aplicativo?', type: 'textarea', required: true, placeholder: 'Ex.: agendamento, delivery, catálogo...' },
+    { id: 'app_features', label: 'Quais funcionalidades principais devem existir?', type: 'textarea' },
+    { id: 'app_auth', label: 'Será necessário cadastro e autenticação?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_database', label: 'Será necessário banco de dados?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_maps', label: 'Será necessário GPS ou mapas?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_store', label: 'O cliente já possui conta Apple Developer?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
   'app-multiplataforma': [
-    {
-      id: 'app_purpose',
-      label: 'Qual será a finalidade principal do aplicativo?',
-      type: 'textarea',
-      required: true,
-      placeholder: 'Ex.: agendamento, delivery, catálogo...'
-    },
-    {
-      id: 'app_platforms',
-      label: 'Quais plataformas devem ser atendidas?',
-      type: 'checkboxes',
-      options: ['Android', 'iOS', 'Web']
-    },
-    {
-      id: 'app_features',
-      label: 'Quais funcionalidades principais devem existir?',
-      type: 'textarea'
-    },
-    {
-      id: 'app_auth',
-      label: 'Será necessário cadastro e autenticação?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_offline',
-      label: 'O app precisa funcionar offline?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_store',
-      label: 'Será necessário publicar nas lojas?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'app_purpose', label: 'Qual será a finalidade principal do aplicativo?', type: 'textarea', required: true, placeholder: 'Ex.: agendamento, delivery, catálogo...' },
+    { id: 'app_platforms', label: 'Quais plataformas devem ser atendidas?', type: 'checkboxes', options: ['Android', 'iOS', 'Web'] },
+    { id: 'app_features', label: 'Quais funcionalidades principais devem existir?', type: 'textarea' },
+    { id: 'app_auth', label: 'Será necessário cadastro e autenticação?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_offline', label: 'O app precisa funcionar offline?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_store', label: 'Será necessário publicar nas lojas?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
   'app-custom': [
-    {
-      id: 'app_process',
-      label: 'Qual processo ou produto o aplicativo deve atender?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'app_users',
-      label: 'Quantos e quais tipos de usuários existirão?',
-      type: 'textarea',
-      placeholder: 'Ex.: clientes, administradores, entregadores...'
-    },
-    {
-      id: 'app_features',
-      label: 'Funcionalidades essenciais do aplicativo',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'app_integrations',
-      label: 'Será necessário integrar com sistemas externos?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'app_store',
-      label: 'Será necessário publicar nas lojas oficiais?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'app_process', label: 'Qual processo ou produto o aplicativo deve atender?', type: 'textarea', required: true },
+    { id: 'app_users', label: 'Quantos e quais tipos de usuários existirão?', type: 'textarea', placeholder: 'Ex.: clientes, administradores, entregadores...' },
+    { id: 'app_features', label: 'Funcionalidades essenciais do aplicativo', type: 'textarea', required: true },
+    { id: 'app_integrations', label: 'Será necessário integrar com sistemas externos?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'app_store', label: 'Será necessário publicar nas lojas oficiais?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
 
   /* ---------- SITES ---------- */
   'landing-page': [
-    {
-      id: 'site_goal',
-      label: 'Qual é o objetivo da landing page?',
-      type: 'textarea',
-      required: true,
-      placeholder: 'Ex.: captar leads, vender produto, divulgar evento...'
-    },
-    {
-      id: 'site_sections',
-      label: 'Quais seções devem existir?',
-      type: 'textarea',
-      placeholder: 'Ex.: hero, benefícios, depoimentos, CTA, formulário...'
-    },
-    {
-      id: 'site_contact_form',
-      label: 'Será necessário formulário de contato?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'site_integrations',
-      label: 'Precisará integrar com CRM, e-mail marketing ou WhatsApp?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'site_goal', label: 'Qual é o objetivo da landing page?', type: 'textarea', required: true, placeholder: 'Ex.: captar leads, vender produto, divulgar evento...' },
+    { id: 'site_sections', label: 'Quais seções devem existir?', type: 'textarea', placeholder: 'Ex.: hero, benefícios, depoimentos, CTA, formulário...' },
+    { id: 'site_contact_form', label: 'Será necessário formulário de contato?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'site_integrations', label: 'Precisará integrar com CRM, e-mail marketing ou WhatsApp?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
   'site-institucional': [
-    {
-      id: 'site_pages',
-      label: 'Quais páginas ou seções devem existir?',
-      type: 'textarea',
-      required: true,
-      placeholder: 'Ex.: Home, Sobre, Serviços, Portfólio, Contato...'
-    },
-    {
-      id: 'site_content_ready',
-      label: 'Os textos institucionais já estão prontos?',
-      type: 'radio',
-      options: ['Sim', 'Parcialmente', 'Não']
-    },
-    {
-      id: 'site_contact_form',
-      label: 'Será necessário formulário de contato?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'site_login',
-      label: 'Será necessário sistema de login ou área restrita?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'site_admin',
-      label: 'Será necessário painel administrativo (CMS)?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'site_seo',
-      label: 'Há preocupação com SEO ou tráfego pago?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'site_pages', label: 'Quais páginas ou seções devem existir?', type: 'textarea', required: true, placeholder: 'Ex.: Home, Sobre, Serviços, Portfólio, Contato...' },
+    { id: 'site_content_ready', label: 'Os textos institucionais já estão prontos?', type: 'radio', options: ['Sim', 'Parcialmente', 'Não'] },
+    { id: 'site_contact_form', label: 'Será necessário formulário de contato?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'site_login', label: 'Será necessário sistema de login ou área restrita?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'site_admin', label: 'Será necessário painel administrativo (CMS)?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'site_seo', label: 'Há preocupação com SEO ou tráfego pago?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
   'portfolio-catalogo': [
-    {
-      id: 'site_purpose',
-      label: 'Qual é a finalidade do portfólio / catálogo?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'site_items_count',
-      label: 'Quantos itens, projetos ou produtos serão exibidos?',
-      type: 'text',
-      placeholder: 'Ex.: 10 projetos, 50 produtos...'
-    },
-    {
-      id: 'site_filters',
-      label: 'Será necessário filtro ou busca?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'site_admin',
-      label: 'Será necessário painel administrativo?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'site_purpose', label: 'Qual é a finalidade do portfólio / catálogo?', type: 'textarea', required: true },
+    { id: 'site_items_count', label: 'Quantos itens, projetos ou produtos serão exibidos?', type: 'text', placeholder: 'Ex.: 10 projetos, 50 produtos...' },
+    { id: 'site_filters', label: 'Será necessário filtro ou busca?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'site_admin', label: 'Será necessário painel administrativo?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
   'loja-virtual': [
-    {
-      id: 'shop_products',
-      label: 'Quantos produtos serão cadastrados inicialmente?',
-      type: 'text',
-      required: true,
-      placeholder: 'Ex.: 20 produtos, 100 produtos...'
-    },
-    {
-      id: 'shop_payment',
-      label: 'Quais formas de pagamento devem ser aceitas?',
-      type: 'textarea',
-      placeholder: 'Ex.: cartão, PIX, boleto...'
-    },
-    {
-      id: 'shop_shipping',
-      label: 'Será necessário cálculo de frete?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'shop_integrations',
-      label: 'Será necessário integrar com ERP, estoque ou transportadora?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'shop_platform',
-      label: 'Prefere plataforma pronta ou solução sob medida?',
-      type: 'radio',
-      options: ['Plataforma pronta', 'Sob medida', 'Ainda não sei']
-    }
+    { id: 'shop_products', label: 'Quantos produtos serão cadastrados inicialmente?', type: 'text', required: true, placeholder: 'Ex.: 20 produtos, 100 produtos...' },
+    { id: 'shop_payment', label: 'Quais formas de pagamento devem ser aceitas?', type: 'textarea', placeholder: 'Ex.: cartão, PIX, boleto...' },
+    { id: 'shop_shipping', label: 'Será necessário cálculo de frete?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'shop_integrations', label: 'Será necessário integrar com ERP, estoque ou transportadora?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'shop_platform', label: 'Prefere plataforma pronta ou solução sob medida?', type: 'radio', options: ['Plataforma pronta', 'Sob medida', 'Ainda não sei'] }
   ],
   'webapp-custom': [
-    {
-      id: 'webapp_purpose',
-      label: 'Qual é a finalidade da aplicação web?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'webapp_users',
-      label: 'Quais tipos de usuários existirão?',
-      type: 'textarea',
-      placeholder: 'Ex.: clientes, administradores, operadores...'
-    },
-    {
-      id: 'webapp_features',
-      label: 'Funcionalidades essenciais',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'webapp_auth',
-      label: 'Será necessário login e área restrita?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'webapp_integrations',
-      label: 'Será necessário integrar com outros sistemas?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'webapp_purpose', label: 'Qual é a finalidade da aplicação web?', type: 'textarea', required: true },
+    { id: 'webapp_users', label: 'Quais tipos de usuários existirão?', type: 'textarea', placeholder: 'Ex.: clientes, administradores, operadores...' },
+    { id: 'webapp_features', label: 'Funcionalidades essenciais', type: 'textarea', required: true },
+    { id: 'webapp_auth', label: 'Será necessário login e área restrita?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'webapp_integrations', label: 'Será necessário integrar com outros sistemas?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
 
   /* ---------- SISTEMAS ---------- */
   'sistema-gestao': [
-    {
-      id: 'sys_process',
-      label: 'Qual processo o sistema deverá organizar?',
-      type: 'textarea',
-      required: true,
-      placeholder: 'Ex.: gestão de clientes, pedidos, estoque...'
-    },
-    {
-      id: 'sys_users',
-      label: 'Quantas pessoas utilizarão o sistema?',
-      type: 'text',
-      placeholder: 'Ex.: 5, 20, 100+'
-    },
-    {
-      id: 'sys_user_types',
-      label: 'Quais tipos de usuários existirão?',
-      type: 'textarea',
-      placeholder: 'Ex.: administrador, vendedor, cliente...'
-    },
-    {
-      id: 'sys_permissions',
-      label: 'Será necessário controle de permissões?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'sys_reports',
-      label: 'Será necessário gerar relatórios?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'sys_export',
-      label: 'Será necessário exportar dados?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'sys_existing',
-      label: 'Existe planilha ou sistema atual que deva ser considerado?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'sys_integrations',
-      label: 'Será necessário integrar com outros sistemas?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'sys_process', label: 'Qual processo o sistema deverá organizar?', type: 'textarea', required: true, placeholder: 'Ex.: gestão de clientes, pedidos, estoque...' },
+    { id: 'sys_users', label: 'Quantas pessoas utilizarão o sistema?', type: 'text', placeholder: 'Ex.: 5, 20, 100+' },
+    { id: 'sys_user_types', label: 'Quais tipos de usuários existirão?', type: 'textarea', placeholder: 'Ex.: administrador, vendedor, cliente...' },
+    { id: 'sys_permissions', label: 'Será necessário controle de permissões?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'sys_reports', label: 'Será necessário gerar relatórios?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'sys_export', label: 'Será necessário exportar dados?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'sys_existing', label: 'Existe planilha ou sistema atual que deva ser considerado?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'sys_integrations', label: 'Será necessário integrar com outros sistemas?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
   'painel-admin': [
-    {
-      id: 'panel_data',
-      label: 'Quais dados ou métricas o painel deve exibir?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'panel_sources',
-      label: 'Quais são as fontes de dados?',
-      type: 'textarea',
-      placeholder: 'Ex.: banco interno, planilha, API externa...'
-    },
-    {
-      id: 'panel_permissions',
-      label: 'Haverá diferentes níveis de permissão?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'panel_reports',
-      label: 'Será necessário exportar relatórios?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    }
+    { id: 'panel_data', label: 'Quais dados ou métricas o painel deve exibir?', type: 'textarea', required: true },
+    { id: 'panel_sources', label: 'Quais são as fontes de dados?', type: 'textarea', placeholder: 'Ex.: banco interno, planilha, API externa...' },
+    { id: 'panel_permissions', label: 'Haverá diferentes níveis de permissão?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'panel_reports', label: 'Será necessário exportar relatórios?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] }
   ],
   'automacao': [
-    {
-      id: 'auto_process',
-      label: 'Qual processo ou tarefa deve ser automatizado?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'auto_systems',
-      label: 'Quais sistemas estão envolvidos?',
-      type: 'textarea',
-      placeholder: 'Ex.: ERP, CRM, planilhas, APIs externas...'
-    },
-    {
-      id: 'auto_frequency',
-      label: 'Com que frequência a automação deve rodar?',
-      type: 'radio',
-      options: ['Tempo real', 'Agendada (diária, semanal...)', 'Sob demanda']
-    },
-    {
-      id: 'auto_docs',
-      label: 'Existe documentação das APIs envolvidas?',
-      type: 'radio',
-      options: ['Sim', 'Parcialmente', 'Não']
-    }
+    { id: 'auto_process', label: 'Qual processo ou tarefa deve ser automatizado?', type: 'textarea', required: true },
+    { id: 'auto_systems', label: 'Quais sistemas estão envolvidos?', type: 'textarea', placeholder: 'Ex.: ERP, CRM, planilhas, APIs externas...' },
+    { id: 'auto_frequency', label: 'Com que frequência a automação deve rodar?', type: 'radio', options: ['Tempo real', 'Agendada (diária, semanal...)', 'Sob demanda'] },
+    { id: 'auto_docs', label: 'Existe documentação das APIs envolvidas?', type: 'radio', options: ['Sim', 'Parcialmente', 'Não'] }
   ],
   'sistema-custom': [
-    {
-      id: 'sys_process',
-      label: 'Qual processo precisa ser atendido?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'sys_users',
-      label: 'Quem utilizará o sistema?',
-      type: 'textarea'
-    },
-    {
-      id: 'sys_features',
-      label: 'Funcionalidades indispensáveis',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'sys_data',
-      label: 'Que tipo de informação será armazenada?',
-      type: 'textarea'
-    },
-    {
-      id: 'sys_integrations',
-      label: 'Será necessário integrar com outros sistemas?',
-      type: 'radio',
-      options: ['Sim', 'Não', 'Ainda não sei']
-    },
-    {
-      id: 'sys_local',
-      label: 'O sistema será usado na internet ou localmente?',
-      type: 'radio',
-      options: ['Internet', 'Local', 'Ambos']
-    }
+    { id: 'sys_process', label: 'Qual processo precisa ser atendido?', type: 'textarea', required: true },
+    { id: 'sys_users', label: 'Quem utilizará o sistema?', type: 'textarea' },
+    { id: 'sys_features', label: 'Funcionalidades indispensáveis', type: 'textarea', required: true },
+    { id: 'sys_data', label: 'Que tipo de informação será armazenada?', type: 'textarea' },
+    { id: 'sys_integrations', label: 'Será necessário integrar com outros sistemas?', type: 'radio', options: ['Sim', 'Não', 'Ainda não sei'] },
+    { id: 'sys_local', label: 'O sistema será usado na internet ou localmente?', type: 'radio', options: ['Internet', 'Local', 'Ambos'] }
   ],
 
   /* ---------- SOLUÇÕES ---------- */
   'identidade-digital': [
-    {
-      id: 'brand_goal',
-      label: 'Qual o objetivo da identidade digital?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'brand_deliverables',
-      label: 'O que deve fazer parte da entrega?',
-      type: 'checkboxes',
-      options: ['Logo', 'Paleta de cores', 'Tipografia', 'Materiais gráficos', 'Templates para redes sociais', 'Site institucional']
-    },
-    {
-      id: 'brand_existing',
-      label: 'Já existe algo pronto?',
-      type: 'radio',
-      options: ['Sim, completo', 'Parcial', 'Nada ainda']
-    }
+    { id: 'brand_goal', label: 'Qual o objetivo da identidade digital?', type: 'textarea', required: true },
+    { id: 'brand_deliverables', label: 'O que deve fazer parte da entrega?', type: 'checkboxes', options: ['Logo', 'Paleta de cores', 'Tipografia', 'Materiais gráficos', 'Templates para redes sociais', 'Site institucional'] },
+    { id: 'brand_existing', label: 'Já existe algo pronto?', type: 'radio', options: ['Sim, completo', 'Parcial', 'Nada ainda'] }
   ],
   'consultoria-tecnica': [
-    {
-      id: 'consult_goal',
-      label: 'Qual é o objetivo da consultoria?',
-      type: 'textarea',
-      required: true,
-      placeholder: 'Ex.: validar viabilidade, definir arquitetura, planejar roadmap...'
-    },
-    {
-      id: 'consult_context',
-      label: 'Contexto atual do projeto ou negócio',
-      type: 'textarea'
-    },
-    {
-      id: 'consult_format',
-      label: 'Formato preferido',
-      type: 'radio',
-      options: ['Por hora', 'Pacote fechado', 'A definir']
-    }
+    { id: 'consult_goal', label: 'Qual é o objetivo da consultoria?', type: 'textarea', required: true, placeholder: 'Ex.: validar viabilidade, definir arquitetura, planejar roadmap...' },
+    { id: 'consult_context', label: 'Contexto atual do projeto ou negócio', type: 'textarea' },
+    { id: 'consult_format', label: 'Formato preferido', type: 'radio', options: ['Por hora', 'Pacote fechado', 'A definir'] }
   ],
   'manutencao': [
-    {
-      id: 'maint_project',
-      label: 'Qual é o projeto que precisa de manutenção?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'maint_problems',
-      label: 'Quais problemas precisam ser resolvidos?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'maint_frequency',
-      label: 'Com que frequência você precisa de suporte?',
-      type: 'radio',
-      options: ['Eventual', 'Semanal', 'Contínuo']
-    }
+    { id: 'maint_project', label: 'Qual é o projeto que precisa de manutenção?', type: 'textarea', required: true },
+    { id: 'maint_problems', label: 'Quais problemas precisam ser resolvidos?', type: 'textarea', required: true },
+    { id: 'maint_frequency', label: 'Com que frequência você precisa de suporte?', type: 'radio', options: ['Eventual', 'Semanal', 'Contínuo'] }
   ],
   'integracoes-apis': [
-    {
-      id: 'api_systems',
-      label: 'Quais sistemas devem ser integrados?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'api_docs',
-      label: 'Existe documentação das APIs?',
-      type: 'radio',
-      options: ['Sim', 'Parcialmente', 'Não']
-    },
-    {
-      id: 'api_data',
-      label: 'Que tipo de dados será trafegado?',
-      type: 'textarea'
-    },
-    {
-      id: 'api_frequency',
-      label: 'Frequência esperada da integração',
-      type: 'radio',
-      options: ['Tempo real', 'Agendada', 'Sob demanda']
-    }
+    { id: 'api_systems', label: 'Quais sistemas devem ser integrados?', type: 'textarea', required: true },
+    { id: 'api_docs', label: 'Existe documentação das APIs?', type: 'radio', options: ['Sim', 'Parcialmente', 'Não'] },
+    { id: 'api_data', label: 'Que tipo de dados será trafegado?', type: 'textarea' },
+    { id: 'api_frequency', label: 'Frequência esperada da integração', type: 'radio', options: ['Tempo real', 'Agendada', 'Sob demanda'] }
   ],
 
   /* ---------- BUSINESS ---------- */
   'publicacao-jogos': [
-    {
-      id: 'game_name',
-      label: 'Qual é o nome ou título do jogo?',
-      type: 'text',
-      required: true
-    },
-    {
-      id: 'game_platform',
-      label: 'Onde o jogo será publicado?',
-      type: 'checkboxes',
-      options: ['Google Play', 'App Store', 'itch.io', 'Steam', 'Outro']
-    },
-    {
-      id: 'game_status',
-      label: 'Em que estágio o jogo está?',
-      type: 'radio',
-      options: ['Conceito', 'Em desenvolvimento', 'Pronto para build', 'Já publicado']
-    },
-    {
-      id: 'game_engine',
-      label: 'Qual engine foi utilizada?',
-      type: 'text',
-      placeholder: 'Ex.: Unity, Godot, Unreal...'
-    }
+    { id: 'game_name', label: 'Qual é o nome ou título do jogo?', type: 'text', required: true },
+    { id: 'game_platform', label: 'Onde o jogo será publicado?', type: 'checkboxes', options: ['Google Play', 'App Store', 'itch.io', 'Steam', 'Outro'] },
+    { id: 'game_status', label: 'Em que estágio o jogo está?', type: 'radio', options: ['Conceito', 'Em desenvolvimento', 'Pronto para build', 'Já publicado'] },
+    { id: 'game_engine', label: 'Qual engine foi utilizada?', type: 'text', placeholder: 'Ex.: Unity, Godot, Unreal...' }
   ],
   'mods-minecraft': [
-    {
-      id: 'mod_scope',
-      label: 'Qual é o escopo do mod ou add-on?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'mod_items',
-      label: 'Quantos itens, entidades ou mecânicas?',
-      type: 'textarea'
-    },
-    {
-      id: 'mod_version',
-      label: 'Versão alvo do Minecraft Bedrock',
-      type: 'text',
-      placeholder: 'Ex.: 1.20, 1.21...'
-    },
-    {
-      id: 'mod_distribution',
-      label: 'Como pretende distribuir?',
-      type: 'radio',
-      options: ['Uso pessoal', 'Servidor privado', 'Publicação pública']
-    }
+    { id: 'mod_scope', label: 'Qual é o escopo do mod ou add-on?', type: 'textarea', required: true },
+    { id: 'mod_items', label: 'Quantos itens, entidades ou mecânicas?', type: 'textarea' },
+    { id: 'mod_version', label: 'Versão alvo do Minecraft Bedrock', type: 'text', placeholder: 'Ex.: 1.20, 1.21...' },
+    { id: 'mod_distribution', label: 'Como pretende distribuir?', type: 'radio', options: ['Uso pessoal', 'Servidor privado', 'Publicação pública'] }
   ],
   'parceria-dev': [
-    {
-      id: 'partner_scope',
-      label: 'Qual é o escopo da parceria?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'partner_frequency',
-      label: 'Qual a frequência esperada de entregas?',
-      type: 'radio',
-      options: ['Semanal', 'Quinzenal', 'Mensal', 'A definir']
-    },
-    {
-      id: 'partner_duration',
-      label: 'Duração estimada da parceria',
-      type: 'text',
-      placeholder: 'Ex.: 3 meses, 1 ano, indefinido'
-    }
+    { id: 'partner_scope', label: 'Qual é o escopo da parceria?', type: 'textarea', required: true },
+    { id: 'partner_frequency', label: 'Qual a frequência esperada de entregas?', type: 'radio', options: ['Semanal', 'Quinzenal', 'Mensal', 'A definir'] },
+    { id: 'partner_duration', label: 'Duração estimada da parceria', type: 'text', placeholder: 'Ex.: 3 meses, 1 ano, indefinido' }
   ],
   'consultoria-produto': [
-    {
-      id: 'prod_stage',
-      label: 'Em que estágio está o produto?',
-      type: 'radio',
-      required: true,
-      options: ['Ideia', 'MVP', 'Produto em operação', 'Reformulação']
-    },
-    {
-      id: 'prod_goal',
-      label: 'Qual é o objetivo da consultoria?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'prod_context',
-      label: 'Contexto adicional',
-      type: 'textarea'
-    }
+    { id: 'prod_stage', label: 'Em que estágio está o produto?', type: 'radio', required: true, options: ['Ideia', 'MVP', 'Produto em operação', 'Reformulação'] },
+    { id: 'prod_goal', label: 'Qual é o objetivo da consultoria?', type: 'textarea', required: true },
+    { id: 'prod_context', label: 'Contexto adicional', type: 'textarea' }
   ]
 };
 
-// Fallback genérico por categoria (usado se subcategoria não tiver requisitos específicos)
 const REQUIREMENTS_BY_CATEGORY = {
   apps: [
-    {
-      id: 'general_app_goal',
-      label: 'Qual é o objetivo do aplicativo?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'general_app_features',
-      label: 'Funcionalidades desejadas',
-      type: 'textarea'
-    }
+    { id: 'general_app_goal', label: 'Qual é o objetivo do aplicativo?', type: 'textarea', required: true },
+    { id: 'general_app_features', label: 'Funcionalidades desejadas', type: 'textarea' }
   ],
   sites: [
-    {
-      id: 'general_site_goal',
-      label: 'Qual é o objetivo do site?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'general_site_pages',
-      label: 'Páginas ou seções necessárias',
-      type: 'textarea'
-    }
+    { id: 'general_site_goal', label: 'Qual é o objetivo do site?', type: 'textarea', required: true },
+    { id: 'general_site_pages', label: 'Páginas ou seções necessárias', type: 'textarea' }
   ],
   sistemas: [
-    {
-      id: 'general_sys_process',
-      label: 'Qual processo o sistema deve atender?',
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 'general_sys_features',
-      label: 'Funcionalidades essenciais',
-      type: 'textarea'
-    }
+    { id: 'general_sys_process', label: 'Qual processo o sistema deve atender?', type: 'textarea', required: true },
+    { id: 'general_sys_features', label: 'Funcionalidades essenciais', type: 'textarea' }
   ],
   solucoes: [],
   business: []
@@ -722,12 +208,10 @@ function getRequirementsFor(categoryId, subcategoryId) {
 }
 
 /* ============================================================
-   2. HELPERS
+   2. HELPERS LOCAIS
    ============================================================ */
 
-function $id(id) {
-  return document.getElementById(id);
-}
+function $id(id) { return document.getElementById(id); }
 
 function escapeHtml(str) {
   if (str == null) return '';
@@ -744,12 +228,12 @@ function isValidEmail(email) {
 }
 
 function formatFileSize(bytes) {
-  if (!bytes || bytes < 1024) return `${bytes} B`;
+  if (!bytes || bytes < 1024) return `${bytes || 0} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 
 function validateFile(file) {
@@ -763,48 +247,93 @@ function validateFile(file) {
   return { ok: true };
 }
 
-function findCategoryById(categoryId) {
-  return CATEGORIES_DB.find(c => c.id === categoryId) || null;
-}
-
-function findSubcategoryById(categoryId, subcategoryId) {
-  const cat = findCategoryById(categoryId);
-  if (!cat) return null;
-  return cat.subcategories.find(s => s.id === subcategoryId) || null;
+function findCategoryById(id) { return CATEGORIES_DB.find(c => c.id === id) || null; }
+function findSubcategoryById(catId, subId) {
+  const cat = findCategoryById(catId);
+  return cat ? cat.subcategories.find(s => s.id === subId) || null : null;
 }
 
 /* ============================================================
-   3. ETAPAS ATIVAS E PROGRESSO
+   3. DRAFT — RASCUNHO PERSISTENTE
+   ============================================================ */
+
+const DRAFT_VERSION = 1;
+
+function hasMeaningfulDraft(draft) {
+  if (!draft || draft._version !== DRAFT_VERSION) return false;
+  return Boolean(
+    draft.clientType ||
+    draft.clientEmail ||
+    draft.clientName ||
+    draft.companyName ||
+    draft.category ||
+    draft.projectName
+  );
+}
+
+function saveDraft() {
+  try {
+    const snapshot = { ...JourneyState };
+    // File não é serializável — dropamos
+    delete snapshot.file;
+    snapshot._version = DRAFT_VERSION;
+    snapshot._savedAt = Date.now();
+    safeSetJSON(JOURNEY_DRAFT_KEY, snapshot);
+  } catch (err) {
+    console.warn('[FGP][assistant] Falha ao salvar rascunho:', err);
+  }
+}
+
+function loadDraft() {
+  const draft = safeGetJSON(JOURNEY_DRAFT_KEY, null);
+  if (!hasMeaningfulDraft(draft)) return false;
+
+  Object.keys(draft).forEach(key => {
+    if (key === '_version' || key === '_savedAt') return;
+    if (key in JourneyState) JourneyState[key] = draft[key];
+  });
+  JourneyState.file = null;
+
+  // Garante que campos de telefone existem (compatibilidade)
+  if (!JourneyState.clientPhoneCountry) JourneyState.clientPhoneCountry = '55';
+  if (!JourneyState.clientPhoneNational) JourneyState.clientPhoneNational = '';
+
+  return true;
+}
+
+function clearDraft() {
+  safeRemove(JOURNEY_DRAFT_KEY);
+}
+
+function showDraftBanner(show) {
+  const banner = $id('journeyDraftBanner');
+  if (banner) banner.style.display = show ? '' : 'none';
+}
+
+const debouncedSaveDraft = debounce(() => {
+  try { collectStepState(JourneyState.step); } catch (_) {}
+  saveDraft();
+}, 500);
+
+/* ============================================================
+   4. ETAPAS ATIVAS E PROGRESSO
    ============================================================ */
 
 function getActiveSteps() {
-  // Etapas sempre ativas
   const steps = [1, 2, 3];
 
-  // Etapa 4 (tipo de projeto) depende de existir projectTypes na subcategoria
   const sub = findSubcategoryById(JourneyState.category, JourneyState.subcategory);
   if (sub && Array.isArray(sub.projectTypes) && sub.projectTypes.length > 0) {
     steps.push(4);
   }
 
-  // Etapas 5 e 6 sempre ativas
   steps.push(5, 6);
 
-  // Etapa 7 (requisitos) só se houver requisitos aplicáveis
   const reqs = getRequirementsFor(JourneyState.category, JourneyState.subcategory);
-  if (reqs.length > 0) {
-    steps.push(7);
-  }
+  if (reqs.length > 0) steps.push(7);
 
-  // Etapas finais
   steps.push(8, 9, 10, 11, 12, 13);
-
   return steps;
-}
-
-function getCurrentActiveIndex() {
-  const active = getActiveSteps();
-  return active.indexOf(JourneyState.step);
 }
 
 function updateProgressUI() {
@@ -824,12 +353,11 @@ function updateProgressUI() {
 function updateAssistantMessage() {
   const bubble = $id('journeyAssistantText');
   if (!bubble) return;
-  bubble.textContent = ASSISTANT_MESSAGES[JourneyState.step]
-    || 'Vamos continuar.';
+  bubble.textContent = ASSISTANT_MESSAGES[JourneyState.step] || 'Vamos continuar.';
 }
 
 /* ============================================================
-   4. NAVEGAÇÃO ENTRE ETAPAS
+   5. NAVEGAÇÃO
    ============================================================ */
 
 function showStep(stepNumber) {
@@ -848,6 +376,8 @@ function goToStep(stepNumber) {
   syncStateToStep(stepNumber);
   updateFooterButtons();
   scrollJourneyToTop();
+  // Save after each navigation
+  saveDraft();
 }
 
 function scrollJourneyToTop() {
@@ -861,9 +391,7 @@ function goNext() {
 
   const active = getActiveSteps();
   const idx = active.indexOf(JourneyState.step);
-  if (idx < 0) return;
-
-  if (idx >= active.length - 1) return; // já está na última
+  if (idx < 0 || idx >= active.length - 1) return;
   goToStep(active[idx + 1]);
 }
 
@@ -885,20 +413,15 @@ function updateFooterButtons() {
   backBtn.style.display = idx > 0 ? '' : 'none';
 
   const isLast = idx === active.length - 1;
-  if (isLast) {
-    nextBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar solicitação';
-  } else {
-    nextBtn.innerHTML = 'Continuar <i class="fas fa-arrow-right"></i>';
-  }
+  nextBtn.innerHTML = isLast
+    ? '<i class="fas fa-paper-plane"></i> Enviar solicitação'
+    : 'Continuar <i class="fas fa-arrow-right"></i>';
 }
 
 /* ============================================================
-   5. SINCRONIZAÇÃO ESTADO ↔ DOM
+   6. SINCRONIZAÇÃO ESTADO ↔ DOM
    ============================================================ */
 
-/**
- * Ao entrar em uma etapa, preenche o DOM com os valores atuais do JourneyState.
- */
 function syncStateToStep(step) {
   switch (step) {
     case 1: syncStep1StateToDom(); break;
@@ -917,9 +440,6 @@ function syncStateToStep(step) {
   }
 }
 
-/**
- * Ao sair de uma etapa (após validação), coleta valores do DOM para o JourneyState.
- */
 function collectStepState(step) {
   switch (step) {
     case 1: collectStep1(); break;
@@ -940,34 +460,34 @@ function syncStep1StateToDom() {
     card.classList.toggle('selected', card.dataset.clientType === JourneyState.clientType);
   });
 
-  const individualFields = $id('journeyIndividualFields');
-  const companyFields = $id('journeyCompanyFields');
-  if (individualFields) individualFields.style.display = JourneyState.clientType === 'individual' ? '' : 'none';
-  if (companyFields) companyFields.style.display = JourneyState.clientType === 'company' ? '' : 'none';
+  const indF = $id('journeyIndividualFields');
+  const coF = $id('journeyCompanyFields');
+  if (indF) indF.style.display = JourneyState.clientType === 'individual' ? '' : 'none';
+  if (coF) coF.style.display = JourneyState.clientType === 'company' ? '' : 'none';
 
   if ($id('journeyClientName')) $id('journeyClientName').value = JourneyState.clientName || '';
   if ($id('journeyClientEmail')) $id('journeyClientEmail').value = JourneyState.clientEmail || '';
-  if ($id('journeyClientPhone')) $id('journeyClientPhone').value = JourneyState.clientPhone || '';
   if ($id('journeyCompanyName')) $id('journeyCompanyName').value = JourneyState.companyName || '';
   if ($id('journeyContactName')) $id('journeyContactName').value = JourneyState.contactName || '';
   if ($id('journeyCompanyEmail')) $id('journeyCompanyEmail').value = JourneyState.clientEmail || '';
-  if ($id('journeyCompanyPhone')) $id('journeyCompanyPhone').value = JourneyState.clientPhone || '';
   if ($id('journeyCompanySegment')) $id('journeyCompanySegment').value = JourneyState.companySegment || '';
+
+  // Telefone: sincroniza os dois grupos (individual + empresa)
+  syncPhoneInputs();
 }
 
 function collectStep1() {
   if (JourneyState.clientType === 'individual') {
     JourneyState.clientName = ($id('journeyClientName')?.value || '').trim();
     JourneyState.clientEmail = ($id('journeyClientEmail')?.value || '').trim();
-    JourneyState.clientPhone = ($id('journeyClientPhone')?.value || '').trim();
     JourneyState.companyName = '';
     JourneyState.contactName = '';
     JourneyState.companySegment = '';
+    // clientPhone* já são atualizados pelos listeners de telefone
   } else if (JourneyState.clientType === 'company') {
     JourneyState.companyName = ($id('journeyCompanyName')?.value || '').trim();
     JourneyState.contactName = ($id('journeyContactName')?.value || '').trim();
     JourneyState.clientEmail = ($id('journeyCompanyEmail')?.value || '').trim();
-    JourneyState.clientPhone = ($id('journeyCompanyPhone')?.value || '').trim();
     JourneyState.companySegment = ($id('journeyCompanySegment')?.value || '').trim();
     JourneyState.clientName = '';
   }
@@ -1007,20 +527,14 @@ function renderRequirements() {
   if (!container) return;
 
   const reqs = getRequirementsFor(JourneyState.category, JourneyState.subcategory);
-
   if (reqs.length === 0) {
-    container.innerHTML =
-      '<p class="journey-hint"><i class="fas fa-info-circle"></i> Não há requisitos técnicos específicos para este serviço. Continue para as próximas etapas.</p>';
+    container.innerHTML = '<p class="journey-hint"><i class="fas fa-info-circle"></i> Não há requisitos técnicos específicos para este serviço. Continue para as próximas etapas.</p>';
     return;
   }
 
-  container.innerHTML = reqs.map(req => renderRequirementField(req)).join('');
-
-  // Restaurar valores do estado
-  reqs.forEach(req => restoreRequirementValue(req));
-
-  // Bind eventos
-  reqs.forEach(req => bindRequirementEvents(req));
+  container.innerHTML = reqs.map(r => renderRequirementField(r)).join('');
+  reqs.forEach(r => restoreRequirementValue(r));
+  reqs.forEach(r => bindRequirementEvents(r));
 }
 
 function renderRequirementField(req) {
@@ -1035,7 +549,6 @@ function renderRequirementField(req) {
         <textarea id="${id}" class="journey-textarea" data-req-id="${escapeHtml(req.id)}" rows="3" maxlength="1500" ${placeholder}></textarea>
       </div>`;
   }
-
   if (req.type === 'text') {
     return `
       <div class="journey-form-group">
@@ -1043,89 +556,81 @@ function renderRequirementField(req) {
         <input type="text" id="${id}" class="journey-input" data-req-id="${escapeHtml(req.id)}" maxlength="300" ${placeholder} />
       </div>`;
   }
-
   if (req.type === 'radio') {
-    const options = (req.options || []).map(opt =>
+    const opts = (req.options || []).map(o =>
       `<label class="journey-radio">
-         <input type="radio" name="${id}" data-req-id="${escapeHtml(req.id)}" value="${escapeHtml(opt)}" />
-         ${escapeHtml(opt)}
+         <input type="radio" name="${id}" data-req-id="${escapeHtml(req.id)}" value="${escapeHtml(o)}" />
+         ${escapeHtml(o)}
        </label>`).join('');
     return `
       <div class="journey-form-group">
         <label>${escapeHtml(req.label)}${requiredStar}</label>
-        <div class="journey-radio-group">${options}</div>
+        <div class="journey-radio-group">${opts}</div>
       </div>`;
   }
-
   if (req.type === 'checkboxes') {
-    const options = (req.options || []).map(opt =>
+    const opts = (req.options || []).map(o =>
       `<label class="journey-checkbox">
-         <input type="checkbox" name="${id}" data-req-id="${escapeHtml(req.id)}" value="${escapeHtml(opt)}" />
-         ${escapeHtml(opt)}
+         <input type="checkbox" name="${id}" data-req-id="${escapeHtml(req.id)}" value="${escapeHtml(o)}" />
+         ${escapeHtml(o)}
        </label>`).join('');
     return `
       <div class="journey-form-group">
         <label>${escapeHtml(req.label)}${requiredStar}</label>
-        <div class="journey-checkbox-grid">${options}</div>
+        <div class="journey-checkbox-grid">${opts}</div>
       </div>`;
   }
-
   return '';
 }
 
 function restoreRequirementValue(req) {
   const val = JourneyState.requirements[req.id];
-
   if (req.type === 'textarea' || req.type === 'text') {
     const el = document.querySelector(`[data-req-id="${req.id}"]`);
     if (el && val != null) el.value = val;
     return;
   }
-
   if (req.type === 'radio') {
     if (val == null) return;
-    document.querySelectorAll(`input[type="radio"][data-req-id="${req.id}"]`).forEach(input => {
-      input.checked = input.value === val;
+    document.querySelectorAll(`input[type="radio"][data-req-id="${req.id}"]`).forEach(i => {
+      i.checked = i.value === val;
     });
     return;
   }
-
   if (req.type === 'checkboxes') {
     const arr = Array.isArray(val) ? val : [];
-    document.querySelectorAll(`input[type="checkbox"][data-req-id="${req.id}"]`).forEach(input => {
-      input.checked = arr.includes(input.value);
+    document.querySelectorAll(`input[type="checkbox"][data-req-id="${req.id}"]`).forEach(i => {
+      i.checked = arr.includes(i.value);
     });
   }
 }
 
 function bindRequirementEvents(req) {
   if (req.type === 'radio') {
-    document.querySelectorAll(`input[type="radio"][data-req-id="${req.id}"]`).forEach(input => {
-      input.addEventListener('change', () => {
-        if (input.checked) JourneyState.requirements[req.id] = input.value;
+    document.querySelectorAll(`input[type="radio"][data-req-id="${req.id}"]`).forEach(i => {
+      i.addEventListener('change', () => {
+        if (i.checked) JourneyState.requirements[req.id] = i.value;
       });
     });
     return;
   }
-
   if (req.type === 'checkboxes') {
-    const existing = JourneyState.requirements[req.id];
-    if (!Array.isArray(existing)) JourneyState.requirements[req.id] = [];
-    document.querySelectorAll(`input[type="checkbox"][data-req-id="${req.id}"]`).forEach(input => {
-      input.addEventListener('change', () => {
+    if (!Array.isArray(JourneyState.requirements[req.id])) {
+      JourneyState.requirements[req.id] = [];
+    }
+    document.querySelectorAll(`input[type="checkbox"][data-req-id="${req.id}"]`).forEach(i => {
+      i.addEventListener('change', () => {
         const arr = JourneyState.requirements[req.id];
-        if (input.checked) {
-          if (!arr.includes(input.value)) arr.push(input.value);
+        if (i.checked) {
+          if (!arr.includes(i.value)) arr.push(i.value);
         } else {
-          const i = arr.indexOf(input.value);
-          if (i >= 0) arr.splice(i, 1);
+          const idx = arr.indexOf(i.value);
+          if (idx >= 0) arr.splice(idx, 1);
         }
       });
     });
     return;
   }
-
-  // text / textarea
   const el = document.querySelector(`[data-req-id="${req.id}"]`);
   if (!el) return;
   el.addEventListener('input', () => {
@@ -1134,14 +639,10 @@ function bindRequirementEvents(req) {
 }
 
 function collectStep7() {
-  // Os valores já são atualizados nos event listeners.
-  // Apenas garantir trim nos textos.
   const reqs = getRequirementsFor(JourneyState.category, JourneyState.subcategory);
   reqs.forEach(req => {
-    const val = JourneyState.requirements[req.id];
-    if (typeof val === 'string') {
-      JourneyState.requirements[req.id] = val.trim();
-    }
+    const v = JourneyState.requirements[req.id];
+    if (typeof v === 'string') JourneyState.requirements[req.id] = v.trim();
   });
 }
 
@@ -1166,8 +667,8 @@ function collectStep8() {
 /* ---------- Etapa 9 ---------- */
 function syncStep9StateToDom() {
   const arr = Array.isArray(JourneyState.availableResources) ? JourneyState.availableResources : [];
-  document.querySelectorAll('#journeyResourcesGrid input[type="checkbox"]').forEach(input => {
-    input.checked = arr.includes(input.value);
+  document.querySelectorAll('#journeyResourcesGrid input[type="checkbox"]').forEach(i => {
+    i.checked = arr.includes(i.value);
   });
   document.querySelectorAll('input[name="needsContentCreation"]').forEach(r => {
     r.checked = r.value === JourneyState.needsContentCreation;
@@ -1176,9 +677,7 @@ function syncStep9StateToDom() {
 
 function collectStep9() {
   const res = [];
-  document.querySelectorAll('#journeyResourcesGrid input[type="checkbox"]:checked').forEach(input => {
-    res.push(input.value);
-  });
+  document.querySelectorAll('#journeyResourcesGrid input[type="checkbox"]:checked').forEach(i => res.push(i.value));
   JourneyState.availableResources = res;
 
   const ncc = document.querySelector('input[name="needsContentCreation"]:checked');
@@ -1187,26 +686,19 @@ function collectStep9() {
 
 /* ---------- Etapa 10 ---------- */
 function syncStep10StateToDom() {
-  document.querySelectorAll('input[name="hasDomain"]').forEach(r => {
-    r.checked = r.value === JourneyState.hasDomain;
-  });
-  document.querySelectorAll('input[name="hasHosting"]').forEach(r => {
-    r.checked = r.value === JourneyState.hasHosting;
-  });
-  document.querySelectorAll('input[name="needsIntegrations"]').forEach(r => {
-    r.checked = r.value === JourneyState.needsIntegrations;
-  });
+  document.querySelectorAll('input[name="hasDomain"]').forEach(r => r.checked = r.value === JourneyState.hasDomain);
+  document.querySelectorAll('input[name="hasHosting"]').forEach(r => r.checked = r.value === JourneyState.hasHosting);
+  document.querySelectorAll('input[name="needsIntegrations"]').forEach(r => r.checked = r.value === JourneyState.needsIntegrations);
   if ($id('journeyIntegrationDetails')) $id('journeyIntegrationDetails').value = JourneyState.integrationDetails || '';
 }
 
 function collectStep10() {
-  const domain = document.querySelector('input[name="hasDomain"]:checked');
-  const hosting = document.querySelector('input[name="hasHosting"]:checked');
-  const integrations = document.querySelector('input[name="needsIntegrations"]:checked');
-
-  JourneyState.hasDomain = domain ? domain.value : null;
-  JourneyState.hasHosting = hosting ? hosting.value : null;
-  JourneyState.needsIntegrations = integrations ? integrations.value : null;
+  const d = document.querySelector('input[name="hasDomain"]:checked');
+  const h = document.querySelector('input[name="hasHosting"]:checked');
+  const i = document.querySelector('input[name="needsIntegrations"]:checked');
+  JourneyState.hasDomain = d ? d.value : null;
+  JourneyState.hasHosting = h ? h.value : null;
+  JourneyState.needsIntegrations = i ? i.value : null;
   JourneyState.integrationDetails = ($id('journeyIntegrationDetails')?.value || '').trim();
 }
 
@@ -1216,9 +708,7 @@ function syncStep11StateToDom() {
     r.checked = r.value === JourneyState.deadlineType;
   });
   const dateGroup = $id('journeyDeadlineDateGroup');
-  if (dateGroup) {
-    dateGroup.style.display = JourneyState.deadlineType === 'especifica' ? '' : 'none';
-  }
+  if (dateGroup) dateGroup.style.display = JourneyState.deadlineType === 'especifica' ? '' : 'none';
   if ($id('journeyDeadlineDate')) $id('journeyDeadlineDate').value = JourneyState.deadlineDate || '';
   if ($id('journeyPriority')) $id('journeyPriority').value = JourneyState.priority || '';
 }
@@ -1232,11 +722,11 @@ function collectStep11() {
 
 /* ---------- Etapa 12 ---------- */
 function syncStep12StateToDom() {
-  document.querySelectorAll('#journeyPaymentGrid .journey-card').forEach(card => {
-    card.classList.toggle('selected', card.dataset.payment === JourneyState.payment);
+  document.querySelectorAll('#journeyPaymentGrid .journey-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.payment === JourneyState.payment);
   });
-  document.querySelectorAll('#journeyMaintenanceGrid .journey-card').forEach(card => {
-    card.classList.toggle('selected', card.dataset.maintenance === JourneyState.maintenance);
+  document.querySelectorAll('#journeyMaintenanceGrid .journey-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.maintenance === JourneyState.maintenance);
   });
   if ($id('journeyCommercialObservations')) {
     $id('journeyCommercialObservations').value = JourneyState.commercialObservations || '';
@@ -1245,35 +735,25 @@ function syncStep12StateToDom() {
 
 function collectStep12() {
   JourneyState.commercialObservations = ($id('journeyCommercialObservations')?.value || '').trim();
-  // payment e maintenance já são atualizados pelos cliques nos cards
 }
 
 /* ============================================================
-   6. VALIDAÇÃO
+   7. VALIDAÇÃO
    ============================================================ */
 
 function clearStepErrors() {
   const alert = $id('journeyAlert');
-  if (alert) {
-    alert.textContent = '';
-    alert.classList.remove('visible');
-  }
-  document.querySelectorAll('#journeyContent .journey-field-error').forEach(el => {
-    el.classList.remove('visible');
-  });
+  if (alert) { alert.textContent = ''; alert.classList.remove('visible'); }
+  document.querySelectorAll('#journeyContent .journey-field-error').forEach(el => el.classList.remove('visible'));
 }
 
-function showStepError(message) {
+function showStepError(msg) {
   const alert = $id('journeyAlert');
-  if (alert) {
-    alert.textContent = message;
-    alert.classList.add('visible');
-  }
+  if (alert) { alert.textContent = msg; alert.classList.add('visible'); }
 }
 
 function validateStep(step) {
   clearStepErrors();
-
   switch (step) {
     case 1: return validateStep1();
     case 2: return validateStep2();
@@ -1292,11 +772,9 @@ function validateStep1() {
     showStepError('Selecione se você é pessoa física ou empresa.');
     return false;
   }
-
   if (JourneyState.clientType === 'individual') {
     const name = ($id('journeyClientName')?.value || '').trim();
     const email = ($id('journeyClientEmail')?.value || '').trim();
-
     if (!name) {
       $id('journeyClientNameError')?.classList.add('visible');
       showStepError('Informe seu nome completo.');
@@ -1308,113 +786,82 @@ function validateStep1() {
       return false;
     }
   } else {
-    const company = ($id('journeyCompanyName')?.value || '').trim();
-    const contact = ($id('journeyContactName')?.value || '').trim();
-    const email = ($id('journeyCompanyEmail')?.value || '').trim();
-
-    if (!company) {
+    const co = ($id('journeyCompanyName')?.value || '').trim();
+    const ct = ($id('journeyContactName')?.value || '').trim();
+    const em = ($id('journeyCompanyEmail')?.value || '').trim();
+    if (!co) {
       $id('journeyCompanyNameError')?.classList.add('visible');
       showStepError('Informe o nome da empresa.');
       return false;
     }
-    if (!contact) {
+    if (!ct) {
       $id('journeyContactNameError')?.classList.add('visible');
       showStepError('Informe o nome do responsável.');
       return false;
     }
-    if (!email || !isValidEmail(email)) {
+    if (!em || !isValidEmail(em)) {
       $id('journeyCompanyEmailError')?.classList.add('visible');
       showStepError('Informe um e-mail válido.');
       return false;
     }
   }
-
   return true;
 }
 
 function validateStep2() {
-  if (!JourneyState.category) {
-    showStepError('Selecione uma categoria para continuar.');
-    return false;
-  }
+  if (!JourneyState.category) { showStepError('Selecione uma categoria.'); return false; }
   return true;
 }
-
 function validateStep3() {
-  if (!JourneyState.subcategory) {
-    showStepError('Selecione um serviço para continuar.');
-    return false;
-  }
+  if (!JourneyState.subcategory) { showStepError('Selecione um serviço.'); return false; }
   return true;
 }
-
 function validateStep4() {
-  if (!JourneyState.projectType) {
-    showStepError('Selecione o tipo de projeto.');
-    return false;
-  }
+  if (!JourneyState.projectType) { showStepError('Selecione o tipo de projeto.'); return false; }
   return true;
 }
-
 function validateStep5() {
   const name = ($id('journeyProjectName')?.value || '').trim();
-  const problem = ($id('journeyProjectProblem')?.value || '').trim();
-
+  const prob = ($id('journeyProjectProblem')?.value || '').trim();
   if (!name) {
     $id('journeyProjectNameError')?.classList.add('visible');
     showStepError('Informe um nome para o projeto.');
     return false;
   }
-  if (!problem) {
+  if (!prob) {
     $id('journeyProjectProblemError')?.classList.add('visible');
     showStepError('Descreva o problema a ser resolvido.');
     return false;
   }
   return true;
 }
-
 function validateStep6() {
-  const target = ($id('journeyTargetAudience')?.value || '').trim();
-  if (!target) {
+  const t = ($id('journeyTargetAudience')?.value || '').trim();
+  if (!t) {
     $id('journeyTargetAudienceError')?.classList.add('visible');
-    showStepError('Descreva o público-alvo do projeto.');
+    showStepError('Descreva o público-alvo.');
     return false;
   }
   return true;
 }
-
 function validateStep7() {
   const reqs = getRequirementsFor(JourneyState.category, JourneyState.subcategory);
-
-  // Força coleta antes de validar
   collectStep7();
-
   for (const req of reqs) {
     if (!req.required) continue;
-    const val = JourneyState.requirements[req.id];
-    const isEmpty =
-      val == null ||
-      (typeof val === 'string' && val.trim() === '') ||
-      (Array.isArray(val) && val.length === 0);
-
-    if (isEmpty) {
-      showStepError(`Responda: ${req.label}`);
-      return false;
-    }
+    const v = JourneyState.requirements[req.id];
+    const empty = v == null || (typeof v === 'string' && v.trim() === '') || (Array.isArray(v) && v.length === 0);
+    if (empty) { showStepError(`Responda: ${req.label}`); return false; }
   }
   return true;
 }
-
 function validateStep12() {
-  if (!JourneyState.payment) {
-    showStepError('Selecione a forma de pagamento da produção.');
-    return false;
-  }
+  if (!JourneyState.payment) { showStepError('Selecione a forma de pagamento da produção.'); return false; }
   return true;
 }
 
 /* ============================================================
-   7. RENDERIZAÇÃO — ETAPAS 2, 3, 4
+   8. RENDERIZAÇÃO — ETAPAS 2, 3, 4
    ============================================================ */
 
 function renderCategories() {
@@ -1444,12 +891,8 @@ function renderCategories() {
 function renderServices() {
   const grid = $id('journeyServicesGrid');
   if (!grid) return;
-
   const cat = findCategoryById(JourneyState.category);
-  if (!cat) {
-    grid.innerHTML = '<p class="journey-hint">Selecione uma categoria primeiro.</p>';
-    return;
-  }
+  if (!cat) { grid.innerHTML = '<p class="journey-hint">Selecione uma categoria primeiro.</p>'; return; }
 
   grid.innerHTML = cat.subcategories.map(sub => `
     <button class="journey-card ${JourneyState.subcategory === sub.id ? 'selected' : ''}"
@@ -1473,18 +916,16 @@ function renderServices() {
 function renderProjectTypes() {
   const grid = $id('journeyTypesGrid');
   if (!grid) return;
-
   const sub = findSubcategoryById(JourneyState.category, JourneyState.subcategory);
   if (!sub || !Array.isArray(sub.projectTypes) || sub.projectTypes.length === 0) {
     grid.innerHTML = '<p class="journey-hint">Esta opção não exige a escolha de um tipo específico.</p>';
     return;
   }
-
-  grid.innerHTML = sub.projectTypes.map(type => `
-    <button class="journey-card ${JourneyState.projectType === type ? 'selected' : ''}"
-            data-project-type="${escapeHtml(type)}" type="button">
+  grid.innerHTML = sub.projectTypes.map(t => `
+    <button class="journey-card ${JourneyState.projectType === t ? 'selected' : ''}"
+            data-project-type="${escapeHtml(t)}" type="button">
       <div class="journey-card-icon"><i class="fas fa-diagram-project"></i></div>
-      <div class="journey-card-title">${escapeHtml(type)}</div>
+      <div class="journey-card-title">${escapeHtml(t)}</div>
     </button>
   `).join('');
 
@@ -1498,15 +939,11 @@ function renderProjectTypes() {
 }
 
 /* ============================================================
-   8. REVISÃO (ETAPA 13)
+   9. REVISÃO
    ============================================================ */
 
-function getCategoryTitle() {
-  return findCategoryById(JourneyState.category)?.title || '—';
-}
-function getSubcategoryTitle() {
-  return findSubcategoryById(JourneyState.category, JourneyState.subcategory)?.title || '—';
-}
+function getCategoryTitle() { return findCategoryById(JourneyState.category)?.title || '—'; }
+function getSubcategoryTitle() { return findSubcategoryById(JourneyState.category, JourneyState.subcategory)?.title || '—'; }
 
 function renderReview() {
   const container = $id('journeyReviewSummary');
@@ -1573,24 +1010,20 @@ function renderReview() {
     </div>
   `;
 
-  // Bind dos botões "editar"
   container.querySelectorAll('[data-edit-step]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const step = Number(btn.dataset.editStep);
-      goToStep(step);
-    });
+    btn.addEventListener('click', () => goToStep(Number(btn.dataset.editStep)));
   });
 }
 
 function renderReviewSection(title, editStep, rows) {
-  const visibleRows = rows.filter(([, v]) => {
+  const visible = rows.filter(([, v]) => {
     if (v == null) return false;
     if (typeof v === 'string') return v.trim() !== '';
     if (Array.isArray(v)) return v.length > 0;
     return true;
   });
 
-  if (visibleRows.length === 0) {
+  if (visible.length === 0) {
     return `
       <div class="journey-review-section">
         <div class="journey-review-header">
@@ -1612,7 +1045,7 @@ function renderReviewSection(title, editStep, rows) {
         </button>
       </div>
       <dl class="journey-review-list">
-        ${visibleRows.map(([label, value]) => `
+        ${visible.map(([label, value]) => `
           <div class="journey-review-row">
             <dt>${escapeHtml(label)}</dt>
             <dd>${escapeHtml(String(value))}</dd>
@@ -1624,15 +1057,13 @@ function renderReviewSection(title, editStep, rows) {
 
 function buildRequirementsRows() {
   const reqs = getRequirementsFor(JourneyState.category, JourneyState.subcategory);
-  if (reqs.length === 0) return [];
-
   const rows = [];
   reqs.forEach(req => {
-    const val = JourneyState.requirements[req.id];
-    if (val == null) return;
-    if (Array.isArray(val) && val.length === 0) return;
-    if (typeof val === 'string' && val.trim() === '') return;
-    rows.push([req.label, Array.isArray(val) ? val.join(', ') : val]);
+    const v = JourneyState.requirements[req.id];
+    if (v == null) return;
+    if (Array.isArray(v) && v.length === 0) return;
+    if (typeof v === 'string' && v.trim() === '') return;
+    rows.push([req.label, Array.isArray(v) ? v.join(', ') : v]);
   });
   return rows;
 }
@@ -1644,82 +1075,158 @@ function formatYesNo(v) {
   if (v == null || v === '') return null;
   return String(v);
 }
-
 function formatDeadline(v) {
-  const map = {
-    flexivel: 'Flexível',
-    asap: 'O quanto antes',
-    especifica: 'Data específica',
-    indefinido: 'Ainda não definido'
-  };
-  return map[v] || null;
+  const m = { flexivel: 'Flexível', asap: 'O quanto antes', especifica: 'Data específica', indefinido: 'Ainda não definido' };
+  return m[v] || null;
 }
 
 /* ============================================================
-   9. UPLOAD DE ARQUIVO
+   10. TELEFONE INTERNACIONAL
+   ============================================================ */
+
+function applyPhoneMask(inputEl, countryCode) {
+  const digits = extractDigits(inputEl.value);
+  const country = getCountryByCode(countryCode);
+  const limited = digits.slice(0, country.nationalDigits);
+  const formatted = formatPhone(limited, countryCode);
+  if (inputEl.value !== formatted) {
+    inputEl.value = formatted;
+    try {
+      inputEl.setSelectionRange(formatted.length, formatted.length);
+    } catch (_) {}
+  }
+  return limited;
+}
+
+function syncPhoneInputs() {
+  const country = JourneyState.clientPhoneCountry || '55';
+  const national = JourneyState.clientPhoneNational || '';
+
+  ['journeyClientPhone', 'journeyCompanyPhone'].forEach(prefix => {
+    const countryEl = $id(`${prefix}Country`);
+    const nationalEl = $id(`${prefix}National`);
+    if (countryEl) countryEl.value = country;
+    if (nationalEl) {
+      nationalEl.value = formatPhone(national, country);
+      const countryObj = getCountryByCode(country);
+      nationalEl.placeholder = countryObj.example;
+      nationalEl.maxLength = Math.max(20, countryObj.nationalDigits + 8);
+    }
+  });
+}
+
+function bindPhoneInputs() {
+  const PAIRS = [
+    { prefix: 'journeyClientPhone', other: 'journeyCompanyPhone' },
+    { prefix: 'journeyCompanyPhone', other: 'journeyClientPhone' }
+  ];
+
+  PAIRS.forEach(({ prefix, other }) => {
+    const countryEl = $id(`${prefix}Country`);
+    const nationalEl = $id(`${prefix}National`);
+    if (!countryEl || !nationalEl) return;
+
+    // Input do número nacional
+    nationalEl.addEventListener('input', () => {
+      const cc = countryEl.value;
+      const digits = applyPhoneMask(nationalEl, cc);
+      JourneyState.clientPhoneCountry = cc;
+      JourneyState.clientPhoneNational = digits;
+      JourneyState.clientPhone = composePhone(digits, cc);
+
+      // Sincroniza o outro par (se visível ou não)
+      const otherCountry = $id(`${other}Country`);
+      const otherNational = $id(`${other}National`);
+      if (otherCountry) otherCountry.value = cc;
+      if (otherNational) otherNational.value = nationalEl.value;
+
+      debouncedSaveDraft();
+    });
+
+    // Troca de país
+    countryEl.addEventListener('change', () => {
+      const cc = countryEl.value;
+      const countryObj = getCountryByCode(cc);
+      const digits = extractDigits(nationalEl.value).slice(0, countryObj.nationalDigits);
+
+      const formatted = formatPhone(digits, cc);
+      nationalEl.value = formatted;
+      nationalEl.placeholder = countryObj.example;
+      nationalEl.maxLength = Math.max(20, countryObj.nationalDigits + 8);
+
+      JourneyState.clientPhoneCountry = cc;
+      JourneyState.clientPhoneNational = digits;
+      JourneyState.clientPhone = composePhone(digits, cc);
+
+      const otherCountry = $id(`${other}Country`);
+      const otherNational = $id(`${other}National`);
+      if (otherCountry) otherCountry.value = cc;
+      if (otherNational) {
+        otherNational.value = formatted;
+        otherNational.placeholder = countryObj.example;
+      }
+
+      debouncedSaveDraft();
+    });
+  });
+}
+
+/* ============================================================
+   11. UPLOAD
    ============================================================ */
 
 function setupFileUpload() {
-  const uploadArea = $id('journeyUploadArea');
-  const fileInput = $id('journeyFileInput');
+  const area = $id('journeyUploadArea');
+  const input = $id('journeyFileInput');
   const preview = $id('journeyUploadPreview');
-  const previewImg = $id('journeyPreviewImg');
-  const previewName = $id('journeyPreviewFilename');
-  const previewSize = $id('journeyPreviewFilesize');
-  const removeBtn = $id('journeyRemoveFileBtn');
-  const errorEl = $id('journeyFileError');
+  const img = $id('journeyPreviewImg');
+  const name = $id('journeyPreviewFilename');
+  const size = $id('journeyPreviewFilesize');
+  const remove = $id('journeyRemoveFileBtn');
+  const err = $id('journeyFileError');
+  if (!area || !input) return;
 
-  if (!uploadArea || !fileInput) return;
+  area.addEventListener('click', () => input.click());
 
-  uploadArea.addEventListener('click', () => fileInput.click());
-
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files && fileInput.files[0];
-    if (!file) return;
-    const check = validateFile(file);
+  input.addEventListener('change', () => {
+    const f = input.files && input.files[0];
+    if (!f) return;
+    const check = validateFile(f);
     if (!check.ok) {
-      if (errorEl) {
-        errorEl.textContent = check.error;
-        errorEl.classList.add('visible');
-      }
-      fileInput.value = '';
+      if (err) { err.textContent = check.error; err.classList.add('visible'); }
+      input.value = '';
       JourneyState.file = null;
-      if (preview) preview.classList.remove('visible');
+      preview?.classList.remove('visible');
       return;
     }
-
-    JourneyState.file = file;
-    if (errorEl) errorEl.classList.remove('visible');
-    if (preview && previewImg && previewName && previewSize) {
+    JourneyState.file = f;
+    if (err) err.classList.remove('visible');
+    if (preview && img && name && size) {
       const reader = new FileReader();
       reader.onload = e => {
-        previewImg.src = e.target.result;
-        previewName.textContent = file.name;
-        previewSize.textContent = formatFileSize(file.size);
+        img.src = e.target.result;
+        name.textContent = f.name;
+        size.textContent = formatFileSize(f.size);
         preview.classList.add('visible');
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(f);
     }
   });
 
-  if (removeBtn) {
-    removeBtn.addEventListener('click', () => {
-      JourneyState.file = null;
-      fileInput.value = '';
-      if (preview) preview.classList.remove('visible');
-      if (previewImg) previewImg.src = '';
-    });
-  }
+  remove?.addEventListener('click', () => {
+    JourneyState.file = null;
+    input.value = '';
+    if (img) img.src = '';
+    preview?.classList.remove('visible');
+  });
 }
 
 /* ============================================================
-   10. SUBMISSÃO
+   12. PAYLOAD E ENVIO
    ============================================================ */
 
 function buildForminitPayload() {
-  // Estrutura organizada e plana — adaptável ao forminit.js
   return {
-    // Solicitante
     client_type: JourneyState.clientType,
     client_name: JourneyState.clientName,
     client_email: JourneyState.clientEmail,
@@ -1727,15 +1234,11 @@ function buildForminitPayload() {
     company_name: JourneyState.companyName,
     contact_name: JourneyState.contactName,
     company_segment: JourneyState.companySegment,
-
-    // Categoria
     category_id: JourneyState.category,
     category_title: getCategoryTitle(),
     subcategory_id: JourneyState.subcategory,
     subcategory_title: getSubcategoryTitle(),
     project_type: JourneyState.projectType,
-
-    // Projeto
     project_name: JourneyState.projectName,
     project_context: JourneyState.projectContext,
     project_problem: JourneyState.projectProblem,
@@ -1743,37 +1246,23 @@ function buildForminitPayload() {
     expected_result: JourneyState.expectedResult,
     target_audience: JourneyState.targetAudience,
     audience_action: JourneyState.audienceAction,
-
-    // Requisitos (serializados)
     requirements_json: JSON.stringify(JourneyState.requirements || {}),
-
-    // Identidade visual
     has_visual_identity: JourneyState.hasVisualIdentity,
     brand_colors: JourneyState.brandColors,
     references: JourneyState.references,
     elements_to_avoid: JourneyState.elementsToAvoid,
-
-    // Materiais
     available_resources: (JourneyState.availableResources || []).join(', '),
     needs_content_creation: JourneyState.needsContentCreation,
-
-    // Infraestrutura
     has_domain: JourneyState.hasDomain,
     has_hosting: JourneyState.hasHosting,
     needs_integrations: JourneyState.needsIntegrations,
     integration_details: JourneyState.integrationDetails,
-
-    // Prazo
     deadline_type: JourneyState.deadlineType,
     deadline_date: JourneyState.deadlineDate,
     priority: JourneyState.priority,
-
-    // Comercial
     payment: JourneyState.payment,
     maintenance: JourneyState.maintenance,
     commercial_observations: JourneyState.commercialObservations,
-
-    // Meta
     submitted_at: new Date().toISOString(),
     source: 'fgp-tech-journey'
   };
@@ -1783,68 +1272,44 @@ let isSubmitting = false;
 
 async function handleSubmit() {
   if (isSubmitting) return;
-
   if (!validateStep(JourneyState.step)) return;
   collectStepState(JourneyState.step);
 
-  // Garantir que o arquivo selecionado no momento seja persistido
   const feedback = $id('journeySubmitFeedback');
   const nextBtn = $id('journeyNextBtn');
 
   isSubmitting = true;
-  if (nextBtn) {
-    nextBtn.disabled = true;
-    nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-  }
+  if (nextBtn) { nextBtn.disabled = true; nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...'; }
   if (feedback) {
-    feedback.className = 'journey-submit-feedback';
+    feedback.className = 'journey-submit-feedback visible';
     feedback.textContent = 'Preparando solicitação...';
-    feedback.classList.add('visible');
   }
 
   try {
     const payload = buildForminitPayload();
-
-    let forminit;
-    try {
-      forminit = await import('./forminit.js');
-    } catch (err) {
-      throw new Error('Módulo de envio (forminit.js) não pôde ser carregado.');
-    }
-
-    const submitFn = forminit.submitJourney
-      || forminit.submitRequest
-      || forminit.submit
-      || forminit.default;
-
-    if (typeof submitFn !== 'function') {
-      throw new Error('Nenhuma função de envio disponível em forminit.js.');
-    }
+    const forminit = await import('./forminit.js');
+    const submitFn = forminit.submitJourney || forminit.submitRequest || forminit.submit || forminit.default;
+    if (typeof submitFn !== 'function') throw new Error('Nenhuma função de envio disponível em forminit.js.');
 
     const result = await submitFn(payload, JourneyState.file || null);
-
-    if (result && result.ok === false) {
-      throw new Error(result.error || 'O envio não foi confirmado.');
-    }
+    if (result && result.ok === false) throw new Error(result.error || 'O envio não foi confirmado.');
 
     if (feedback) {
       feedback.className = 'journey-submit-feedback success visible';
       feedback.innerHTML = '<i class="fas fa-circle-check"></i> Solicitação enviada com sucesso! Entraremos em contato em breve.';
     }
+    if (nextBtn) nextBtn.innerHTML = '<i class="fas fa-check"></i> Enviado';
 
-    if (nextBtn) {
-      nextBtn.innerHTML = '<i class="fas fa-check"></i> Enviado';
-    }
+    // Limpa rascunho + estado após sucesso
+    clearDraft();
+    showDraftBanner(false);
 
-    // Reset após sucesso
     setTimeout(() => {
       resetJourneyState();
       closeJourney();
     }, 2200);
-
   } catch (err) {
     console.error('[FGP][assistant] Erro no envio:', err);
-
     if (feedback) {
       feedback.className = 'journey-submit-feedback error visible';
       feedback.innerHTML = `<i class="fas fa-circle-exclamation"></i> ${escapeHtml(err.message || 'Erro ao enviar. Tente novamente.')}`;
@@ -1859,7 +1324,7 @@ async function handleSubmit() {
 }
 
 /* ============================================================
-   11. RESET E API PÚBLICA
+   13. RESET E API PÚBLICA
    ============================================================ */
 
 function resetJourneyState() {
@@ -1869,6 +1334,8 @@ function resetJourneyState() {
     clientName: '',
     clientEmail: '',
     clientPhone: '',
+    clientPhoneCountry: '55',
+    clientPhoneNational: '',
     companyName: '',
     contactName: '',
     companySegment: '',
@@ -1906,25 +1373,28 @@ function resetJourneyState() {
 export function openJourney(opts = {}) {
   const { category, subcategory, reset = false } = opts;
 
-  if (reset || category) {
+  if (reset) {
     resetJourneyState();
+    clearDraft();
+    showDraftBanner(false);
+  } else {
+    const loaded = loadDraft();
+    showDraftBanner(loaded);
   }
 
-if (category) {
-  JourneyState.category = category;
-  if (subcategory) {
-    JourneyState.subcategory = subcategory;
+  if (category) {
+    JourneyState.category = category;
+    if (subcategory) JourneyState.subcategory = subcategory;
   }
-  // Mantém o passo atual em 1 (identificação), mas com
-  // categoria/subcategoria já pré-preenchidas.
+
+  // BUG FIX: sempre começa pela etapa 1 (identificação)
   JourneyState.step = 1;
-}
 
   const modal = $id('journeyModal');
   if (!modal) return;
 
+  showSafely(modal, { focusFirst: false });
   modal.classList.add('open');
-  modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
 
   goToStep(JourneyState.step);
@@ -1933,27 +1403,31 @@ if (category) {
 export function closeJourney() {
   const modal = $id('journeyModal');
   if (!modal) return;
+
+  // Coleta + salva antes de fechar
+  try { collectStepState(JourneyState.step); } catch (_) {}
+  saveDraft();
+
+  // Fallback de foco: o botão que costuma abrir a jornada
+  const trigger = $id('heroStartBtn') || $id('sideMenuStartBtn');
+  hideSafely(modal, { focusFallback: trigger });
   modal.classList.remove('open');
-  modal.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
 }
 
 /* ============================================================
-   12. EVENTOS
+   14. EVENTOS
    ============================================================ */
 
 function bindEventListeners() {
   // Fechar
-  $id('closeJourneyBtn')?.addEventListener('click', () => closeJourney());
+  $id('closeJourneyBtn')?.addEventListener('click', closeJourney);
 
   // Navegação
-  $id('journeyBackBtn')?.addEventListener('click', () => goPrev());
+  $id('journeyBackBtn')?.addEventListener('click', goPrev);
   $id('journeyNextBtn')?.addEventListener('click', () => {
-    if (JourneyState.step === 13) {
-      handleSubmit();
-    } else {
-      goNext();
-    }
+    if (JourneyState.step === 13) handleSubmit();
+    else goNext();
   });
 
   // Etapa 1 — seleção do tipo de cliente
@@ -1961,6 +1435,7 @@ function bindEventListeners() {
     card.addEventListener('click', () => {
       JourneyState.clientType = card.dataset.clientType;
       syncStep1StateToDom();
+      saveDraft();
     });
   });
 
@@ -1968,9 +1443,7 @@ function bindEventListeners() {
   document.querySelectorAll('input[name="deadlineType"]').forEach(input => {
     input.addEventListener('change', () => {
       const dateGroup = $id('journeyDeadlineDateGroup');
-      if (dateGroup) {
-        dateGroup.style.display = input.value === 'especifica' ? '' : 'none';
-      }
+      if (dateGroup) dateGroup.style.display = input.value === 'especifica' ? '' : 'none';
     });
   });
 
@@ -1990,15 +1463,36 @@ function bindEventListeners() {
     });
   });
 
-  // Upload de arquivo
+  // Discard draft
+  $id('journeyDiscardDraftBtn')?.addEventListener('click', () => {
+    clearDraft();
+    resetJourneyState();
+    showDraftBanner(false);
+    goToStep(1);
+  });
+
+  // Auto-save em qualquer input dentro do conteúdo da jornada
+  const content = $id('journeyContent');
+  if (content) {
+    content.addEventListener('input', debouncedSaveDraft);
+    content.addEventListener('change', debouncedSaveDraft);
+  }
+
+  // Upload
   setupFileUpload();
+
+  // Telefone
+  bindPhoneInputs();
 }
 
 /* ============================================================
-   13. INIT
+   15. INIT
    ============================================================ */
 
+let initialized = false;
+
 export function initAssistant() {
+  if (initialized) return;
   bindEventListeners();
-  // Ao abrir o modal do zero, o estado inicial é exibido pela primeira chamada de openJourney
+  initialized = true;
 }
