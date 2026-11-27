@@ -1,708 +1,519 @@
 /* ============================================================
-FGP TECHNOLOGIES — assistant.js
-Jornada guiada (FGP Assistant): 7 etapas de atendimento
-progressivo, navegação, upload de arquivos, revisão final
-e envio via Forminit.
+FGP TECHNOLOGIES — state.js
+Estado global, constantes e referências DOM centralizadas.
+Este arquivo não contém lógica de negócio, apenas dados e referências.
 ============================================================ */
-
-// CORREÇÃO CRÍTICA: CATEGORIES_DB deve vir de './state.js', NUNCA de './catalog.js'
-import {
-    CATEGORIES_DB,
-    JourneyState,
-    ASSISTANT_MESSAGES,
-    JOURNEY_TOTAL_BASE_STEPS,
-    dom
-} from './state.js';
-
-import { escapeHtml, formatFileSize } from './utils.js';
-import {
-    MAX_FILE_SIZE,
-    ALLOWED_TYPES,
-    buildForminitPayload,
-    submitToForminit
-} from './forminit.js';
-import { closeSideMenu } from './navigation.js';
 
 /* ============================================================
-INIT
+1. BASE DE DADOS HIERÁRQUICA (Catálogo)
 ============================================================ */
-export function initAssistant() {
-    setupJourney();
-}
+export const CATEGORIES_DB = [
+  {
+    id: 'apps',
+    icon: 'fa-mobile-screen-button',
+    title: 'Aplicativos',
+    description: 'Apps para Android, iOS e web — do MVP institucional ao produto empresarial completo.',
+    features: ['Desenvolvimento nativo ou multiplataforma', 'Publicação nas lojas oficiais', 'Suporte e manutenção opcional'],
+    subcategories: [
+      {
+        id: 'app-android',
+        icon: 'fa-android',
+        title: 'App Android',
+        description: 'Desenvolvimento nativo para a plataforma Android, com publicação na Play Store.',
+        priceRange: 'R$ 5.000 – 60.000+',
+        priceNote: 'Varia conforme a complexidade do aplicativo',
+        deadline: 'Prazo variável conforme escopo',
+        status: 'available',
+        longDescription: 'Aplicativo nativo para dispositivos Android. Cobre desde catálogos digitais até sistemas com autenticação, banco de dados e integrações.',
+        features: ['Desenvolvimento nativo (Kotlin/Java)', 'Publicação na Play Store', 'Testes e ajustes de compatibilidade'],
+        projectTypes: [
+          'Institucional / estático — catálogo, portfólio, apresentação (R$ 5.000–15.000, 2–8 semanas)',
+          'Informativo interativo — busca, filtros, formulários, navegação avançada (orçamento conforme complexidade)',
+          'Com backend e login — cadastro, perfis, banco de dados, integrações (R$ 15.000–60.000, 2–5 meses para MVP)',
+          'Empresarial avançado — regras de negócio, integrações, painel administrativo (avaliação técnica)'
+        ],
+        paymentTerms: ['À vista com desconto negociável', 'Parcelamento mensal durante o desenvolvimento', 'Primeira parcela antes do início'],
+        additionalCosts: ['Taxa anual de desenvolvedor Google Play', 'Serviços de backend, hospedagem e APIs pagas', 'Certificados e ferramentas de terceiros'],
+        observations: [
+          'A faixa de referência de mercado para MVPs empresariais fica em R$ 30.000–60.000.',
+          'A publicação exige adequação às políticas da Play Store.',
+          'O prazo definitivo depende da clareza do escopo funcional.'
+        ]
+      },
+      {
+        id: 'app-ios',
+        icon: 'fa-apple',
+        title: 'App iOS',
+        description: 'Desenvolvimento nativo para iPhone e iPad, com publicação na App Store.',
+        priceRange: 'Orçamento após análise',
+        priceNote: 'Publicação e testes exigem avaliação específica',
+        deadline: 'Prazo definido após análise do projeto',
+        status: 'evaluation',
+        longDescription: 'Aplicativo nativo para iOS. As exigências da Apple (revisão, ferramentas, testes em dispositivos) influenciam diretamente no investimento e no prazo.',
+        features: ['Desenvolvimento nativo (Swift)', 'Publicação na App Store', 'Conformidade com diretrizes Apple'],
+        projectTypes: ['Institucional / estático', 'Informativo interativo', 'Com backend e login', 'Empresarial avançado'],
+        paymentTerms: ['À vista ou parcelamento mensal', 'Primeira parcela antes do início'],
+        additionalCosts: ['Apple Developer Program (taxa anual)', 'Mac de desenvolvimento (quando aplicável)', 'Serviços externos e APIs'],
+        observations: [
+          'Não assumimos valores idênticos aos projetos Android.',
+          'A revisão da Apple é criteriosa e pode gerar ajustes.',
+          'Serviço sob avaliação técnica nesta fase da FGP.'
+        ]
+      },
+      {
+        id: 'app-multiplataforma',
+        icon: 'fa-layer-group',
+        title: 'App multiplataforma',
+        description: 'Base compartilhada de código para Android, iOS e, quando aplicável, web.',
+        priceRange: 'A partir de R$ 14.900',
+        priceNote: 'Referência para MVP multiplataforma',
+        deadline: 'Prazo de referência: 45 a 90 dias',
+        status: 'available',
+        longDescription: 'Uma única base de código para múltiplas plataformas. Reduz duplicação de desenvolvimento, mas não elimina testes, adaptações e requisitos específicos de cada loja.',
+        features: ['Código compartilhado (Flutter/React Native)', 'Android, iOS e web', 'Atualizações centralizadas'],
+        projectTypes: ['Multiplataforma estático', 'Multiplataforma interativo', 'Multiplataforma com backend', 'Aplicação empresarial multiplataforma (avaliação técnica)'],
+        paymentTerms: ['À vista ou parcelamento mensal', 'Primeira parcela antes do início'],
+        additionalCosts: ['Taxas de publicação em cada loja', 'Serviços de backend, APIs e hospedagem', 'Ferramentas e licenças específicas'],
+        observations: [
+          'A referência de R$ 14.900 é para MVPs divulgados por fornecedores.',
+          'O prazo de 45–90 dias aplica-se ao MVP padrão.',
+          'Recursos nativos específicos de cada plataforma podem exigir código separado.'
+        ]
+      },
+      {
+        id: 'app-custom',
+        icon: 'fa-sliders',
+        title: 'App sob medida',
+        description: 'Aplicativo projetado do zero para um processo ou produto específico.',
+        priceRange: 'R$ 30.000 – 120.000+',
+        priceNote: 'Projetos avançados podem superar R$ 150.000',
+        deadline: 'Prazo de referência: 2 a 5 meses para MVP',
+        status: 'evaluation',
+        longDescription: 'Aplicativo construído exclusivamente para o seu negócio, com funcionalidades e integrações específicas.',
+        features: ['Escopo dedicado', 'Integrações específicas', 'Design e UX personalizados'],
+        projectTypes: ['Aplicativo de serviços', 'Aplicativo comercial', 'Aplicativo de gerenciamento', 'Aplicativo transacional', 'Aplicativo com integrações avançadas'],
+        paymentTerms: ['À vista ou parcelamento mensal conforme cronograma', 'Primeira parcela antes do início'],
+        additionalCosts: ['Backend dedicado e hospedagem', 'Integrações com sistemas legados', 'Serviços de terceiros'],
+        observations: [
+          'Avaliação técnica obrigatória antes de qualquer proposta.',
+          'Complexidade pode alterar significativamente prazo e valor.',
+          'Serviço sob avaliação técnica nesta fase da FGP.'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'sites',
+    icon: 'fa-globe',
+    title: 'Sites',
+    description: 'Do cartão de visitas digital à loja virtual completa.',
+    features: ['Design responsivo', 'SEO básico incluído', 'Painel administrativo quando contratado'],
+    subcategories: [
+      {
+        id: 'landing-page',
+        icon: 'fa-bullseye',
+        title: 'Landing page',
+        description: 'Página única focada em conversão para produto, serviço ou campanha.',
+        priceRange: 'R$ 900 – 2.500',
+        priceNote: 'Referência para landing pages simples',
+        deadline: 'Prazo estimado: 1 a 2 semanas',
+        status: 'available',
+        longDescription: 'Página única, com design focado em conversão e estrutura enxuta para campanhas ou lançamentos.',
+        features: ['Design focado em conversão', 'Layout responsivo', 'Formulário de contato'],
+        projectTypes: ['Landing page simples', 'Landing page personalizada', 'Landing page com formulários e integrações'],
+        paymentTerms: ['À vista ou em até 3 parcelas', 'Primeira parcela antes do início'],
+        additionalCosts: ['Domínio e hospedagem', 'Ferramentas de automação ou CRM', 'Integrações pagas'],
+        observations: ['Valor total do projeto — não é mensalidade.', 'Prazo pode variar conforme quantidade de seções e integrações.']
+      },
+      {
+        id: 'site-institucional',
+        icon: 'fa-building',
+        title: 'Site institucional',
+        description: 'Site de apresentação da empresa, com múltiplas seções e páginas.',
+        priceRange: 'R$ 1.500 – 6.000',
+        priceNote: 'Referência para 5 a 10 páginas',
+        deadline: 'Prazo estimado: 2 a 4 semanas',
+        status: 'available',
+        longDescription: 'Site institucional com múltiplas páginas, apresentando a empresa, serviços, equipe e canais de contato.',
+        features: ['Múltiplas páginas', 'Design responsivo', 'Otimização básica de SEO'],
+        projectTypes: ['Institucional básico', 'Institucional personalizado', 'Institucional com CMS', 'Institucional com blog'],
+        paymentTerms: ['À vista ou parcelado durante o desenvolvimento', 'Primeira parcela antes do início'],
+        additionalCosts: ['Domínio e hospedagem', 'Plugins ou licenças premium', 'Serviços de e-mail profissional'],
+        observations: ['Projetos com mais páginas ou recursos avançados recebem orçamento próprio.', 'CMS e blog influenciam no prazo e no valor.']
+      },
+      {
+        id: 'portfolio-catalogo',
+        icon: 'fa-images',
+        title: 'Portfólio / catálogo digital',
+        description: 'Apresentação visual de projetos, produtos ou serviços.',
+        priceRange: 'Orçamento conforme conteúdo',
+        priceNote: 'Depende da quantidade de itens e recursos',
+        deadline: 'Prazo definido após análise',
+        status: 'available',
+        longDescription: 'Site voltado à exposição de trabalhos, produtos ou serviços, com foco em apresentação visual.',
+        features: ['Galeria de imagens', 'Layout responsivo', 'Filtros e categorias'],
+        projectTypes: ['Portfólio profissional', 'Catálogo de produtos', 'Catálogo de serviços', 'Galeria e apresentação de projetos'],
+        paymentTerms: ['À vista ou parcelado', 'Primeira parcela antes do início'],
+        additionalCosts: ['Domínio e hospedagem', 'Sessão de fotos (não inclusa)', 'Integrações com redes sociais'],
+        observations: ['Valor e prazo dependem da quantidade de conteúdo e recursos desejados.']
+      },
+      {
+        id: 'loja-virtual',
+        icon: 'fa-cart-shopping',
+        title: 'Loja virtual',
+        description: 'E-commerce completo com catálogo, carrinho e checkout.',
+        priceRange: 'R$ 2.000 – 9.000',
+        priceNote: 'Referência para plataformas prontas',
+        deadline: 'Prazo estimado: 3 a 6 semanas',
+        status: 'available',
+        longDescription: 'Loja virtual com catálogo, carrinho e checkout. A referência considera plataformas prontas e configuração.',
+        features: ['Catálogo de produtos', 'Carrinho e checkout', 'Painel administrativo'],
+        projectTypes: ['Loja em plataforma pronta (R$ 2.000–9.000)', 'Loja personalizada', 'E-commerce com integrações', 'E-commerce sob medida (orçamento separado)'],
+        paymentTerms: ['À vista ou parcelado', 'Primeira parcela antes do início'],
+        additionalCosts: ['Plataforma (mensalidade)', 'Gateway de pagamento (taxas por transação)', 'Domínio, hospedagem e certificado SSL', 'Integrações com logística e ERP'],
+        observations: [
+          'Projetos sob medida possuem orçamento separado.',
+          'Checkout personalizado e integrações financeiras exigem avaliação técnica.',
+          'Não inclui custos de gateways e taxas de terceiros.'
+        ]
+      },
+      {
+        id: 'webapp-custom',
+        icon: 'fa-code',
+        title: 'Site personalizado / Web App',
+        description: 'Site com funcionalidades sob medida, integrações e área restrita.',
+        priceRange: 'R$ 10.000 – 25.000+',
+        priceNote: 'Referência para aplicações web leves',
+        deadline: 'Prazo definido conforme escopo',
+        status: 'evaluation',
+        longDescription: 'Aplicação web com lógica própria, área de usuário e/ou banco de dados. Não é apenas um site — é um sistema na web.',
+        features: ['Lógica personalizada', 'Integrações com APIs', 'Área de usuário'],
+        projectTypes: ['Portal informativo', 'Web app interativo', 'Área de usuário', 'Aplicação com banco de dados', 'Sistema web personalizado (avaliação técnica)'],
+        paymentTerms: ['À vista ou parcelamento mensal', 'Primeira parcela antes do início'],
+        additionalCosts: ['Backend, hospedagem e banco de dados', 'APIs e serviços de terceiros', 'Infraestrutura de e-mail e notificações'],
+        observations: [
+          'Valor de referência é para projetos leves, não para sistemas complexos.',
+          'Escopo detalhado necessário antes da proposta.',
+          'Serviço sob avaliação técnica para casos complexos.'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'sistemas',
+    icon: 'fa-server',
+    title: 'Sistemas',
+    description: 'Sistemas internos, painéis e automação de processos.',
+    features: ['Análise de processo antes do desenvolvimento', 'Controle de usuários e permissões', 'Evolução contínua possível'],
+    subcategories: [
+      {
+        id: 'sistema-gestao',
+        icon: 'fa-clipboard-list',
+        title: 'Sistema de gestão',
+        description: 'Sistema para organizar clientes, produtos, pedidos ou operações internas.',
+        priceRange: 'R$ 18.000 – 45.000',
+        priceNote: 'Referência para sistemas simples (CRUD)',
+        deadline: 'Prazo estimado: 6 a 10 semanas',
+        status: 'evaluation',
+        longDescription: 'Sistema para cadastros, consultas e relatórios. As referências consideram escopos limitados, não sistemas empresariais completos.',
+        features: ['Cadastros e relatórios', 'Controle de usuários', 'Painel personalizado'],
+        projectTypes: ['Gestão de clientes', 'Gestão de produtos', 'Gestão de pedidos', 'Gestão operacional'],
+        paymentTerms: ['À vista ou parcelamento mensal', 'Primeira parcela antes do início'],
+        additionalCosts: ['Servidor, banco de dados e hospedagem', 'Backups e monitoramento', 'Integrações com sistemas legados'],
+        observations: [
+          'Valores de referência são para escopos limitados.',
+          'Sistemas empresariais completos exigem orçamento próprio.',
+          'Serviço sob avaliação técnica antes da contratação.'
+        ]
+      },
+      {
+        id: 'painel-admin',
+        icon: 'fa-gauge-high',
+        title: 'Painel administrativo',
+        description: 'Dashboard para visualizar métricas e administrar dados.',
+        priceRange: 'Orçamento após análise',
+        priceNote: 'Fontes de dados e permissões influenciam',
+        deadline: 'Prazo definido após escopo',
+        status: 'evaluation',
+        longDescription: 'Painel administrativo para visualização e gestão de dados. O valor depende de quantos indicadores, fontes de dados, permissões e funcionalidades forem necessários.',
+        features: ['Visualização de dados', 'Gestão de conteúdo', 'Controle de permissões'],
+        projectTypes: ['Dashboard básico', 'Painel de controle', 'Gestão de conteúdo', 'Administração de usuários', 'Painel com relatórios'],
+        paymentTerms: ['À vista ou parcelamento', 'Primeira parcela antes do início'],
+        additionalCosts: ['Backend e banco de dados', 'Integrações com fontes de dados', 'Hospedagem e monitoramento'],
+        observations: ['Avaliação de escopo obrigatória antes do orçamento.', 'Fontes de dados e permissões influenciam diretamente o valor.']
+      },
+      {
+        id: 'automacao',
+        icon: 'fa-robot',
+        title: 'Automação e integrações',
+        description: 'Automação de tarefas e integração entre sistemas via API.',
+        priceRange: 'R$ 5.000 – 50.000+',
+        priceNote: 'APIs simples R$ 5–15k · Complexas R$ 30–50k+',
+        deadline: 'Prazo de referência: 8 a 24 semanas',
+        status: 'available',
+        longDescription: 'Automação de processos e integração de sistemas. O valor depende do número de sistemas, complexidade das APIs e regras de negócio.',
+        features: ['Automação de tarefas', 'Integração com APIs', 'Agendamento e webhooks'],
+        projectTypes: ['Automação simples', 'Integração entre sistemas', 'Integrações via API', 'Webhooks', 'Automação empresarial (avaliação)'],
+        paymentTerms: ['À vista ou parcelado', 'Primeira parcela antes do início'],
+        additionalCosts: ['APIs de terceiros (custos por chamada)', 'Infraestrutura de execução', 'Credenciais e serviços pagos'],
+        observations: [
+          'Não aplicar o valor de uma API simples a uma integração empresarial complexa.',
+          'Prazo depende dos sistemas envolvidos e da documentação disponível.'
+        ]
+      },
+      {
+        id: 'sistema-custom',
+        icon: 'fa-cogs',
+        title: 'Sistema sob medida',
+        description: 'Sistema construído do zero para um processo específico do seu negócio.',
+        priceRange: 'R$ 25.000 – 150.000+',
+        priceNote: 'Interno simples R$ 25–60k · Complexos R$ 45–150k+',
+        deadline: 'Prazo de referência: 10 a 20 semanas',
+        status: 'evaluation',
+        longDescription: 'Sistema dedicado ao seu processo. Escopo construído em conjunto com a FGP durante a análise técnica.',
+        features: ['Escopo dedicado', 'Banco de dados próprio', 'Possibilidade de evolução contínua'],
+        projectTypes: ['Sistema interno', 'Sistema multiusuário', 'Plataforma empresarial', 'Sistema com integrações', 'Sistema de operações personalizado'],
+        paymentTerms: ['À vista ou parcelamento conforme cronograma', 'Primeira parcela antes do início'],
+        additionalCosts: ['Infraestrutura (servidor, banco, backups)', 'Integrações críticas', 'Licenças e ferramentas específicas'],
+        observations: [
+          'Sistemas mais complexos podem superar significativamente a faixa.',
+          'Avaliação técnica obrigatória.',
+          'Serviço sob avaliação técnica.'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'solucoes',
+    icon: 'fa-wand-magic-sparkles',
+    title: 'Soluções Digitais',
+    description: 'Consultoria, identidade digital, manutenção e integrações.',
+    features: ['Consultoria por hora ou pacote', 'Manutenção recorrente opcional', 'Integrações sob demanda'],
+    subcategories: [
+      {
+        id: 'identidade-digital',
+        icon: 'fa-fingerprint',
+        title: 'Identidade digital',
+        description: 'Presença digital completa: site, redes sociais e comunicação visual.',
+        priceRange: 'Orçamento personalizado',
+        priceNote: 'Depende dos entregáveis definidos',
+        deadline: 'Prazo definido conforme escopo',
+        status: 'evaluation',
+        longDescription: 'Conjunto de ações para consolidar a presença digital de uma marca. Não há preço fixo sem definir os entregáveis.',
+        features: ['Diretrizes visuais', 'Presença nas redes', 'Materiais de apoio'],
+        projectTypes: ['Identidade visual digital', 'Presença digital', 'Materiais de comunicação', 'Organização da presença online'],
+        paymentTerms: ['À vista ou parcelado', 'Primeira parcela antes do início'],
+        additionalCosts: ['Ferramentas de design', 'Banco de imagens e fontes', 'Serviços de social media'],
+        observations: ['Não é possível fixar preço sem definir os entregáveis.', 'Cada projeto recebe orçamento próprio.']
+      },
+      {
+        id: 'consultoria-tecnica',
+        icon: 'fa-lightbulb',
+        title: 'Consultoria técnica',
+        description: 'Análise, diagnóstico e recomendação para projetos digitais.',
+        priceRange: 'R$ 60 – 150 / hora',
+        priceNote: 'Referência de mercado para profissionais iniciantes',
+        deadline: 'Modalidade: por hora ou pacote',
+        status: 'available',
+        longDescription: 'Consultoria pontual ou contínua. A cobrança pode ser por hora ou por pacote fechado, conforme a necessidade.',
+        features: ['Diagnóstico', 'Recomendações práticas', 'Plano de ação'],
+        projectTypes: ['Análise de projetos', 'Diagnóstico técnico', 'Planejamento', 'Orientação tecnológica'],
+        paymentTerms: ['Por hora ou pacote', 'Pagamento na entrega do relatório'],
+        additionalCosts: ['Acesso a sistemas para análise', 'Ferramentas de diagnóstico (quando aplicável)'],
+        observations: [
+          'Não é uma tarifa oficial da FGP.',
+          'O valor final depende da experiência, escopo e duração.',
+          'O valor-hora de R$ 60–150 é referência de mercado, não fixo.'
+        ]
+      },
+      {
+        id: 'manutencao',
+        icon: 'fa-screwdriver-wrench',
+        title: 'Manutenção e suporte',
+        description: 'Manutenção contínua de sites, apps ou sistemas já existentes.',
+        priceRange: 'R$ 70 – 1.290 / mês',
+        priceNote: 'Conforme nível de suporte contratado',
+        deadline: 'Modalidade: contratação mensal',
+        status: 'available',
+        longDescription: 'Plano recorrente para manter o projeto funcionando e atualizado. Escopo e quantidade de suporte definidos em contrato.',
+        features: ['Atualizações periódicas', 'Correções conforme escopo', 'Relatórios'],
+        projectTypes: [
+          'Básico — R$ 70–200/mês · atualizações, backups, monitoramento básico',
+          'Intermediário — R$ 197–397/mês · suporte, correções limitadas, atualizações frequentes',
+          'Avançado — R$ 797–1.290/mês · monitoramento avançado, backups frequentes, horas limitadas de desenvolvimento'
+        ],
+        paymentTerms: ['Mensal recorrente', 'Plano anual antecipado com desconto (5–10%, quando aplicável)'],
+        additionalCosts: ['Hospedagem e domínio', 'Renovação de licenças e plugins', 'Desenvolvimento além do escopo contratado'],
+        observations: [
+          'Não oferece suporte ilimitado.',
+          'Os valores são referências de planos publicados no Brasil em 2026.',
+          'A FGP define em contrato o que cada nível inclui.'
+        ]
+      },
+      {
+        id: 'integracoes-apis',
+        icon: 'fa-plug',
+        title: 'Integrações e APIs',
+        description: 'Conexão entre sistemas via APIs e integrações específicas.',
+        priceRange: 'R$ 5.000 – 50.000+',
+        priceNote: 'APIs simples R$ 5–15k · Complexas R$ 30–50k+',
+        deadline: 'Prazo de referência: 8 a 24 semanas',
+        status: 'available',
+        longDescription: 'Construção de integrações entre sistemas. O escopo depende dos sistemas envolvidos e do nível de complexidade.',
+        features: ['APIs REST', 'Webhooks', 'Documentação'],
+        projectTypes: ['API simples', 'Integração entre plataformas', 'Webhooks', 'Integração empresarial', 'Integração personalizada'],
+        paymentTerms: ['À vista ou parcelado', 'Primeira parcela antes do início'],
+        additionalCosts: ['APIs de terceiros', 'Ambientes de teste e produção', 'Credenciais e serviços pagos'],
+        observations: ['Não garantir valores sem conhecer os sistemas envolvidos.', 'Prazo depende da documentação e do ambiente de testes.']
+      }
+    ]
+  },
+  {
+    id: 'business',
+    icon: 'fa-briefcase',
+    title: 'Serviços e Negócios da FGP',
+    description: 'Publicação de jogos, mods de Minecraft, parcerias e consultoria de produto.',
+    features: ['Serviços autorais da FGP', 'Orçamento após análise', 'Propostas personalizadas'],
+    subcategories: [
+      {
+        id: 'publicacao-jogos',
+        icon: 'fa-gamepad',
+        title: 'Publicação de jogos',
+        description: 'Apoio na publicação de jogos independentes em lojas digitais.',
+        priceRange: 'Orçamento por projeto',
+        priceNote: 'Taxas de loja e custos de terceiros separados',
+        deadline: 'Prazo definido conforme projeto',
+        status: 'evaluation',
+        longDescription: 'Suporte completo ou parcial na publicação de um jogo independente em lojas digitais.',
+        features: ['Preparação de build', 'Publicação nas lojas', 'Acompanhamento de lançamento'],
+        projectTypes: ['Preparação de build', 'Publicação na Play Store', 'Publicação na itch.io', 'Adequação técnica', 'Acompanhamento de lançamento'],
+        paymentTerms: ['Por projeto ou etapas', 'Primeira parcela antes do início'],
+        additionalCosts: ['Taxa anual de desenvolvedor Google Play', 'Taxas da itch.io (quando aplicável)', 'Materiais de marketing e assets'],
+        observations: ['Não há preço único de mercado — cada jogo exige escopo próprio.', 'Serviço sob avaliação técnica nesta fase da FGP.']
+      },
+      {
+        id: 'mods-minecraft',
+        icon: 'fa-cubes',
+        title: 'Mods e add-ons Minecraft',
+        description: 'Desenvolvimento de mods ou add-ons para Minecraft Bedrock.',
+        priceRange: 'Orçamento personalizado',
+        priceNote: 'Depende de itens, comportamentos e complexidade',
+        deadline: 'Prazo definido após escopo detalhado',
+        status: 'available',
+        longDescription: 'Desenvolvimento de add-ons para Minecraft Bedrock. O valor considera quantidade de itens, comportamentos, entidades, texturas e testes.',
+        features: ['Comportamentos e itens', 'Compatibilidade Bedrock', 'Pacote .mcaddon'],
+        projectTypes: ['Add-ons de itens', 'Add-ons de entidades', 'Mecânicas e comportamentos', 'Pacotes personalizados', 'Projetos Minecraft Bedrock'],
+        paymentTerms: ['Por projeto ou etapas', 'Primeira parcela antes do início'],
+        additionalCosts: ['Recursos gráficos e texturas', 'Testes em servidores dedicados', 'Publicação em lojas específicas'],
+        observations: ['Não há preço de mercado único comparável.', 'Quantidade de itens e complexidade das mecâ define m o valor.']
+      },
+      {
+        id: 'parceria-dev',
+        icon: 'fa-handshake-angle',
+        title: 'Parceria de desenvolvimento',
+        description: 'Colaboração contínua em projetos de longo prazo.',
+        priceRange: 'Proposta personalizada',
+        priceNote: 'Horas, responsabilidades e frequência definem',
+        deadline: 'Modalidade: contratação recorrente',
+        status: 'evaluation',
+        longDescription: 'Parceria de longo prazo com a FGP para desenvolvimento contínuo. Envolve definição de responsabilidades, horas, entregas e propriedade intelectual.',
+        features: ['Escopo recorrente', 'Comunicação direta', 'Acompanhamento'],
+        projectTypes: ['Parceria por projeto', 'Desenvolvimento recorrente', 'Colaboração tecnológica', 'Desenvolvimento conjunto'],
+        paymentTerms: ['Recorrente mensal com escopo definido', 'Possibilidade de anual antecipado com desconto'],
+        additionalCosts: ['Infraestrutura compartilhada', 'Ferramentas de colaboração', 'Serviços de terceiros'],
+        observations: ['Definir em contrato: propriedade intelectual, responsabilidades e entregas.', 'Serviço sob avaliação técnica.']
+      },
+      {
+        id: 'consultoria-produto',
+        icon: 'fa-compass',
+        title: 'Consultoria de produto',
+        description: 'Orientação sobre escopo, viabilidade e roadmap de um projeto.',
+        priceRange: 'R$ 60 – 150 / hora',
+        priceNote: 'Referência de mercado para profissionais iniciantes',
+        deadline: 'Modalidade: por hora ou pacote',
+        status: 'available',
+        longDescription: 'Orientação estratégica para produtos digitais. O valor final depende da experiência, escopo e duração.',
+        features: ['Análise de escopo', 'Viabilidade técnica', 'Roadmap sugerido'],
+        projectTypes: ['Planejamento de produto', 'Análise de viabilidade', 'Definição de escopo', 'Roadmap', 'Orientação de desenvolvimento'],
+        paymentTerms: ['Por hora ou pacote', 'Pagamento na entrega do relatório'],
+        additionalCosts: ['Ferramentas de prototipação', 'Acesso a dados e métricas do produto'],
+        observations: [
+          'Não é tarifa oficial da FGP.',
+          'O valor-hora é referência de mercado, não fixo.'
+        ]
+      }
+    ]
+  }
+];
 
 /* ============================================================
-HELPERS — ACESSO AO CATÁLOGO
+2. ESTADO DE NAVEGAÇÃO (Catálogo)
 ============================================================ */
-function getJourneyCategory() {
-    return JourneyState.category
-        ? CATEGORIES_DB.find(c => c.id === JourneyState.category)
-        : null;
-}
-
-function getJourneySubcategory() {
-    const cat = getJourneyCategory();
-    if (!cat || !JourneyState.subcategory) return null;
-    return cat.subcategories.find(s => s.id === JourneyState.subcategory) || null;
-}
-
-function parseProjectTypeName(raw) {
-    if (!raw) return '';
-    const parts = raw.split(/\s+—\s+/);
-    return parts[0] || raw;
-}
-
-function parseProjectTypeDesc(raw) {
-    if (!raw) return '';
-    const parts = raw.split(/\s+—\s+/);
-    return parts[1] || '';
-}
+export const NavState = {
+  currentCategory: null,
+  currentSubcategory: null
+};
 
 /* ============================================================
-ETAPAS ATIVAS
+3. ESTADO DA JORNADA GUIADA (FGP Assistant)
 ============================================================ */
-function getActiveJourneySteps() {
-    const steps = [1, 2];
-    const sub = getJourneySubcategory();
-    if (!JourneyState.subcategory) {
-        steps.push(3);
-    } else if (sub && sub.projectTypes && sub.projectTypes.length > 0) {
-        steps.push(3);
-    }
-    steps.push(4, 5, 6, 7);
-    return steps;
-}
+export const JourneyState = {
+  step: 1,
+  category: null,
+  subcategory: null,
+  projectType: null,
+  title: '',
+  description: '',
+  payment: null,
+  maintenance: null,
+  file: null
+};
 
 /* ============================================================
-RESET
+4. REFERÊNCIAS DOM CENTRALIZADAS
 ============================================================ */
-function resetJourneyState() {
-    JourneyState.step = 1;
-    JourneyState.category = null;
-    JourneyState.subcategory = null;
-    JourneyState.projectType = null;
-    JourneyState.title = '';
-    JourneyState.description = '';
-    JourneyState.payment = null;
-    JourneyState.maintenance = null;
-    JourneyState.file = null;
-    resetJourneyFile();
-}
-
-function resetJourneyFile() {
-    const fileInput = document.getElementById('journeyFileInput');
-    const uploadArea = document.getElementById('journeyUploadArea');
-    const preview = document.getElementById('journeyUploadPreview');
-    if (!fileInput || !uploadArea || !preview) return;
-
-    fileInput.value = '';
-    preview.classList.remove('visible');
-    uploadArea.style.display = '';
-    document.getElementById('journeyPreviewImg').src = '';
-    document.getElementById('journeyPreviewFilename').textContent = '';
-    document.getElementById('journeyPreviewFilesize').textContent = '';
-    document.getElementById('journeyFileError').classList.remove('visible');
-}
+export const dom = {
+  categoriesIntro: () => document.getElementById('categoriesIntro'),
+  breadcrumb: () => document.getElementById('breadcrumb'),
+  categoriesContainer: () => document.getElementById('categoriesContainer'),
+  subcategoriesContainer: () => document.getElementById('subcategoriesContainer'),
+  detailsContainer: () => document.getElementById('detailsContainer'),
+  siteHeader: () => document.getElementById('siteHeader'),
+  colorPanel: () => document.getElementById('colorPanel'),
+  sideMenu: () => document.getElementById('sideMenu'),
+  sideOverlay: () => document.getElementById('sideOverlay'),
+  requestModal: () => document.getElementById('requestModal'),
+  accessosModal: () => document.getElementById('accessosModal'),
+  journeyModal: () => document.getElementById('journeyModal')
+};
 
 /* ============================================================
-ABRIR / FECHAR JORNADA
+5. CONSTANTES DE CONFIGURAÇÃO (Cores e Assistente)
 ============================================================ */
-function openJourney() {
-    resetJourneyState();
-    JourneyState.step = 1;
-    openJourneyModal();
-    renderJourneyStep();
-}
-
-export function openJourneyFromCatalog(catId, subId) {
-    resetJourneyState();
-    JourneyState.category = catId;
-    JourneyState.subcategory = subId;
-
-    const cat = getJourneyCategory();
-    const sub = getJourneySubcategory();
-    if (cat && sub) {
-        JourneyState.title = `Solicitação de desenvolvimento — ${sub.title}`;
-        JourneyState.description =
-            `Olá! Tenho interesse no desenvolvimento de ${sub.title.toLowerCase()} (${cat.title}) e gostaria de conhecer as condições de contratação.`;
-    }
-
-    if (sub && sub.projectTypes && sub.projectTypes.length > 0) {
-        JourneyState.step = 3;
-    } else {
-        JourneyState.step = 4;
-    }
-
-    openJourneyModal();
-    renderJourneyStep();
-}
-
-function openJourneyModal() {
-    const modal = dom.journeyModal();
-    if (!modal) return;
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeJourneyWithConfirm() {
-    const modal = dom.journeyModal();
-    if (!modal || !modal.classList.contains('open')) return;
-
-    const hasData = JourneyState.category || JourneyState.subcategory ||
-        JourneyState.title || JourneyState.description ||
-        JourneyState.payment || JourneyState.maintenance || JourneyState.file;
-
-    if (hasData) {
-        if (!window.confirm('Você tem informações preenchidas. Deseja realmente sair da jornada?')) {
-            return;
-        }
-    }
-
-    modal.classList.remove('open');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-    resetJourneyState();
-}
-
-/* ============================================================
-NAVEGAÇÃO ENTRE ETAPAS
-============================================================ */
-function handleJourneyNext() {
-    const step = JourneyState.step;
-
-    if (step === 1) {
-        if (!JourneyState.category) {
-            showJourneyAlert('Escolha uma categoria para continuar.');
-            return;
-        }
-    } else if (step === 2) {
-        if (!JourneyState.subcategory) {
-            showJourneyAlert('Escolha um serviço para continuar.');
-            return;
-        }
-    } else if (step === 3) {
-        if (!JourneyState.projectType) {
-            showJourneyAlert('Escolha o tipo de projeto para continuar.');
-            return;
-        }
-    } else if (step === 4) {
-        const titleEl = document.getElementById('journeyTitleField');
-        const descEl = document.getElementById('journeyDescField');
-        const title = (titleEl?.value || '').trim();
-        const desc = (descEl?.value || '').trim();
-
-        if (!title) {
-            document.getElementById('journeyTitleError').classList.add('visible');
-            titleEl?.classList.add('error');
-            titleEl?.focus();
-            return;
-        }
-        if (!desc) {
-            document.getElementById('journeyDescError').classList.add('visible');
-            descEl?.classList.add('error');
-            descEl?.focus();
-            return;
-        }
-        JourneyState.title = title;
-        JourneyState.description = desc;
-    } else if (step === 5) {
-        if (!JourneyState.payment) {
-            showJourneyAlert('Escolha uma forma de pagamento para continuar.');
-            return;
-        }
-    } else if (step === 6) {
-        if (!JourneyState.maintenance) {
-            showJourneyAlert('Escolha uma preferência de manutenção para continuar.');
-            return;
-        }
-    } else if (step === 7) {
-        submitJourney();
-        return;
-    }
-
-    const activeSteps = getActiveJourneySteps();
-    const idx = activeSteps.indexOf(step);
-    if (idx < activeSteps.length - 1) {
-        JourneyState.step = activeSteps[idx + 1];
-        renderJourneyStep();
-    }
-}
-
-function handleJourneyBack() {
-    const activeSteps = getActiveJourneySteps();
-    const idx = activeSteps.indexOf(JourneyState.step);
-    if (idx > 0) {
-        JourneyState.step = activeSteps[idx - 1];
-        renderJourneyStep();
-    }
-}
-
-/* ============================================================
-FEEDBACK VISUAL
-============================================================ */
-let journeyAlertTimer = null;
-
-function showJourneyAlert(msg) {
-    const bubble = document.getElementById('journeyAssistantText');
-    if (!bubble) return;
-
-    const originalText = ASSISTANT_MESSAGES[JourneyState.step] || bubble.textContent;
-
-    if (journeyAlertTimer) clearTimeout(journeyAlertTimer);
-
-    bubble.textContent = '⚠ ' + msg;
-    bubble.classList.add('journey-assistant-bubble-alert');
-
-    journeyAlertTimer = setTimeout(() => {
-        bubble.textContent = originalText;
-        bubble.classList.remove('journey-assistant-bubble-alert');
-    }, 2800);
-}
-
-/* ============================================================
-RENDER GERAL DA ETAPA ATUAL
-============================================================ */
-function renderJourneyStep() {
-    document.querySelectorAll('.journey-step').forEach(el => el.style.display = 'none');
-
-    const current = document.querySelector(`.journey-step[data-step="${JourneyState.step}"]`);
-    if (current) current.style.display = '';
-
-    const assistant = document.getElementById('journeyAssistantText');
-    if (assistant) {
-        assistant.textContent = ASSISTANT_MESSAGES[JourneyState.step] || '';
-        assistant.classList.remove('journey-assistant-bubble-alert');
-    }
-
-    updateJourneyProgress();
-
-    const backBtn = document.getElementById('journeyBackBtn');
-    const nextBtn = document.getElementById('journeyNextBtn');
-    const activeSteps = getActiveJourneySteps();
-    const idx = activeSteps.indexOf(JourneyState.step);
-
-    if (backBtn) backBtn.style.display = idx > 0 ? '' : 'none';
-    if (nextBtn) {
-        if (JourneyState.step === 7) {
-            nextBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
-        } else {
-            nextBtn.innerHTML = 'Continuar <i class="fas fa-arrow-right"></i>';
-        }
-    }
-
-    if (JourneyState.step === 1) renderJourneyCategories();
-    else if (JourneyState.step === 2) renderJourneyServices();
-    else if (JourneyState.step === 3) renderJourneyTypes();
-    else if (JourneyState.step === 4) renderJourneyForm();
-    else if (JourneyState.step === 5) renderJourneyPayment();
-    else if (JourneyState.step === 6) renderJourneyMaintenance();
-    else if (JourneyState.step === 7) renderJourneyReview();
-}
-
-/* ============================================================
-PROGRESSO
-============================================================ */
-function updateJourneyProgress() {
-    const fill = document.getElementById('journeyProgressFill');
-    const text = document.getElementById('journeyProgressText');
-    if (!fill || !text) return;
-
-    const activeSteps = getActiveJourneySteps();
-    const idx = activeSteps.indexOf(JourneyState.step);
-    const total = activeSteps.length;
-    const current = idx >= 0 ? idx + 1 : 1;
-    const percent = Math.min(100, (current / total) * 100);
-
-    fill.style.width = percent + '%';
-    text.textContent = `Etapa ${current} de ${total}`;
-}
-
-/* ============================================================
-ETAPA 1 — Categorias
-============================================================ */
-function renderJourneyCategories() {
-    const grid = document.getElementById('journeyCategoriesGrid');
-    if (!grid) return;
-
-    grid.innerHTML = CATEGORIES_DB.map(cat => `
-        <button class="journey-card ${JourneyState.category === cat.id ? 'selected' : ''}"
-                data-category="${cat.id}" type="button">
-            <div class="journey-card-icon">
-                <i class="fas ${cat.icon}"></i>
-            </div>
-            <div class="journey-card-title">${escapeHtml(cat.title)}</div>
-            <div class="journey-card-desc">${escapeHtml(cat.description)}</div>
-            <div class="journey-card-meta">
-                <i class="fas fa-layer-group"></i>
-                ${cat.subcategories.length} ${cat.subcategories.length === 1 ? 'serviço' : 'serviços'}
-            </div>
-        </button>
-    `).join('');
-
-    grid.querySelectorAll('[data-category]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const newCat = btn.dataset.category;
-            if (newCat !== JourneyState.category) {
-                JourneyState.category = newCat;
-                JourneyState.subcategory = null;
-                JourneyState.projectType = null;
-            }
-            renderJourneyCategories();
-        });
-    });
-}
-
-/* ============================================================
-ETAPA 2 — Serviços
-============================================================ */
-function renderJourneyServices() {
-    const grid = document.getElementById('journeyServicesGrid');
-    if (!grid) return;
-
-    const cat = getJourneyCategory();
-    if (!cat) {
-        grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">Selecione uma categoria primeiro.</p>';
-        return;
-    }
-
-    grid.innerHTML = cat.subcategories.map(sub => `
-        <button class="journey-card ${JourneyState.subcategory === sub.id ? 'selected' : ''}"
-                data-subcategory="${sub.id}" type="button">
-            <div class="journey-card-icon">
-                <i class="fas ${sub.icon}"></i>
-            </div>
-            <div class="journey-card-title">${escapeHtml(sub.title)}</div>
-            <div class="journey-card-desc">${escapeHtml(sub.description)}</div>
-            ${sub.priceRange ? `<div class="journey-card-price">${escapeHtml(sub.priceRange)}</div>` : ''}
-        </button>
-    `).join('');
-
-    grid.querySelectorAll('[data-subcategory]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const newSub = btn.dataset.subcategory;
-            if (newSub !== JourneyState.subcategory) {
-                JourneyState.subcategory = newSub;
-                JourneyState.projectType = null;
-            }
-            renderJourneyServices();
-        });
-    });
-}
-
-/* ============================================================
-ETAPA 3 — Tipos de projeto
-============================================================ */
-function renderJourneyTypes() {
-    const grid = document.getElementById('journeyTypesGrid');
-    if (!grid) return;
-
-    const sub = getJourneySubcategory();
-    if (!sub || !sub.projectTypes || sub.projectTypes.length === 0) {
-        grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">Este serviço não possui subdivisões. Continue para a próxima etapa.</p>';
-        return;
-    }
-
-    grid.innerHTML = sub.projectTypes.map((raw, idx) => {
-        const name = parseProjectTypeName(raw);
-        const desc = parseProjectTypeDesc(raw);
-        return `
-            <button class="journey-card ${JourneyState.projectType === raw ? 'selected' : ''}"
-                    data-type-index="${idx}" type="button">
-                <div class="journey-card-title">${escapeHtml(name)}</div>
-                ${desc ? `<div class="journey-card-desc">${escapeHtml(desc)}</div>` : ''}
-            </button>
-        `;
-    }).join('');
-
-    grid.querySelectorAll('[data-type-index]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = parseInt(btn.dataset.typeIndex, 10);
-            const s = getJourneySubcategory();
-            if (s && s.projectTypes[idx] !== undefined) {
-                JourneyState.projectType = s.projectTypes[idx];
-                renderJourneyTypes();
-            }
-        });
-    });
-}
-
-/* ============================================================
-ETAPA 4 — Formulário
-============================================================ */
-function renderJourneyForm() {
-    const titleEl = document.getElementById('journeyTitleField');
-    const descEl = document.getElementById('journeyDescField');
-    if (!titleEl || !descEl) return;
-
-    titleEl.value = JourneyState.title || '';
-    descEl.value = JourneyState.description || '';
-
-    document.getElementById('journeyTitleError').classList.remove('visible');
-    document.getElementById('journeyDescError').classList.remove('visible');
-    titleEl.classList.remove('error');
-    descEl.classList.remove('error');
-}
-
-/* ============================================================
-ETAPA 5 — Pagamento
-============================================================ */
-function renderJourneyPayment() {
-    const grid = document.getElementById('journeyPaymentGrid');
-    if (!grid) return;
-    grid.querySelectorAll('[data-payment]').forEach(card => {
-        card.classList.toggle('selected', card.dataset.payment === JourneyState.payment);
-    });
-}
-
-/* ============================================================
-ETAPA 6 — Manutenção
-============================================================ */
-function renderJourneyMaintenance() {
-    const grid = document.getElementById('journeyMaintenanceGrid');
-    if (!grid) return;
-    grid.querySelectorAll('[data-maintenance]').forEach(card => {
-        card.classList.toggle('selected', card.dataset.maintenance === JourneyState.maintenance);
-    });
-}
-
-/* ============================================================
-ETAPA 7 — Revisão
-============================================================ */
-function renderJourneyReview() {
-    const summary = document.getElementById('journeyReviewSummary');
-    if (!summary) return;
-
-    const cat = getJourneyCategory();
-    const sub = getJourneySubcategory();
-    const typeName = JourneyState.projectType ? parseProjectTypeName(JourneyState.projectType) : '';
-
-    const items = [];
-    items.push({ label: 'Categoria', value: cat ? cat.title : '—' });
-    items.push({ label: 'Serviço', value: sub ? sub.title : '—' });
-    if (typeName) items.push({ label: 'Tipo de projeto', value: typeName });
-    items.push({ label: 'Título do pedido', value: JourneyState.title || '—' });
-    items.push({ label: 'Descrição inicial', value: JourneyState.description || '—' });
-    items.push({ label: 'Pagamento da produção', value: JourneyState.payment || '—' });
-    items.push({ label: 'Preferência de manutenção', value: JourneyState.maintenance || '—' });
-
-    summary.innerHTML = items.map(item => `
-        <div class="journey-review-item">
-            <div class="journey-review-label">${escapeHtml(item.label)}</div>
-            <div class="journey-review-value">${escapeHtml(item.value)}</div>
-        </div>
-    `).join('');
-
-    const preview = document.getElementById('journeyUploadPreview');
-    const uploadArea = document.getElementById('journeyUploadArea');
-    if (JourneyState.file) {
-        if (preview) preview.classList.add('visible');
-        if (uploadArea) uploadArea.style.display = 'none';
-    } else {
-        if (preview) preview.classList.remove('visible');
-        if (uploadArea) uploadArea.style.display = '';
-    }
-
-    const feedback = document.getElementById('journeySubmitFeedback');
-    if (feedback) feedback.classList.remove('visible', 'success', 'error');
-}
-
-/* ============================================================
-UPLOAD DE IMAGEM
-============================================================ */
-function handleJourneyFileSelect(file) {
-    const errorEl = document.getElementById('journeyFileError');
-    errorEl.classList.remove('visible');
-
-    if (!ALLOWED_TYPES.includes(file.type)) {
-        errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Formato inválido. Envie apenas JPEG, PNG ou WebP.';
-        errorEl.classList.add('visible');
-        JourneyState.file = null;
-        resetJourneyFile();
-        return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-        errorEl.innerHTML = `<i class="fas fa-circle-exclamation"></i> Arquivo muito grande. Máximo: 5 MB (${formatFileSize(file.size)}).`;
-        errorEl.classList.add('visible');
-        JourneyState.file = null;
-        resetJourneyFile();
-        return;
-    }
-
-    JourneyState.file = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById('journeyPreviewImg').src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-
-    document.getElementById('journeyPreviewFilename').textContent = file.name;
-    document.getElementById('journeyPreviewFilesize').textContent = formatFileSize(file.size);
-    document.getElementById('journeyUploadArea').style.display = 'none';
-    document.getElementById('journeyUploadPreview').classList.add('visible');
-}
-
-function setupJourneyUpload() {
-    const uploadArea = document.getElementById('journeyUploadArea');
-    const fileInput = document.getElementById('journeyFileInput');
-    const removeBtn = document.getElementById('journeyRemoveFileBtn');
-    if (!uploadArea || !fileInput || !removeBtn) return;
-
-    uploadArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-            handleJourneyFileSelect(e.target.files[0]);
-        }
-    });
-    removeBtn.addEventListener('click', () => {
-        JourneyState.file = null;
-        resetJourneyFile();
-        fileInput.value = '';
-    });
-
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = 'var(--primary)';
-    });
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.style.borderColor = '';
-    });
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = '';
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            handleJourneyFileSelect(e.dataTransfer.files[0]);
-        }
-    });
-}
-
-/* ============================================================
-SUBMIT DA JORNADA
-============================================================ */
-async function submitJourney() {
-    const submitFeedback = document.getElementById('journeySubmitFeedback');
-    const nextBtn = document.getElementById('journeyNextBtn');
-
-    if (!JourneyState.category || !JourneyState.subcategory) {
-        showJourneyAlert('Escolha categoria e serviço antes de enviar.');
-        return;
-    }
-    if (!JourneyState.title || !JourneyState.description) {
-        showJourneyAlert('Preencha título e descrição antes de enviar.');
-        return;
-    }
-    if (!JourneyState.payment) {
-        showJourneyAlert('Escolha uma forma de pagamento.');
-        return;
-    }
-    if (!JourneyState.maintenance) {
-        showJourneyAlert('Escolha uma preferência de manutenção.');
-        return;
-    }
-
-    const cat = getJourneyCategory();
-    const sub = getJourneySubcategory();
-    const typeName = JourneyState.projectType ? parseProjectTypeName(JourneyState.projectType) : '';
-    const fullType = typeName
-        ? `${cat.title} > ${sub.title} > ${typeName}`
-        : `${cat.title} > ${sub.title}`;
-
-    const payloadData = {
-        title: JourneyState.title,
-        requestType: fullType,
-        category: cat.title,
-        subcategory: sub.title,
-        projectType: JourneyState.projectType || 'Não especificado',
-        description: JourneyState.description,
-        productionPayment: JourneyState.payment,
-        maintenancePreference: JourneyState.maintenance,
-        file: JourneyState.file
-    };
-
-    const formData = buildForminitPayload(payloadData, true);
-
-    nextBtn.disabled = true;
-    const originalBtnHtml = nextBtn.innerHTML;
-    nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-    submitFeedback.classList.remove('visible', 'success', 'error');
-
-    const result = await submitToForminit(formData);
-
-    if (result.success) {
-        submitFeedback.className = 'journey-submit-feedback success visible';
-        submitFeedback.innerHTML = `<i class="fas fa-circle-check"></i> ${result.message}`;
-        submitFeedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => {
-            const modal = dom.journeyModal();
-            if (modal) {
-                modal.classList.remove('open');
-                modal.setAttribute('aria-hidden', 'true');
-            }
-            document.body.style.overflow = '';
-            resetJourneyState();
-        }, 3500);
-    } else {
-        submitFeedback.className = 'journey-submit-feedback error visible';
-        submitFeedback.innerHTML = `<i class="fas fa-circle-exclamation"></i> ${result.message}`;
-        submitFeedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    nextBtn.disabled = false;
-    nextBtn.innerHTML = originalBtnHtml;
-}
-
-/* ============================================================
-SETUP DA JORNADA
-============================================================ */
-function setupJourney() {
-    document.getElementById('heroStartBtn')?.addEventListener('click', openJourney);
-    document.getElementById('sideMenuStartBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        closeSideMenu();
-        openJourney();
-    });
-
-    document.getElementById('journeyNextBtn')?.addEventListener('click', handleJourneyNext);
-    document.getElementById('journeyBackBtn')?.addEventListener('click', handleJourneyBack);
-    document.getElementById('closeJourneyBtn')?.addEventListener('click', closeJourneyWithConfirm);
-
-    const journeyModal = dom.journeyModal();
-    if (journeyModal) {
-        journeyModal.addEventListener('click', (e) => {
-            if (e.target === journeyModal) closeJourneyWithConfirm();
-        });
-    }
-
-    const titleEl = document.getElementById('journeyTitleField');
-    const descEl = document.getElementById('journeyDescField');
-    titleEl?.addEventListener('input', (e) => {
-        JourneyState.title = e.target.value;
-        if (e.target.value.trim()) {
-            document.getElementById('journeyTitleError').classList.remove('visible');
-            e.target.classList.remove('error');
-        }
-    });
-    descEl?.addEventListener('input', (e) => {
-        JourneyState.description = e.target.value;
-        if (e.target.value.trim()) {
-            document.getElementById('journeyDescError').classList.remove('visible');
-            e.target.classList.remove('error');
-        }
-    });
-
-    document.querySelectorAll('#journeyPaymentGrid [data-payment]').forEach(card => {
-        card.addEventListener('click', () => {
-            JourneyState.payment = card.dataset.payment;
-            renderJourneyPayment();
-        });
-    });
-
-    document.querySelectorAll('#journeyMaintenanceGrid [data-maintenance]').forEach(card => {
-        card.addEventListener('click', () => {
-            JourneyState.maintenance = card.dataset.maintenance;
-            renderJourneyMaintenance();
-        });
-    });
-
-    setupJourneyUpload();
-}
+export const COLOR_STORAGE_KEY = 'fgp_tech_palette';
+
+export const DEFAULT_PALETTE = {
+  primary: '#3b82f6',
+  accent: '#06b6d4',
+  bg: '#0a0e17',
+  text: '#f1f5f9'
+};
+
+export const COLOR_PRESETS = [
+  { name: 'FGP Tech', palette: { primary: '#3b82f6', accent: '#06b6d4', bg: '#0a0e17', text: '#f1f5f9' } },
+  { name: 'Corporativo', palette: { primary: '#2563eb', accent: '#f59e0b', bg: '#0c1424', text: '#f8fafc' } },
+  { name: 'Minimal', palette: { primary: '#64748b', accent: '#0ea5e9', bg: '#0f172a', text: '#f1f5f9' } },
+  { name: 'Claro', palette: { primary: '#2563eb', accent: '#0891b2', bg: '#f8fafc', text: '#0f172a' } }
+];
+
+export const ASSISTANT_MESSAGES = {
+  1: 'Olá! Vamos encontrar a solução ideal para seu projeto? Escolha uma das categorias abaixo para começar.',
+  2: 'Ótimo! Agora escolha o serviço que mais combina com sua necessidade.',
+  3: 'Estamos avançando! Qual modalidade de projeto você deseja?',
+  4: 'Conte um pouco sobre sua ideia. Não precisa utilizar termos técnicos!',
+  5: 'Agora vamos conhecer sua preferência de pagamento.',
+  6: 'Você também pode informar se deseja serviços de manutenção.',
+  7: 'Tudo pronto! Confira suas escolhas antes de enviar.'
+};
+
+export const JOURNEY_TOTAL_BASE_STEPS = 7;
