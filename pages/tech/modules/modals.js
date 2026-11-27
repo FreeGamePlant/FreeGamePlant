@@ -1,402 +1,420 @@
 /* ============================================================
-FGP TECHNOLOGIES — modals.js
-Modal de solicitação legado + Modal de acessos.
-Consuma o módulo forminit.js para o envio real.
-============================================================ */
+   FGP TECHNOLOGIES — modals.js
+   Gerencia os modais legados (#accessosModal e #requestModal).
+   O #journeyModal é controlado pelo assistant.js e não é
+   manipulador aqui, exceto por delegação genérica de ESC.
+
+   EXPORTA:
+   - initModals()
+   - openAccessosModal() / closeAccessosModal()
+   - openRequestModal(opts) / closeRequestModal()
+   ============================================================ */
 
 import { dom } from './state.js';
-import { formatFileSize } from './utils.js';
-import {
-    MAX_FILE_SIZE,
-    ALLOWED_TYPES,
-    buildForminitPayload,
-    submitToForminit
-} from './forminit.js';
+import { submitRequest } from './forminit.js';
 
 /* ============================================================
-ESTADO LOCAL DO UPLOAD (legado)
-============================================================ */
+   1. HELPERS
+   ============================================================ */
+
+function $(id) { return document.getElementById(id); }
+
+function openOverlay(el) {
+  if (!el) return;
+  el.classList.add('open');
+  el.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeOverlay(el) {
+  if (!el) return;
+  el.classList.remove('open');
+  el.setAttribute('aria-hidden', 'true');
+  // Só remove o lock se nenhum outro overlay estiver aberto
+  if (!document.querySelector('.modal-overlay.open, .journey-modal-overlay.open')) {
+    document.body.classList.remove('modal-open');
+  }
+}
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatFileSize(bytes) {
+  if (!bytes || bytes < 1024) return `${bytes || 0} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+
+/* ============================================================
+   2. ACCESSOS MODAL
+   ============================================================ */
+
+export function openAccessosModal() {
+  openOverlay(dom.accessosModal());
+}
+
+export function closeAccessosModal() {
+  closeOverlay(dom.accessosModal());
+}
+
+function bindAccessosModal() {
+  const modal = dom.accessosModal();
+  if (!modal) return;
+
+  // Botões que abrem (side menu + footer)
+  $('accessosSideBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openAccessosModal();
+  });
+  $('accessosFooterBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openAccessosModal();
+  });
+
+  // Fechar
+  $('closeAccessosBtn')?.addEventListener('click', closeAccessosModal);
+
+  // Clique no backdrop
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeAccessosModal();
+  });
+}
+
+/* ============================================================
+   3. REQUEST MODAL (LEGADO)
+   ============================================================ */
+
 let currentFile = null;
 
-/* ============================================================
-INIT
-============================================================ */
-export function initModals() {
-    setupAccessosModal();
-    setupRequestModal();
-    setupFileUpload();
-}
+export function openRequestModal(opts = {}) {
+  const modal = dom.requestModal();
+  if (!modal) return;
 
-/* ============================================================
-MODAL DE ACESSOS
-============================================================ */
-export function openAccessosModal() {
-    const modal = dom.accessosModal();
-    if (!modal) return;
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
+  // Preenchimento opcional vindo do catálogo ou de um CTA externo
+  const titleEl = $('requestTitle');
+  const initialDescEl = $('initialDescription');
+  const typeDisplayEl = $('requestTypeDisplay');
+  const typeHiddenEl = $('requestType');
 
-function closeAccessosModal() {
-    const modal = dom.accessosModal();
-    if (!modal || !modal.classList.contains('open')) return;
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-}
+  if (titleEl && opts.title) titleEl.value = opts.title;
+  if (initialDescEl && opts.description) initialDescEl.value = opts.description;
+  if (typeDisplayEl) typeDisplayEl.textContent = opts.type || '—';
+  if (typeHiddenEl) typeHiddenEl.value = opts.type || '';
 
-function setupAccessosModal() {
-    const modal = dom.accessosModal();
-    if (!modal) return;
+  openOverlay(modal);
 
-    document.getElementById('closeAccessosBtn')?.addEventListener('click', closeAccessosModal);
-    document.getElementById('accessosFooterBtn')?.addEventListener('click', openAccessosModal);
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeAccessosModal();
-    });
-}
-
-/* ============================================================
-MODAL DE SOLICITAÇÃO — POPULATE DE SELECTS
-============================================================ */
-function populateInstallmentOptions() {
-    const selCount = document.getElementById('installmentCount');
-    const selDay = document.getElementById('dueDay');
-    if (!selCount || !selDay) return;
-
-    const countOpts = ['<option value="">Selecione...</option>'];
-    for (let i = 3; i <= 27; i++) {
-        countOpts.push(`<option value="${i}">${i}x</option>`);
-    }
-    countOpts.push('<option value="outra">Outra quantidade — avaliar</option>');
-    selCount.innerHTML = countOpts.join('');
-
-    const dayOpts = ['<option value="">Selecione...</option>'];
-    for (let i = 1; i <= 28; i++) {
-        dayOpts.push(`<option value="${i}">Dia ${i}</option>`);
-    }
-    selDay.innerHTML = dayOpts.join('');
-}
-
-function updateInstallmentVisibility() {
-    const selected = document.querySelector('input[name="productionPayment"]:checked');
-    const isParcelado = selected && selected.value === 'Parcelado';
-    const fields = document.getElementById('installmentFields');
-    if (!fields) return;
-
-    if (isParcelado) {
-        fields.classList.add('visible');
-    } else {
-        fields.classList.remove('visible');
-        document.getElementById('installmentCount')?.classList.remove('error');
-        document.getElementById('dueDay')?.classList.remove('error');
-        document.getElementById('installmentCountError')?.classList.remove('visible');
-        document.getElementById('dueDayError')?.classList.remove('visible');
-    }
-}
-
-/* ============================================================
-MODAL DE SOLICITAÇÃO — HELPERS DE UI
-============================================================ */
-function clearErrors() {
-    document.querySelectorAll('.field-error').forEach(el => el.classList.remove('visible'));
-    document.querySelectorAll('.form-group input, .form-group textarea, .form-group select')
-        .forEach(el => el.classList.remove('error'));
-}
-
-function resetFileUpload() {
-    currentFile = null;
-    const fileInput = document.getElementById('fileInput');
-    const uploadArea = document.getElementById('uploadArea');
-    const preview = document.getElementById('uploadPreview');
-    if (!fileInput || !uploadArea || !preview) return;
-
-    fileInput.value = '';
-    preview.classList.remove('visible');
-    uploadArea.style.display = '';
-    uploadArea.classList.remove('has-file');
-    document.getElementById('previewImg').src = '';
-    document.getElementById('previewFilename').textContent = '';
-    document.getElementById('previewFilesize').textContent = '';
-    document.getElementById('fileError').classList.remove('visible');
-}
-
-function handleFileSelect(file) {
-    const fileError = document.getElementById('fileError');
-    fileError.classList.remove('visible');
-
-    if (!ALLOWED_TYPES.includes(file.type)) {
-        fileError.innerHTML = '<i class="fas fa-circle-exclamation"></i> Formato inválido. Envie apenas JPEG, PNG ou WebP.';
-        fileError.classList.add('visible');
-        resetFileUpload();
-        return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-        fileError.innerHTML = `<i class="fas fa-circle-exclamation"></i> Arquivo muito grande. Máximo: 5 MB (seu arquivo: ${formatFileSize(file.size)}).`;
-        fileError.classList.add('visible');
-        resetFileUpload();
-        return;
-    }
-
-    currentFile = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById('previewImg').src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-
-    document.getElementById('previewFilename').textContent = file.name;
-    document.getElementById('previewFilesize').textContent = formatFileSize(file.size);
-    document.getElementById('uploadArea').style.display = 'none';
-    document.getElementById('uploadPreview').classList.add('visible');
-}
-
-function setupFileUpload() {
-    const uploadArea = document.getElementById('uploadArea');
-    const fileInput = document.getElementById('fileInput');
-    const removeBtn = document.getElementById('removeFileBtn');
-    if (!uploadArea || !fileInput || !removeBtn) return;
-
-    uploadArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-            handleFileSelect(e.target.files[0]);
-        }
-    });
-    removeBtn.addEventListener('click', () => {
-        resetFileUpload();
-        fileInput.value = '';
-    });
-
-    // Drag & drop
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = 'var(--primary)';
-    });
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.style.borderColor = '';
-    });
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = '';
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            handleFileSelect(e.dataTransfer.files[0]);
-        }
-    });
-}
-
-/* ============================================================
-MODAL DE SOLICITAÇÃO — ABRIR / FECHAR
-============================================================ */
-export function openRequestModal(cat, sub) {
-    const modal = dom.requestModal();
-    if (!modal) return;
-
-    const typeText = `${cat.title} > ${sub.title}`;
-    document.getElementById('requestTypeDisplay').textContent = typeText;
-    document.getElementById('requestType').value = typeText;
-    document.getElementById('requestTitle').value = `Solicitação de desenvolvimento — ${sub.title}`;
-    document.getElementById('initialDescription').value =
-        `Olá! Tenho interesse no desenvolvimento de ${sub.title.toLowerCase()} (${cat.title}) e gostaria de conhecer as condições de contratação.`;
-    document.getElementById('projectDescription').value = '';
-
-    document.querySelectorAll('input[name="productionPayment"]').forEach(r => r.checked = false);
-    document.querySelectorAll('input[name="maintenancePreference"]').forEach(r => r.checked = false);
-    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-
-    const instCount = document.getElementById('installmentCount');
-    const dueDay = document.getElementById('dueDay');
-    if (instCount) instCount.value = '';
-    if (dueDay) dueDay.value = '';
-
-    updateInstallmentVisibility();
-    resetFileUpload();
-    clearErrors();
-
-    const feedback = document.getElementById('submitFeedback');
-    feedback.classList.remove('visible', 'success', 'error');
-
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-
-    setTimeout(() => document.getElementById('requestTitle').focus(), 100);
-    modal._previousFocus = document.activeElement;
+  // Foco no primeiro campo após abrir
+  setTimeout(() => titleEl?.focus(), 80);
 }
 
 export function closeRequestModal() {
-    const modal = dom.requestModal();
-    if (!modal || !modal.classList.contains('open')) return;
-
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-
-    if (modal._previousFocus && typeof modal._previousFocus.focus === 'function') {
-        modal._previousFocus.focus();
-    }
+  closeOverlay(dom.requestModal());
 }
 
 /* ============================================================
-MODAL DE SOLICITAÇÃO — VALIDAÇÃO
-============================================================ */
-function validateForm() {
-    clearErrors();
-    let valid = true;
+   4. FORM DO REQUEST MODAL
+   ============================================================ */
 
-    const title = document.getElementById('requestTitle');
-    const initialDesc = document.getElementById('initialDescription');
-    const projectDesc = document.getElementById('projectDescription');
+function populateInstallmentOptions() {
+  const countSel = $('installmentCount');
+  const daySel = $('dueDay');
 
-    if (!title.value.trim()) {
-        title.classList.add('error');
-        document.getElementById('titleError').classList.add('visible');
-        valid = false;
+  if (countSel && countSel.options.length === 0) {
+    for (let i = 2; i <= 12; i++) {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = `${i}x`;
+      countSel.appendChild(opt);
     }
-    if (!initialDesc.value.trim()) {
-        initialDesc.classList.add('error');
-        document.getElementById('initialDescError').classList.add('visible');
-        valid = false;
-    }
-    if (!projectDesc.value.trim()) {
-        projectDesc.classList.add('error');
-        document.getElementById('projectDescError').classList.add('visible');
-        valid = false;
-    }
+  }
 
-    const production = document.querySelector('input[name="productionPayment"]:checked');
-    if (!production) {
-        document.getElementById('productionPaymentError').classList.add('visible');
-        valid = false;
-    } else if (production.value === 'Parcelado') {
-        const instCount = document.getElementById('installmentCount');
-        const dueDay = document.getElementById('dueDay');
-        if (!instCount.value) {
-            instCount.classList.add('error');
-            document.getElementById('installmentCountError').classList.add('visible');
-            valid = false;
-        }
-        if (!dueDay.value) {
-            dueDay.classList.add('error');
-            document.getElementById('dueDayError').classList.add('visible');
-            valid = false;
-        }
+  if (daySel && daySel.options.length === 0) {
+    for (let i = 1; i <= 28; i++) {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = `Dia ${i}`;
+      daySel.appendChild(opt);
     }
+  }
+}
 
-    const maintenance = document.querySelector('input[name="maintenancePreference"]:checked');
-    if (!maintenance) {
-        document.getElementById('maintenanceError').classList.add('visible');
-        valid = false;
-    }
+function setInstallmentVisibility(visible) {
+  const fields = $('installmentFields');
+  if (!fields) return;
+  fields.classList.toggle('hidden', !visible);
+  fields.style.display = visible ? '' : 'none';
+}
 
-    return valid;
+function bindPaymentOptions() {
+  document.querySelectorAll('input[name="productionPayment"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      setInstallmentVisibility(radio.value === 'Parcelado' && radio.checked);
+      // Atualiza visual da label
+      document.querySelectorAll('#productionPaymentOptions .payment-option').forEach(lbl => {
+        const input = lbl.querySelector('input[type="radio"]');
+        lbl.classList.toggle('selected', !!input?.checked);
+      });
+    });
+  });
+
+  document.querySelectorAll('input[name="maintenancePreference"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('#maintenanceOptions .payment-option').forEach(lbl => {
+        const input = lbl.querySelector('input[type="radio"]');
+        lbl.classList.toggle('selected', !!input?.checked);
+      });
+    });
+  });
 }
 
 /* ============================================================
-MODAL DE SOLICITAÇÃO — SUBMIT (usando forminit.js)
-============================================================ */
-async function submitRequest(e) {
+   5. UPLOAD (requestModal)
+   ============================================================ */
+
+function setupUpload() {
+  const area = $('uploadArea');
+  const input = $('fileInput');
+  const preview = $('uploadPreview');
+  const previewImg = $('previewImg');
+  const nameEl = $('previewFilename');
+  const sizeEl = $('previewFilesize');
+  const removeBtn = $('removeFileBtn');
+
+  if (!area || !input) return;
+
+  area.addEventListener('click', () => input.click());
+
+  input.addEventListener('change', () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`Arquivo muito grande (${formatFileSize(file.size)}). Máximo: 5 MB.`);
+      input.value = '';
+      return;
+    }
+    if (!ACCEPTED_MIME.includes(file.type)) {
+      alert('Formato inválido. Envie JPEG, PNG ou WebP.');
+      input.value = '';
+      return;
+    }
+
+    currentFile = file;
+
+    if (preview && previewImg && nameEl && sizeEl) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        nameEl.textContent = file.name;
+        sizeEl.textContent = formatFileSize(file.size);
+        preview.classList.add('visible');
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  removeBtn?.addEventListener('click', () => {
+    currentFile = null;
+    input.value = '';
+    if (previewImg) previewImg.src = '';
+    preview?.classList.remove('visible');
+  });
+}
+
+/* ============================================================
+   6. VALIDAÇÃO E SUBMISSÃO DO REQUEST MODAL
+   ============================================================ */
+
+function showFeedback(message, type = 'error') {
+  const fb = $('submitFeedback');
+  if (!fb) return;
+  fb.textContent = message;
+  fb.className = `submit-feedback visible ${type}`;
+}
+
+function clearFeedback() {
+  const fb = $('submitFeedback');
+  if (!fb) return;
+  fb.textContent = '';
+  fb.className = 'submit-feedback';
+}
+
+function collectRequestForm() {
+  const title = $('requestTitle')?.value.trim() || '';
+  const initialDescription = $('initialDescription')?.value.trim() || '';
+  const requestType = $('requestType')?.value || '';
+  const projectDescription = $('projectDescription')?.value.trim() || '';
+
+  const payment = document.querySelector('input[name="productionPayment"]:checked')?.value || '';
+  const installments = $('installmentCount')?.value || '';
+  const dueDay = $('dueDay')?.value || '';
+  const maintenance = document.querySelector('input[name="maintenancePreference"]:checked')?.value || '';
+
+  return {
+    title,
+    initialDescription,
+    requestType,
+    projectDescription,
+    productionPayment: payment,
+    installmentCount: payment === 'Parcelado' ? installments : '',
+    dueDay: payment === 'Parcelado' ? dueDay : '',
+    maintenancePreference: maintenance
+  };
+}
+
+function validateRequestForm(data) {
+  if (!data.title) {
+    showFeedback('Por favor, informe o título do pedido.');
+    $('requestTitle')?.focus();
+    return false;
+  }
+  if (!data.initialDescription) {
+    showFeedback('Por favor, preencha a descrição inicial.');
+    $('initialDescription')?.focus();
+    return false;
+  }
+  if (!data.projectDescription) {
+    showFeedback('Por favor, descreva o projeto.');
+    $('projectDescription')?.focus();
+    return false;
+  }
+  if (data.productionPayment === 'Parcelado') {
+    if (!data.installmentCount) {
+      showFeedback('Selecione a quantidade de parcelas.');
+      return false;
+    }
+    if (!data.dueDay) {
+      showFeedback('Selecione o dia de vencimento.');
+      return false;
+    }
+  }
+  return true;
+}
+
+let submitting = false;
+
+async function handleRequestSubmit(e) {
+  e.preventDefault();
+  if (submitting) return;
+
+  clearFeedback();
+  const data = collectRequestForm();
+  if (!validateRequestForm(data)) return;
+
+  const btn = $('submitBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add('loading');
+  }
+  submitting = true;
+
+  try {
+    const result = await submitRequest(data, currentFile);
+
+    if (!result.ok) {
+      showFeedback(result.error || 'Não foi possível enviar. Tente novamente.');
+      return;
+    }
+
+    showFeedback('Pedido enviado com sucesso! Entraremos em contato em breve.', 'success');
+
+    // Reset após 1.8s e fecha
+    setTimeout(() => {
+      resetRequestForm();
+      closeRequestModal();
+    }, 1800);
+
+  } catch (err) {
+    console.error('[FGP][modals] Erro no envio do requestModal:', err);
+    showFeedback('Erro inesperado ao enviar. Tente novamente.');
+  } finally {
+    submitting = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+}
+
+function resetRequestForm() {
+  $('requestForm')?.reset();
+  currentFile = null;
+
+  const preview = $('uploadPreview');
+  preview?.classList.remove('visible');
+  const previewImg = $('previewImg');
+  if (previewImg) previewImg.src = '';
+
+  const typeDisplay = $('requestTypeDisplay');
+  if (typeDisplay) typeDisplay.textContent = '—';
+  const typeHidden = $('requestType');
+  if (typeHidden) typeHidden.value = '';
+
+  document.querySelectorAll('#productionPaymentOptions .payment-option, #maintenanceOptions .payment-option')
+    .forEach(lbl => lbl.classList.remove('selected'));
+
+  setInstallmentVisibility(false);
+  clearFeedback();
+}
+
+function bindRequestModal() {
+  const modal = dom.requestModal();
+  const form = $('requestForm');
+  if (!modal) return;
+
+  // Preencher selects (idempotente)
+  populateInstallmentOptions();
+  setInstallmentVisibility(false);
+
+  // Bind payment + maintenance
+  bindPaymentOptions();
+
+  // Upload
+  setupUpload();
+
+  // Submit
+  form?.addEventListener('submit', handleRequestSubmit);
+  $('submitBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
+    handleRequestSubmit(e);
+  });
 
-    if (!validateForm()) {
-        const firstError = document.querySelector('.field-error.visible');
-        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-    }
+  // Fechar
+  $('closeRequestBtn')?.addEventListener('click', closeRequestModal);
 
-    const submitBtn = document.getElementById('submitBtn');
-    const feedback = document.getElementById('submitFeedback');
+  // Backdrop
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeRequestModal();
+  });
 
-    submitBtn.disabled = true;
-    submitBtn.classList.add('loading');
-    feedback.classList.remove('visible', 'success', 'error');
-
-    // Monta dados para o payload
-    const prodPayment = document.querySelector('input[name="productionPayment"]:checked');
-    let productionText = prodPayment ? prodPayment.value : '';
-    if (prodPayment && prodPayment.value === 'Parcelado') {
-        const countEl = document.getElementById('installmentCount');
-        const dueEl = document.getElementById('dueDay');
-        const countText = countEl.value === 'outra' ? 'Outra quantidade — avaliar' : `${countEl.value} parcelas`;
-        productionText += ` — ${countText}, vencimento dia ${dueEl.value}`;
-    }
-
-    const maintPref = document.querySelector('input[name="maintenancePreference"]:checked');
-    const requestType = document.getElementById('requestType').value;
-
-    const payloadData = {
-        title: document.getElementById('requestTitle').value.trim(),
-        requestType: requestType,
-        category: 'Solicitação Direta',
-        subcategory: 'Solicitação Direta',
-        projectType: 'Não especificado',
-        initialDescription: document.getElementById('initialDescription').value.trim(),
-        description: document.getElementById('projectDescription').value.trim(),
-        productionPayment: productionText,
-        maintenancePreference: maintPref ? maintPref.value : 'Não informado',
-        file: currentFile
-    };
-
-    const formData = buildForminitPayload(payloadData, false);
-    const result = await submitToForminit(formData);
-
-    if (result.success) {
-        feedback.className = 'submit-feedback success visible';
-        feedback.innerHTML = `<i class="fas fa-circle-check"></i> ${result.message}`;
-        feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => closeRequestModal(), 5000);
-    } else {
-        feedback.className = 'submit-feedback error visible';
-        feedback.innerHTML = `<i class="fas fa-circle-exclamation"></i> ${result.message}`;
-        feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    submitBtn.disabled = false;
-    submitBtn.classList.remove('loading');
+  // ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (modal.classList.contains('open')) closeRequestModal();
+  });
 }
 
 /* ============================================================
-MODAL DE SOLICITAÇÃO — SETUP
-============================================================ */
-function setupRequestModal() {
-    const modal = dom.requestModal();
-    const form = document.getElementById('requestForm');
-    const closeBtn = document.getElementById('closeRequestBtn');
-    if (!modal || !form) return;
+   7. INIT
+   ============================================================ */
 
-    populateInstallmentOptions();
+let initialized = false;
 
-    closeBtn.addEventListener('click', closeRequestModal);
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeRequestModal();
-    });
+export function initModals() {
+  if (initialized) return;
 
-    // Seleção visual de opções de pagamento
-    document.querySelectorAll('.payment-options').forEach(group => {
-        group.querySelectorAll('.payment-option').forEach(option => {
-            option.addEventListener('click', () => {
-                group.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-                option.classList.add('selected');
-                const radio = option.querySelector('input[type="radio"]');
-                if (radio) {
-                    radio.checked = true;
-                    if (radio.name === 'productionPayment') updateInstallmentVisibility();
-                }
-            });
-        });
-    });
+  bindAccessosModal();
+  bindRequestModal();
 
-    // Limpa erros ao alterar selects de parcelas
-    document.getElementById('installmentCount')?.addEventListener('change', (e) => {
-        if (e.target.value) {
-            e.target.classList.remove('error');
-            document.getElementById('installmentCountError').classList.remove('visible');
-        }
-    });
-    document.getElementById('dueDay')?.addEventListener('change', (e) => {
-        if (e.target.value) {
-            e.target.classList.remove('error');
-            document.getElementById('dueDayError').classList.remove('visible');
-        }
-    });
-
-    form.addEventListener('submit', submitRequest);
+  initialized = true;
 }
