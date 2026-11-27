@@ -1,327 +1,376 @@
 /* ============================================================
-FGP TECHNOLOGIES — catalog.js
-Catálogo hierárquico: categorias, subcategorias, detalhes
-comerciais, breadcrumb e navegação entre níveis.
-============================================================ */
+   FGP TECHNOLOGIES — catalog.js
+   Catálogo público hierárquico: Categorias → Subcategorias → Detalhes.
+   Integra com o assistente (openJourney) para iniciar a solicitação
+   a partir de um serviço específico.
+
+   EXPORTA:
+   - initCatalog()  → inicializa listeners e render inicial
+   ============================================================ */
 
 import { CATEGORIES_DB, NavState, dom } from './state.js';
-import { escapeHtml } from './utils.js';
+import { openJourney } from './assistant.js';
+
+/* ============================================================
+   1. HELPERS
+   ============================================================ */
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function findCategory(id) {
+  return CATEGORIES_DB.find(c => c.id === id) || null;
+}
+
+function findSubcategory(catId, subId) {
+  const cat = findCategory(catId);
+  if (!cat) return null;
+  return cat.subcategories.find(s => s.id === subId) || null;
+}
+
+function statusBadge(status) {
+  const map = {
+    available: { label: 'Disponível', cls: 'status-available' },
+    evaluation: { label: 'Sob avaliação', cls: 'status-evaluation' }
+  };
+  const s = map[status] || { label: status || '', cls: '' };
+  return `<span class="status-badge ${s.cls}">${escapeHtml(s.label)}</span>`;
+}
+
+/* ============================================================
+   2. RENDER — NÍVEL 1: CATEGORIAS
+   ============================================================ */
+
+function renderCategories() {
+  const container = dom.categoriesContainer();
+  if (!container) return;
+
+  container.innerHTML = CATEGORIES_DB.map(cat => `
+    <button class="category-card" data-category="${escapeHtml(cat.id)}" type="button">
+      <div class="category-card-icon">
+        <i class="fas ${escapeHtml(cat.icon)}"></i>
+      </div>
+      <div class="category-card-body">
+        <h3>${escapeHtml(cat.title)}</h3>
+        <p>${escapeHtml(cat.description)}</p>
+        <ul class="category-card-features">
+          ${(cat.features || []).map(f => `<li><i class="fas fa-check"></i> ${escapeHtml(f)}</li>`).join('')}
+        </ul>
+      </div>
+      <div class="category-card-arrow" aria-hidden="true">
+        <i class="fas fa-arrow-right"></i>
+      </div>
+    </button>
+  `).join('');
+}
+
+/* ============================================================
+   3. RENDER — NÍVEL 2: SUBCATEGORIAS
+   ============================================================ */
+
+function renderSubcategories(categoryId) {
+  const container = dom.subcategoriesContainer();
+  if (!container) return;
+
+  const cat = findCategory(categoryId);
+  if (!cat) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = cat.subcategories.map(sub => `
+    <button class="subcategory-card"
+            data-category="${escapeHtml(categoryId)}"
+            data-subcategory="${escapeHtml(sub.id)}"
+            type="button">
+      <div class="subcategory-card-header">
+        <div class="subcategory-card-icon">
+          <i class="fas ${escapeHtml(sub.icon)}"></i>
+        </div>
+        ${statusBadge(sub.status)}
+      </div>
+      <h4>${escapeHtml(sub.title)}</h4>
+      <p class="subcategory-card-desc">${escapeHtml(sub.description)}</p>
+      <div class="subcategory-card-meta">
+        <span class="meta-price"><i class="fas fa-tag"></i> ${escapeHtml(sub.priceRange)}</span>
+        <span class="meta-deadline"><i class="fas fa-clock"></i> ${escapeHtml(sub.deadline)}</span>
+      </div>
+      <span class="subcategory-card-cta">
+        Ver detalhes <i class="fas fa-arrow-right"></i>
+      </span>
+    </button>
+  `).join('');
+}
+
+/* ============================================================
+   4. RENDER — NÍVEL 3: DETALHES
+   ============================================================ */
+
+function renderDetails(categoryId, subcategoryId) {
+  const container = dom.detailsContainer();
+  if (!container) return;
+
+  const cat = findCategory(categoryId);
+  const sub = findSubcategory(categoryId, subcategoryId);
+  if (!cat || !sub) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const mailSubject = encodeURIComponent(`Sobre: ${cat.title} — ${sub.title}`);
+
+  container.innerHTML = `
+    <article class="details-panel"
+             data-category="${escapeHtml(categoryId)}"
+             data-subcategory="${escapeHtml(subcategoryId)}">
+
+      <header class="details-header">
+        <div class="details-header-main">
+          <div class="details-icon">
+            <i class="fas ${escapeHtml(sub.icon)}"></i>
+          </div>
+          <div>
+            <h2>${escapeHtml(sub.title)}</h2>
+            <p class="details-category">${escapeHtml(cat.title)}</p>
+          </div>
+        </div>
+        ${statusBadge(sub.status)}
+      </header>
+
+      <p class="details-long-desc">${escapeHtml(sub.longDescription || sub.description)}</p>
+
+      <div class="details-metrics">
+        <div class="details-metric">
+          <span class="metric-label">Faixa de investimento</span>
+          <span class="metric-value">${escapeHtml(sub.priceRange)}</span>
+          <span class="metric-note">${escapeHtml(sub.priceNote || '')}</span>
+        </div>
+        <div class="details-metric">
+          <span class="metric-label">Prazo estimado</span>
+          <span class="metric-value">${escapeHtml(sub.deadline)}</span>
+        </div>
+      </div>
+
+      ${sub.features && sub.features.length ? `
+        <section class="details-section">
+          <h3><i class="fas fa-check-circle"></i> O que está incluso</h3>
+          <ul class="details-list">
+            ${sub.features.map(f => `<li>${escapeHtml(f)}</li>`).join('')}
+          </ul>
+        </section>
+      ` : ''}
+
+      ${sub.projectTypes && sub.projectTypes.length ? `
+        <section class="details-section">
+          <h3><i class="fas fa-diagram-project"></i> Tipos de projeto</h3>
+          <ul class="details-list">
+            ${sub.projectTypes.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+          </ul>
+        </section>
+      ` : ''}
+
+      ${sub.paymentTerms && sub.paymentTerms.length ? `
+        <section class="details-section">
+          <h3><i class="fas fa-credit-card"></i> Condições de pagamento</h3>
+          <ul class="details-list">
+            ${sub.paymentTerms.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+          </ul>
+        </section>
+      ` : ''}
+
+      ${sub.additionalCosts && sub.additionalCosts.length ? `
+        <section class="details-section">
+          <h3><i class="fas fa-receipt"></i> Custos adicionais (externos)</h3>
+          <ul class="details-list">
+            ${sub.additionalCosts.map(c => `<li>${escapeHtml(c)}</li>`).join('')}
+          </ul>
+        </section>
+      ` : ''}
+
+      ${sub.observations && sub.observations.length ? `
+        <section class="details-section details-observations">
+          <h3><i class="fas fa-info-circle"></i> Observações importantes</h3>
+          <ul class="details-list">
+            ${sub.observations.map(o => `<li>${escapeHtml(o)}</li>`).join('')}
+          </ul>
+        </section>
+      ` : ''}
+
+      <div class="details-actions">
+        <button class="btn-primary details-start-btn"
+                data-category="${escapeHtml(categoryId)}"
+                data-subcategory="${escapeHtml(subcategoryId)}"
+                type="button">
+          <i class="fas fa-wand-magic-sparkles"></i> Começar com este serviço
+        </button>
+        <a class="btn-outline details-contact-btn"
+           href="mailto:fgpfreegameplant@gmail.com?subject=${mailSubject}">
+          <i class="fas fa-envelope"></i> Falar com a FGP
+        </a>
+      </div>
+
+      <p class="details-disclaimer">
+        <i class="fas fa-info-circle"></i>
+        Os valores e prazos apresentados são referências. A proposta definitiva
+        depende da análise do escopo do projeto.
+      </p>
+    </article>
+  `;
+}
+
+/* ============================================================
+   5. BREADCRUMB
+   ============================================================ */
+
+function renderBreadcrumb(level, categoryId = null, subcategoryId = null) {
+  const el = dom.breadcrumb();
+  if (!el) return;
+
+  if (level === 'categories') {
+    el.innerHTML = '';
+    el.classList.add('hidden');
+    return;
+  }
+
+  const cat = findCategory(categoryId);
+  const parts = [
+    `<button class="breadcrumb-item" data-nav="categories" type="button">
+       <i class="fas fa-layer-group"></i> Serviços
+     </button>`
+  ];
+
+  if (cat) {
+    parts.push(`<span class="breadcrumb-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>`);
+
+    if (level === 'details') {
+      parts.push(`<button class="breadcrumb-item" data-nav="subcategories" type="button">
+        ${escapeHtml(cat.title)}
+      </button>`);
+    } else {
+      parts.push(`<span class="breadcrumb-current">${escapeHtml(cat.title)}</span>`);
+    }
+  }
+
+  if (level === 'details' && subcategoryId) {
+    const sub = findSubcategory(categoryId, subcategoryId);
+    if (sub) {
+      parts.push(`<span class="breadcrumb-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>`);
+      parts.push(`<span class="breadcrumb-current">${escapeHtml(sub.title)}</span>`);
+    }
+  }
+
+  el.innerHTML = parts.join('');
+  el.classList.remove('hidden');
+}
+
+/* ============================================================
+   6. NAVEGAÇÃO INTERNA
+   ============================================================ */
+
+function showCategories() {
+  NavState.currentCategory = null;
+  NavState.currentSubcategory = null;
+
+  dom.categoriesContainer()?.classList.remove('hidden');
+  dom.subcategoriesContainer()?.classList.add('hidden');
+  dom.detailsContainer()?.classList.add('hidden');
+
+  renderBreadcrumb('categories');
+  renderCategories();
+}
+
+function showSubcategories(categoryId) {
+  NavState.currentCategory = categoryId;
+  NavState.currentSubcategory = null;
+
+  dom.categoriesContainer()?.classList.add('hidden');
+  dom.subcategoriesContainer()?.classList.remove('hidden');
+  dom.detailsContainer()?.classList.add('hidden');
+
+  renderBreadcrumb('subcategories', categoryId);
+  renderSubcategories(categoryId);
+}
+
+function showDetails(categoryId, subcategoryId) {
+  NavState.currentCategory = categoryId;
+  NavState.currentSubcategory = subcategoryId;
+
+  dom.categoriesContainer()?.classList.add('hidden');
+  dom.subcategoriesContainer()?.classList.add('hidden');
+  dom.detailsContainer()?.classList.remove('hidden');
+
+  renderBreadcrumb('details', categoryId, subcategoryId);
+  renderDetails(categoryId, subcategoryId);
+}
+
+/* ============================================================
+   7. HANDLERS (delegação de eventos)
+   ============================================================ */
+
+function handleCategoryClick(e) {
+  const card = e.target.closest('.category-card');
+  if (!card) return;
+  const catId = card.dataset.category;
+  if (catId) showSubcategories(catId);
+}
+
+function handleSubcategoryClick(e) {
+  const card = e.target.closest('.subcategory-card');
+  if (!card) return;
+  const catId = card.dataset.category;
+  const subId = card.dataset.subcategory;
+  if (catId && subId) showDetails(catId, subId);
+}
+
+function handleDetailsClick(e) {
+  const startBtn = e.target.closest('.details-start-btn');
+  if (!startBtn) return;
+  const catId = startBtn.dataset.category;
+  const subId = startBtn.dataset.subcategory;
+  if (catId && subId) {
+    openJourney({ category: catId, subcategory: subId });
+  }
+}
+
+function handleBreadcrumbClick(e) {
+  const item = e.target.closest('[data-nav]');
+  if (!item) return;
+  const target = item.dataset.nav;
+  if (target === 'categories') {
+    showCategories();
+  } else if (target === 'subcategories' && NavState.currentCategory) {
+    showSubcategories(NavState.currentCategory);
+  }
+}
+
+/* ============================================================
+   8. INIT
+   ============================================================ */
+
+let initialized = false;
 
 export function initCatalog() {
-    renderCategories();
-    showLevel(1);
-}
+  if (initialized) return;
 
-/* ============================================================
-NAVEGAÇÃO ENTRE NÍVEIS
-============================================================ */
-function showLevel(level) {
-    const intro = dom.categoriesIntro();
-    const breadcrumb = dom.breadcrumb();
-    const cats = dom.categoriesContainer();
-    const subs = dom.subcategoriesContainer();
-    const dets = dom.detailsContainer();
+  const categoriesEl = dom.categoriesContainer();
+  const subcategoriesEl = dom.subcategoriesContainer();
+  const detailsEl = dom.detailsContainer();
+  const breadcrumbEl = dom.breadcrumb();
 
-    if (level === 1) {
-        intro?.classList.remove('hidden');
-        breadcrumb?.classList.add('hidden');
-        cats?.classList.remove('hidden');
-        subs?.classList.add('hidden');
-        dets?.classList.add('hidden');
-    } else if (level === 2) {
-        intro?.classList.add('hidden');
-        breadcrumb?.classList.remove('hidden');
-        cats?.classList.add('hidden');
-        subs?.classList.remove('hidden');
-        dets?.classList.add('hidden');
-    } else if (level === 3) {
-        intro?.classList.add('hidden');
-        breadcrumb?.classList.remove('hidden');
-        cats?.classList.add('hidden');
-        subs?.classList.add('hidden');
-        dets?.classList.remove('hidden');
-    }
-}
+  if (categoriesEl) categoriesEl.addEventListener('click', handleCategoryClick);
+  if (subcategoriesEl) subcategoriesEl.addEventListener('click', handleSubcategoryClick);
+  if (detailsEl) detailsEl.addEventListener('click', handleDetailsClick);
+  if (breadcrumbEl) breadcrumbEl.addEventListener('click', handleBreadcrumbClick);
 
-function scrollToCategories() {
-    const el = document.getElementById('categorias');
-    if (el) {
-        const offset = 80;
-        const top = el.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top, behavior: 'smooth' });
-    }
-}
+  // Estado inicial: mostrar apenas as categorias
+  showCategories();
 
-export function openCategory(categoryId) {
-    const cat = CATEGORIES_DB.find(c => c.id === categoryId);
-    if (!cat) return;
-    NavState.currentCategory = categoryId;
-    NavState.currentSubcategory = null;
-    renderSubcategories(cat);
-    renderBreadcrumb();
-    showLevel(2);
-    scrollToCategories();
-}
-
-export function openSubcategory(subcategoryId) {
-    const cat = CATEGORIES_DB.find(c => c.id === NavState.currentCategory);
-    if (!cat) return;
-    const sub = cat.subcategories.find(s => s.id === subcategoryId);
-    if (!sub) return;
-    NavState.currentSubcategory = subcategoryId;
-    renderDetails(cat, sub);
-    renderBreadcrumb();
-    showLevel(3);
-    scrollToCategories();
-}
-
-export function backToCategories() {
-    NavState.currentCategory = null;
-    NavState.currentSubcategory = null;
-    renderBreadcrumb();
-    showLevel(1);
-    scrollToCategories();
-}
-
-export function backToSubcategories() {
-    NavState.currentSubcategory = null;
-    renderBreadcrumb();
-    showLevel(2);
-    scrollToCategories();
-}
-
-/* ============================================================
-RENDERIZAÇÃO — NÍVEL 1 (categorias)
-============================================================ */
-function renderCategories() {
-    const container = dom.categoriesContainer();
-    if (!container) return;
-
-    container.innerHTML = CATEGORIES_DB.map(cat => `
-        <article class="category-card">
-            <div class="category-card-icon">
-                <i class="fas ${cat.icon}"></i>
-            </div>
-            <h3>${escapeHtml(cat.title)}</h3>
-            <p class="category-card-desc">${escapeHtml(cat.description)}</p>
-            <ul class="category-card-features">
-                ${cat.features.map(f => `<li><i class="fas fa-check"></i> ${escapeHtml(f)}</li>`).join('')}
-            </ul>
-            <div class="category-card-meta">
-                <span class="category-card-count">
-                    <i class="fas fa-layer-group"></i> ${cat.subcategories.length} ${cat.subcategories.length === 1 ? 'subcategoria' : 'subcategorias'}
-                </span>
-                <button class="btn-open" data-category="${cat.id}">
-                    Abrir <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </article>
-    `).join('');
-
-    container.querySelectorAll('.btn-open').forEach(btn => {
-        btn.addEventListener('click', () => openCategory(btn.dataset.category));
-    });
-}
-
-/* ============================================================
-RENDERIZAÇÃO — NÍVEL 2 (subcategorias)
-============================================================ */
-function renderSubcategories(cat) {
-    const container = dom.subcategoriesContainer();
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="subcategories-header">
-            <div class="subcategories-header-text">
-                <h2>${escapeHtml(cat.title)}</h2>
-                <p>${escapeHtml(cat.description)}</p>
-            </div>
-            <button class="btn-back" id="backToCatsBtn">
-                <i class="fas fa-arrow-left"></i> Voltar às categorias
-            </button>
-        </div>
-        <div class="subcategories-grid">
-            ${cat.subcategories.map(sub => `
-                <article class="subcategory-card" data-subcategory="${sub.id}">
-                    <div class="subcategory-card-header">
-                        <div class="subcategory-card-icon">
-                            <i class="fas ${sub.icon}"></i>
-                        </div>
-                        <h3>${escapeHtml(sub.title)}</h3>
-                    </div>
-                    <p class="subcategory-card-desc">${escapeHtml(sub.description)}</p>
-                    <div class="subcategory-card-footer">
-                        <span class="subcategory-card-price">${escapeHtml(sub.priceRange)}</span>
-                        <button class="btn-view-details" data-subcategory="${sub.id}">
-                            Ver detalhes <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </article>
-            `).join('')}
-        </div>
-    `;
-
-    container.querySelector('#backToCatsBtn')?.addEventListener('click', backToCategories);
-    container.querySelectorAll('.subcategory-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.closest('.btn-view-details')) return;
-            openSubcategory(card.dataset.subcategory);
-        });
-    });
-    container.querySelectorAll('.btn-view-details').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openSubcategory(btn.dataset.subcategory);
-        });
-    });
-}
-
-/* ============================================================
-RENDERIZAÇÃO — NÍVEL 3 (detalhes)
-============================================================ */
-function getStatusBadge(status) {
-    const map = {
-        available:  { label: 'Disponível',            icon: 'fa-circle-check',         cls: 'available' },
-        evaluation: { label: 'Sob avaliação técnica', icon: 'fa-triangle-exclamation', cls: 'evaluation' },
-        expansion:  { label: 'Em expansão',           icon: 'fa-seedling',             cls: 'expansion' }
-    };
-    const info = map[status] || map.evaluation;
-    return `<span class="status-badge ${info.cls}"><i class="fas ${info.icon}"></i> ${info.label}</span>`;
-}
-
-function renderDetails(cat, sub) {
-    const container = dom.detailsContainer();
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="details-header">
-            <button class="btn-back" id="backToSubsBtn">
-                <i class="fas fa-arrow-left"></i> Voltar para ${escapeHtml(cat.title)}
-            </button>
-            ${getStatusBadge(sub.status)}
-        </div>
-        <div class="details-card">
-            <div class="details-top">
-                <div class="details-icon">
-                    <i class="fas ${sub.icon}"></i>
-                </div>
-                <div class="details-top-info">
-                    <div class="details-category-label">${escapeHtml(cat.title)}</div>
-                    <h2 class="details-title">${escapeHtml(sub.title)}</h2>
-                    <p class="details-description">${escapeHtml(sub.longDescription || sub.description)}</p>
-                </div>
-            </div>
-            <div class="details-highlight-row">
-                <div class="details-highlight">
-                    <div class="details-highlight-label">
-                        <i class="fas fa-money-bill-wave"></i> Investimento de referência
-                    </div>
-                    <div class="details-highlight-value">
-                        ${escapeHtml(sub.priceRange)}
-                        <small>${escapeHtml(sub.priceNote || 'Valor final sujeito ao escopo.')}</small>
-                    </div>
-                </div>
-                <div class="details-highlight">
-                    <div class="details-highlight-label">
-                        <i class="fas fa-clock"></i> Prazo de desenvolvimento
-                    </div>
-                    <div class="details-highlight-value">
-                        ${escapeHtml(sub.deadline)}
-                        <small>Estimativa inicial — pode variar com o escopo.</small>
-                    </div>
-                </div>
-            </div>
-            <div class="details-sections">
-                <div class="details-section">
-                    <h4><i class="fas fa-list-check"></i> Tipos de projeto atendidos</h4>
-                    <ul class="details-list">
-                        ${sub.projectTypes.map(t => `<li><i class="fas fa-angle-right"></i> ${escapeHtml(t)}</li>`).join('')}
-                    </ul>
-                </div>
-                <div class="details-section">
-                    <h4><i class="fas fa-credit-card"></i> Modalidades de pagamento</h4>
-                    <ul class="details-list">
-                        ${sub.paymentTerms.map(p => `<li><i class="fas fa-angle-right"></i> ${escapeHtml(p)}</li>`).join('')}
-                    </ul>
-                </div>
-                <div class="details-section">
-                    <h4><i class="fas fa-receipt"></i> Custos adicionais</h4>
-                    <ul class="details-list">
-                        ${sub.additionalCosts.map(c => `<li><i class="fas fa-angle-right"></i> ${escapeHtml(c)}</li>`).join('')}
-                    </ul>
-                </div>
-                <div class="details-section">
-                    <h4><i class="fas fa-star"></i> Características</h4>
-                    <ul class="details-list">
-                        ${sub.features.map(f => `<li><i class="fas fa-check"></i> ${escapeHtml(f)}</li>`).join('')}
-                    </ul>
-                </div>
-            </div>
-            <div class="details-observations">
-                <h4><i class="fas fa-circle-info"></i> Observações importantes</h4>
-                <ul>
-                    ${sub.observations.map(o => `<li><i class="fas fa-circle-info"></i> ${escapeHtml(o)}</li>`).join('')}
-                </ul>
-            </div>
-            <div class="details-cta">
-                <p class="details-cta-note">
-                    Os valores e prazos são referências de mercado. O orçamento definitivo será
-                    elaborado após a análise do escopo, das funcionalidades e dos requisitos técnicos.
-                </p>
-                <button class="btn-request-large" data-subcategory="${sub.id}">
-                    <i class="fas fa-wand-magic-sparkles"></i> Começar com este serviço
-                </button>
-            </div>
-        </div>
-    `;
-
-    container.querySelector('#backToSubsBtn')?.addEventListener('click', backToSubcategories);
-    container.querySelector('.btn-request-large')?.addEventListener('click', () => {
-        // Importação dinâmica para evitar dependência circular no carregamento
-        import('./assistant.js').then(mod => {
-            mod.openJourneyFromCatalog(cat.id, sub.id);
-        }).catch(err => {
-            console.error('Erro ao abrir jornada a partir do catálogo:', err);
-        });
-    });
-}
-
-/* ============================================================
-BREADCRUMB
-============================================================ */
-function renderBreadcrumb() {
-    const container = dom.breadcrumb();
-    if (!container) return;
-
-    const cat = NavState.currentCategory
-        ? CATEGORIES_DB.find(c => c.id === NavState.currentCategory)
-        : null;
-    const sub = cat && NavState.currentSubcategory
-        ? cat.subcategories.find(s => s.id === NavState.currentSubcategory)
-        : null;
-
-    if (!cat) {
-        container.classList.add('hidden');
-        container.innerHTML = '';
-        return;
-    }
-
-    const items = [];
-    items.push(`<button class="breadcrumb-item" data-crumb="root">
-        <i class="fas fa-layer-group"></i> Catálogo
-    </button>`);
-
-    if (!sub) {
-        items.push(`<span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>`);
-        items.push(`<span class="breadcrumb-item current">${escapeHtml(cat.title)}</span>`);
-    } else {
-        items.push(`<span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>`);
-        items.push(`<button class="breadcrumb-item" data-crumb="category">${escapeHtml(cat.title)}</button>`);
-        items.push(`<span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>`);
-        items.push(`<span class="breadcrumb-item current">${escapeHtml(sub.title)}</span>`);
-    }
-
-    container.innerHTML = items.join('');
-    container.querySelector('[data-crumb="root"]')?.addEventListener('click', backToCategories);
-    container.querySelector('[data-crumb="category"]')?.addEventListener('click', backToSubcategories);
+  initialized = true;
 }
