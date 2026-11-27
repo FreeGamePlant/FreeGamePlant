@@ -1,10 +1,10 @@
 /* ============================================================
 FGP TECHNOLOGIES — assistant.js
-Jornada guiada (FGP Assistant): 7 etapas de atendimento
-progressivo, navegação, upload de arquivos, revisão final
-e envio via Forminit.
+Jornada guiada (FGP Assistant): atendimento progressivo,
+navegação, upload de arquivos, revisão final e envio via Forminit.
 ============================================================ */
 
+// CORREÇÃO CRÍTICA: CATEGORIES_DB vem de './state.js'
 import {
     CATEGORIES_DB,
     JourneyState,
@@ -12,6 +12,7 @@ import {
     JOURNEY_TOTAL_BASE_STEPS,
     dom
 } from './state.js';
+
 import { escapeHtml, formatFileSize } from './utils.js';
 import {
     MAX_FILE_SIZE,
@@ -57,8 +58,6 @@ function parseProjectTypeDesc(raw) {
 
 /* ============================================================
 ETAPAS ATIVAS
-A etapa 3 (tipo de projeto) só aparece se a subcategoria
-possuir projectTypes definidos.
 ============================================================ */
 function getActiveJourneySteps() {
     const steps = [1, 2];
@@ -122,8 +121,7 @@ export function openJourneyFromCatalog(catId, subId) {
     const sub = getJourneySubcategory();
     if (cat && sub) {
         JourneyState.title = `Solicitação de desenvolvimento — ${sub.title}`;
-        JourneyState.description =
-            `Olá! Tenho interesse no desenvolvimento de ${sub.title.toLowerCase()} (${cat.title}) e gostaria de conhecer as condições de contratação.`;
+        JourneyState.description = `Olá! Tenho interesse no desenvolvimento de ${sub.title.toLowerCase()} (${cat.title}) e gostaria de conhecer as condições de contratação.`;
     }
 
     if (sub && sub.projectTypes && sub.projectTypes.length > 0) {
@@ -170,7 +168,6 @@ NAVEGAÇÃO ENTRE ETAPAS
 function handleJourneyNext() {
     const step = JourneyState.step;
 
-    // Validação por etapa
     if (step === 1) {
         if (!JourneyState.category) {
             showJourneyAlert('Escolha uma categoria para continuar.');
@@ -239,7 +236,7 @@ function handleJourneyBack() {
 }
 
 /* ============================================================
-FEEDBACK VISUAL VIA BALÃO DO ASSISTENTE
+FEEDBACK VISUAL
 ============================================================ */
 let journeyAlertTimer = null;
 
@@ -264,24 +261,19 @@ function showJourneyAlert(msg) {
 RENDER GERAL DA ETAPA ATUAL
 ============================================================ */
 function renderJourneyStep() {
-    // Oculta todos
     document.querySelectorAll('.journey-step').forEach(el => el.style.display = 'none');
 
-    // Mostra a atual
     const current = document.querySelector(`.journey-step[data-step="${JourneyState.step}"]`);
     if (current) current.style.display = '';
 
-    // Atualiza assistente
     const assistant = document.getElementById('journeyAssistantText');
     if (assistant) {
         assistant.textContent = ASSISTANT_MESSAGES[JourneyState.step] || '';
         assistant.classList.remove('journey-assistant-bubble-alert');
     }
 
-    // Atualiza progresso
     updateJourneyProgress();
 
-    // Atualiza botões
     const backBtn = document.getElementById('journeyBackBtn');
     const nextBtn = document.getElementById('journeyNextBtn');
     const activeSteps = getActiveJourneySteps();
@@ -296,7 +288,6 @@ function renderJourneyStep() {
         }
     }
 
-    // Render específico por etapa
     if (JourneyState.step === 1) renderJourneyCategories();
     else if (JourneyState.step === 2) renderJourneyServices();
     else if (JourneyState.step === 3) renderJourneyTypes();
@@ -434,7 +425,7 @@ function renderJourneyTypes() {
 }
 
 /* ============================================================
-ETAPA 4 — Formulário (título + descrição)
+ETAPA 4 — Formulário
 ============================================================ */
 function renderJourneyForm() {
     const titleEl = document.getElementById('journeyTitleField');
@@ -451,7 +442,7 @@ function renderJourneyForm() {
 }
 
 /* ============================================================
-ETAPA 5 — Pagamento da produção
+ETAPA 5 — Pagamento
 ============================================================ */
 function renderJourneyPayment() {
     const grid = document.getElementById('journeyPaymentGrid');
@@ -499,7 +490,6 @@ function renderJourneyReview() {
         </div>
     `).join('');
 
-    // Atualiza visibilidade do preview de arquivo
     const preview = document.getElementById('journeyUploadPreview');
     const uploadArea = document.getElementById('journeyUploadArea');
     if (JourneyState.file) {
@@ -510,13 +500,12 @@ function renderJourneyReview() {
         if (uploadArea) uploadArea.style.display = '';
     }
 
-    // Limpa feedback anterior
     const feedback = document.getElementById('journeySubmitFeedback');
     if (feedback) feedback.classList.remove('visible', 'success', 'error');
 }
 
 /* ============================================================
-UPLOAD DE IMAGEM NA JORNADA
+UPLOAD DE IMAGEM
 ============================================================ */
 function handleJourneyFileSelect(file) {
     const errorEl = document.getElementById('journeyFileError');
@@ -569,7 +558,6 @@ function setupJourneyUpload() {
         fileInput.value = '';
     });
 
-    // Drag & drop
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.style.borderColor = 'var(--primary)';
@@ -587,13 +575,12 @@ function setupJourneyUpload() {
 }
 
 /* ============================================================
-SUBMIT DA JORNADA (usando forminit.js)
+SUBMIT DA JORNADA
 ============================================================ */
 async function submitJourney() {
     const submitFeedback = document.getElementById('journeySubmitFeedback');
     const nextBtn = document.getElementById('journeyNextBtn');
 
-    // Revalida tudo
     if (!JourneyState.category || !JourneyState.subcategory) {
         showJourneyAlert('Escolha categoria e serviço antes de enviar.');
         return;
@@ -618,7 +605,6 @@ async function submitJourney() {
         ? `${cat.title} > ${sub.title} > ${typeName}`
         : `${cat.title} > ${sub.title}`;
 
-    // Monta dados para o payload
     const payloadData = {
         title: JourneyState.title,
         requestType: fullType,
@@ -667,7 +653,6 @@ async function submitJourney() {
 SETUP DA JORNADA
 ============================================================ */
 function setupJourney() {
-    // Triggers de abertura
     document.getElementById('heroStartBtn')?.addEventListener('click', openJourney);
     document.getElementById('sideMenuStartBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -675,12 +660,10 @@ function setupJourney() {
         openJourney();
     });
 
-    // Botões de navegação
     document.getElementById('journeyNextBtn')?.addEventListener('click', handleJourneyNext);
     document.getElementById('journeyBackBtn')?.addEventListener('click', handleJourneyBack);
     document.getElementById('closeJourneyBtn')?.addEventListener('click', closeJourneyWithConfirm);
 
-    // Fechar clicando fora do container
     const journeyModal = dom.journeyModal();
     if (journeyModal) {
         journeyModal.addEventListener('click', (e) => {
@@ -688,7 +671,6 @@ function setupJourney() {
         });
     }
 
-    // Etapa 4 — campos
     const titleEl = document.getElementById('journeyTitleField');
     const descEl = document.getElementById('journeyDescField');
     titleEl?.addEventListener('input', (e) => {
@@ -706,7 +688,6 @@ function setupJourney() {
         }
     });
 
-    // Etapa 5 — cards de pagamento
     document.querySelectorAll('#journeyPaymentGrid [data-payment]').forEach(card => {
         card.addEventListener('click', () => {
             JourneyState.payment = card.dataset.payment;
@@ -714,7 +695,6 @@ function setupJourney() {
         });
     });
 
-    // Etapa 6 — cards de manutenção
     document.querySelectorAll('#journeyMaintenanceGrid [data-maintenance]').forEach(card => {
         card.addEventListener('click', () => {
             JourneyState.maintenance = card.dataset.maintenance;
@@ -722,6 +702,5 @@ function setupJourney() {
         });
     });
 
-    // Upload
     setupJourneyUpload();
 }
