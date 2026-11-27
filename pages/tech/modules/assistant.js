@@ -1910,21 +1910,15 @@ export function openJourney(opts = {}) {
     resetJourneyState();
   }
 
-  if (category) {
-    JourneyState.category = category;
-    if (subcategory) {
-      JourneyState.subcategory = subcategory;
-      const sub = findSubcategoryById(category, subcategory);
-      // Se a subcategoria tem tipos, começa na etapa 4; senão, na 5
-      if (sub && Array.isArray(sub.projectTypes) && sub.projectTypes.length > 0) {
-        JourneyState.step = 4;
-      } else {
-        JourneyState.step = 5;
-      }
-    } else {
-      JourneyState.step = 3;
-    }
+if (category) {
+  JourneyState.category = category;
+  if (subcategory) {
+    JourneyState.subcategory = subcategory;
   }
+  // Mantém o passo atual em 1 (identificação), mas com
+  // categoria/subcategoria já pré-preenchidas.
+  JourneyState.step = 1;
+}
 
   const modal = $id('journeyModal');
   if (!modal) return;
