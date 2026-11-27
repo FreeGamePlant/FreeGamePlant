@@ -446,32 +446,71 @@ export const CATEGORIES_DB = [
   }
 ];
 
-/* ============================================================
-2. ESTADO DE NAVEGAÇÃO (Catálogo)
-============================================================ */
 export const NavState = {
   currentCategory: null,
   currentSubcategory: null
 };
 
-/* ============================================================
-3. ESTADO DA JORNADA GUIADA (FGP Assistant)
-============================================================ */
 export const JourneyState = {
   step: 1,
+  // Etapa 1: Identificação
+  clientType: null, // 'individual' | 'company'
+  clientName: '',
+  clientEmail: '',
+  clientPhone: '',
+  companyName: '',
+  contactName: '',
+  companySegment: '',
+  
+  // Etapas 2, 3, 4: Catálogo
   category: null,
   subcategory: null,
-  projectType: null,
-  title: '',
-  description: '',
+  projectType: '',
+  
+  // Etapa 5: Identificação do Projeto
+  projectName: '',
+  projectContext: '',
+  projectProblem: '',
+  projectObjective: '',
+  expectedResult: '',
+  
+  // Etapa 6: Público-alvo
+  targetAudience: '',
+  audienceAction: '',
+  
+  // Etapa 7: Requisitos Detalhados (Objeto dinâmico)
+  requirements: {},
+  
+  // Etapa 8: Identidade Visual
+  hasVisualIdentity: null, // 'sim' | 'nao' | 'parcial'
+  brandColors: '',
+  references: '',
+  elementsToAvoid: '',
+  
+  // Etapa 9: Conteúdo e Recursos
+  availableResources: [],
+  needsContentCreation: null, // 'sim' | 'nao' | 'parcial'
+  
+  // Etapa 10: Infraestrutura
+  hasDomain: null,
+  hasHosting: null,
+  needsIntegrations: null,
+  integrationDetails: '',
+  
+  // Etapa 11: Prazo
+  deadlineType: null, // 'flexivel' | 'asap' | 'especifica' | 'indefinido'
+  deadlineDate: '',
+  priority: '',
+  
+  // Etapa 12: Comercial
   payment: null,
   maintenance: null,
+  commercialObservations: '',
+  
+  // Etapa 13: Arquivo
   file: null
 };
 
-/* ============================================================
-4. REFERÊNCIAS DOM CENTRALIZADAS
-============================================================ */
 export const dom = {
   categoriesIntro: () => document.getElementById('categoriesIntro'),
   breadcrumb: () => document.getElementById('breadcrumb'),
@@ -487,18 +526,8 @@ export const dom = {
   journeyModal: () => document.getElementById('journeyModal')
 };
 
-/* ============================================================
-5. CONSTANTES DE CONFIGURAÇÃO (Cores e Assistente)
-============================================================ */
 export const COLOR_STORAGE_KEY = 'fgp_tech_palette';
-
-export const DEFAULT_PALETTE = {
-  primary: '#3b82f6',
-  accent: '#06b6d4',
-  bg: '#0a0e17',
-  text: '#f1f5f9'
-};
-
+export const DEFAULT_PALETTE = { primary: '#3b82f6', accent: '#06b6d4', bg: '#0a0e17', text: '#f1f5f9' };
 export const COLOR_PRESETS = [
   { name: 'FGP Tech', palette: { primary: '#3b82f6', accent: '#06b6d4', bg: '#0a0e17', text: '#f1f5f9' } },
   { name: 'Corporativo', palette: { primary: '#2563eb', accent: '#f59e0b', bg: '#0c1424', text: '#f8fafc' } },
@@ -507,13 +536,19 @@ export const COLOR_PRESETS = [
 ];
 
 export const ASSISTANT_MESSAGES = {
-  1: 'Olá! Vamos encontrar a solução ideal para seu projeto? Escolha uma das categorias abaixo para começar.',
-  2: 'Ótimo! Agora escolha o serviço que mais combina com sua necessidade.',
-  3: 'Estamos avançando! Qual modalidade de projeto você deseja?',
-  4: 'Conte um pouco sobre sua ideia. Não precisa utilizar termos técnicos!',
-  5: 'Agora vamos conhecer sua preferência de pagamento.',
-  6: 'Você também pode informar se deseja serviços de manutenção.',
-  7: 'Tudo pronto! Confira suas escolhas antes de enviar.'
+  1: 'Olá! Vamos começar identificando quem está solicitando o serviço. Isso nos ajuda a personalizar a comunicação.',
+  2: 'Perfeito! Agora, escolha a categoria principal que melhor representa sua necessidade.',
+  3: 'Ótimo. Dentro desta categoria, qual serviço específico você procura?',
+  4: 'Estamos avançando! Qual modalidade ou tipo de projeto melhor descreve sua ideia?',
+  5: 'Conte-nos sobre o projeto. Não precisa usar termos técnicos; explique com suas próprias palavras.',
+  6: 'Para quem estamos criando essa solução? Entender o público é fundamental para o sucesso do projeto.',
+  7: 'Agora vamos aos detalhes técnicos e funcionais. Selecione ou descreva o que é essencial para o seu projeto.',
+  8: 'Sobre a aparência: você já possui uma identidade visual ou referências de estilo que devemos seguir?',
+  9: 'Quais materiais você já possui (textos, logos, imagens)? A FGP precisará produzir algo que ainda não existe?',
+  10: 'Vamos falar de infraestrutura. O projeto precisará de domínio, hospedagem ou integração com outros sistemas?',
+  11: 'Qual é a sua expectativa de prazo? Isso nos ajuda a priorizar e planejar a melhor abordagem.',
+  12: 'Como você prefere estruturar o investimento na produção e a manutenção futura?',
+  13: 'Tudo pronto! Confira o resumo inteligente da sua solicitação. Você pode voltar e editar qualquer etapa.'
 };
 
-export const JOURNEY_TOTAL_BASE_STEPS = 7;
+export const JOURNEY_TOTAL_BASE_STEPS = 13;
