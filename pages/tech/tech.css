@@ -320,13 +320,19 @@ p { margin: 0 0 1em; }
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-lg);
-  visibility: hidden;
-}
-.side-menu.open {
-  transform: translateX(0);
-  visibility: visible;
+
+  /* Base: não interativo enquanto off-screen.
+     NÃO usar visibility:hidden — ele conflita com inert em alguns
+     navegadores e cria a sensação de "painel morto". */
+  pointer-events: none;
 }
 
+.side-menu.open {
+  transform: translateX(0);
+  /* Especificidade .side-menu.open (0,2,0) > [inert] (0,1,0).
+     Mesmo que inert permaneça por 1 frame, o painel já responde. */
+  pointer-events: auto;
+}
 .side-menu-header {
   padding: 22px 22px 18px;
   border-bottom: 1px solid var(--border);
@@ -409,11 +415,12 @@ p { margin: 0 0 1em; }
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-lg);
-  visibility: hidden;
+  pointer-events: none;
 }
+
 .color-panel.open {
   transform: translateX(0);
-  visibility: visible;
+  pointer-events: auto;
 }
 
 .color-panel-header {
