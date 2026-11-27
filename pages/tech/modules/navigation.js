@@ -66,18 +66,25 @@ export function openSideMenu() {
   overlay?.classList.add('open');
   document.body.classList.add('menu-open');
 
-  // Remove inert + aria-hidden="false" (na ordem correta do showSafely)
+  // Fallback: força remoção de inert ANTES de chamar showSafely.
+  // Isso garante que o próximo frame já veja o menu como interativo,
+  // mesmo em navegadores que reagem ao `inert` com atraso.
+  menu.removeAttribute('inert');
+  if (menu.style.pointerEvents === 'none') {
+    menu.style.pointerEvents = '';
+  }
+
   showSafely(menu, { focusFirst: false });
 
-  // Foca o primeiro link do menu (boa prática a11y para diálogos)
+  // Foca o primeiro link do menu
   requestAnimationFrame(() => {
     const firstLink = menu.querySelector('.side-menu-nav a, .side-menu-nav button');
     if (firstLink) firstLink.focus({ preventScroll: true });
   });
 
-  // Guarda a referência ao trigger para o foco de retorno
   menu._focusReturn = trigger || null;
 }
+
 
 export function closeSideMenu() {
   const menu = dom.sideMenu();
@@ -131,11 +138,17 @@ export function openColorPanel() {
   const trigger = $id('colorBtn');
   if (!panel) return;
 
-  // Fecha o side menu se estiver aberto (evita sobreposição)
+  // Fecha o side menu se estiver aberto
   if (isOpen(dom.sideMenu())) closeSideMenu();
 
   panel.classList.add('open');
   document.body.classList.add('menu-open');
+
+  // Mesmo fallback do side menu
+  panel.removeAttribute('inert');
+  if (panel.style.pointerEvents === 'none') {
+    panel.style.pointerEvents = '';
+  }
 
   showSafely(panel, { focusFirst: false });
 
