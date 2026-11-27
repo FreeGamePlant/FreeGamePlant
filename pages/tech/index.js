@@ -4,7 +4,6 @@ Ponto de entrada da aplicação modular (ES Modules).
 Responsável apenas por importar e inicializar os módulos.
 ============================================================ */
 
-import { initUtils } from './modules/utils.js';
 import { initNavigation } from './modules/navigation.js';
 import { initPersonalization } from './modules/personalization.js';
 import { initCatalog } from './modules/catalog.js';
@@ -13,12 +12,11 @@ import { initAssistant } from './modules/assistant.js';
 
 /**
  * Orquestra a inicialização de todos os módulos da aplicação.
- * A ordem é importante: utilitários e navegação primeiro, 
+ * A ordem é importante: navegação e personalização primeiro, 
  * seguidos pelos componentes visuais e, por fim, a jornada guiada.
  */
 function initializeTech() {
     try {
-        initUtils();
         initNavigation();
         initPersonalization();
         initCatalog();
