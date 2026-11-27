@@ -4,132 +4,148 @@
    (requestModal) e da nova jornada guiada (journeyModal, 13 etapas).
 
    EXPORTA:
-   - submitRequest(payload)         → envio legado (compatível)
-   - submitJourney(payload, file)   → novo assistente
-   - default                         → alias de submitJourney
+   - submitRequest(payload, file)   → envio legado (requestModal)
+   - submitJourney(payload, file)   → novo assistente (13 etapas)
+   - submit                         → alias de submitJourney
+   - default                        → alias de submitJourney
 
    CONTRATO:
-   Ambas as funções retornam Promise<{ ok: boolean, error?: string, data?: any }>.
+   Todas as funções retornam Promise<{ ok: boolean, error?: string, data?: any }>.
    Nunca lançam para o chamador — o erro é encapsulado em { ok: false }.
    ============================================================ */
+
+import {
+  validateFile,
+  formatFileSize,
+  isValidEmail,
+  MAX_FILE_SIZE,
+  ACCEPTED_FILE_MIME
+} from './utils.js';
 
 /* ============================================================
    1. CONFIGURAÇÃO DO FORMINIT
    ------------------------------------------------------------
-   ⚠️ Ajuste estes dois valores conforme o painel do Forminit.
-   O endpoint público do Forminit costuma ser algo como:
-     https://forminit.com/f/<FORM_ID>
-   ou
-     https://api.forminit.com/v1/forms/<FORM_ID>/submissions
-   Consulte a documentação do painel para o endpoint exato.
+   O endpoint é derivado automaticamente do form ID para evitar
+   mismatch. Se o seu formulário usa um domínio customizado
+   (ex.: https://forms.suaempresa.com/f/xyz), sobrescreva
+   FORMINIT_ENDPOINT manualmente.
    ============================================================ */
 
-const FORMINIT_ENDPOINT = 'https://forminit.com/f/SEU_FORM_ID_AQUI';
 const FORMINIT_FORM_ID = 'l6ts8syb4td';
+const FORMINIT_ENDPOINT = `https://forminit.com/f/${FORMINIT_FORM_ID}`;
+
+/**
+ * Timeout máximo por requisição (ms). Se o Forminit não responder
+ * nesse intervalo, abortamos e retornamos { ok: false }.
+ */
+const REQUEST_TIMEOUT_MS = 30_000;
 
 /* ============================================================
-   2. HELPERS
+   2. HELPERS LOCAIS
    ============================================================ */
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-const ACCEPTED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
-}
-
-function formatFileSize(bytes) {
-  if (!bytes || bytes < 1024) return `${bytes || 0} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-}
-
-function validateFile(file) {
-  if (!file) return { ok: false, error: 'Nenhum arquivo selecionado.' };
-  if (file.size > MAX_FILE_SIZE) {
-    return { ok: false, error: `Arquivo muito grande (${formatFileSize(file.size)}). Máximo: 5 MB.` };
-  }
-  if (!ACCEPTED_MIME.includes(file.type)) {
-    return { ok: false, error: 'Formato inválido. Envie JPEG, PNG ou WebP.' };
-  }
-  return { ok: true };
-}
 
 /**
  * Normaliza qualquer valor para string segura de envio.
  * - null/undefined → ''
  * - arrays → string separada por vírgula
  * - objetos → JSON
+ * - booleanos → 'true'/'false'
  */
 function toFieldValue(v) {
   if (v == null) return '';
   if (Array.isArray(v)) return v.join(', ');
   if (typeof v === 'object') return JSON.stringify(v);
+  if (typeof v === 'boolean') return v ? 'true' : 'false';
   return String(v);
 }
 
+/**
+ * Mensagens de erro conhecidas do Forminit (para fallback
+ * quando o servidor não retorna JSON estruturado).
+ */
+const HTTP_ERROR_HINTS = {
+  400: 'Os dados enviados não foram aceitos pelo formulário. Verifique se todos os campos obrigatórios estão configurados no painel.',
+  401: 'Formulário não autorizado. Verifique se ele está público no painel do Forminit.',
+  403: 'Envio bloqueado. O formulário pode estar restrito ou o domínio não autorizado.',
+  404: 'Formulário não encontrado. Verifique o form ID.',
+  413: 'Arquivo grande demais para o servidor. Reduza o tamanho do anexo.',
+  422: 'Alguns campos foram rejeitados pelo formulário. Verifique a configuração dos blocos no painel.',
+  429: 'Muitos envios em pouco tempo. Aguarde alguns minutos e tente novamente.',
+  500: 'Erro interno no Forminit. Tente novamente em instantes.',
+  502: 'Serviço do Forminit indisponível no momento.',
+  503: 'Serviço do Forminit em manutenção. Tente novamente mais tarde.'
+};
+
 /* ============================================================
-   3. ENVIO BASE (multipart/form-data)
-   ------------------------------------------------------------
-   O Forminit aceita multipart/form-data com o arquivo no campo
-   configurado no painel. Usamos `fetch` diretamente para ter
-   controle total sobre o FormData e o tratamento de erros.
+   3. ENVIO BASE (multipart/form-data + timeout)
    ============================================================ */
 
 let activeSubmissions = 0;
 
 async function postToForminit(fields, file) {
-  // Bloqueio de envios duplicados
+  // Defesa contra envios duplicados (o assistant.js/modals.js também bloqueiam)
   if (activeSubmissions > 0) {
     return { ok: false, error: 'Já existe um envio em andamento. Aguarde a conclusão.' };
   }
   activeSubmissions++;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
   try {
-    const formData = new FormData();
-
-    // Campos de texto
-    Object.entries(fields).forEach(([key, value]) => {
-      formData.append(key, toFieldValue(value));
-    });
-
-    // Metadados úteis
-    formData.append('_form_id', FORMINIT_FORM_ID);
-    formData.append('_submitted_at', new Date().toISOString());
-    formData.append('_source', 'fgp-tech');
-
-    // Arquivo (opcional)
+    // Validação do arquivo antes de montar o FormData
     if (file) {
       const check = validateFile(file);
       if (!check.ok) {
         return { ok: false, error: check.error };
       }
-      // O nome "attachment" deve corresponder ao bloco do painel Forminit.
+    }
+
+    const formData = new FormData();
+
+    Object.entries(fields).forEach(([key, value]) => {
+      formData.append(key, toFieldValue(value));
+    });
+
+    // Metadados úteis (o painel pode ignorar se não houver blocos)
+    formData.append('_form_id', FORMINIT_FORM_ID);
+    formData.append('_submitted_at', new Date().toISOString());
+    formData.append('_source', 'fgp-tech');
+
+    if (file) {
+      // O nome "attachment" deve coincidir com o bloco de upload
+      // configurado no painel Forminit.
       formData.append('attachment', file, file.name);
     }
 
     const response = await fetch(FORMINIT_ENDPOINT, {
       method: 'POST',
       body: formData,
-      headers: {
-        'Accept': 'application/json'
-      }
-      // NÃO definir Content-Type: o browser define o boundary do multipart.
+      headers: { 'Accept': 'application/json' },
+      signal: controller.signal
+      // NÃO definir Content-Type: o browser preenche o boundary.
     });
 
-    // Forminit pode responder 200, 201, 202 ou 204 em sucesso.
+    clearTimeout(timeoutId);
+
+    // ---- Erros HTTP ----
     if (!response.ok) {
-      let errMsg = `Falha no envio (HTTP ${response.status}).`;
+      let serverMessage = '';
       try {
         const data = await response.json();
-        if (data && (data.error || data.message)) errMsg = data.error || data.message;
+        serverMessage = data?.error || data?.message || '';
       } catch (_) {
-        // Resposta sem JSON — mantém a mensagem padrão.
+        // Resposta sem JSON — ignora
       }
-      return { ok: false, error: errMsg };
+
+      const hint = HTTP_ERROR_HINTS[response.status] || `Falha no envio (HTTP ${response.status}).`;
+      return {
+        ok: false,
+        error: serverMessage || hint
+      };
     }
 
-    // Sucesso — tenta ler resposta (pode ser vazia).
+    // ---- Sucesso (200/201/202/204) ----
     let data = null;
     try {
       data = await response.json();
@@ -137,7 +153,7 @@ async function postToForminit(fields, file) {
       data = null;
     }
 
-    // Alguns endpoints retornam 200 com { success: false }.
+    // Alguns endpoints retornam 200 com { success: false }
     if (data && data.success === false) {
       return {
         ok: false,
@@ -148,12 +164,21 @@ async function postToForminit(fields, file) {
     return { ok: true, data };
 
   } catch (err) {
-    // Erro de rede / CORS / timeout.
+    clearTimeout(timeoutId);
+
+    if (err && err.name === 'AbortError') {
+      return {
+        ok: false,
+        error: 'O envio demorou mais de 30 segundos. Verifique sua conexão e tente novamente.'
+      };
+    }
+
     console.error('[FGP][forminit] Erro de rede:', err);
     return {
       ok: false,
       error: 'Não foi possível conectar ao serviço de envio. Verifique sua conexão e tente novamente.'
     };
+
   } finally {
     activeSubmissions = Math.max(0, activeSubmissions - 1);
   }
@@ -162,21 +187,24 @@ async function postToForminit(fields, file) {
 /* ============================================================
    4. ENVIO LEGADO — requestModal
    ------------------------------------------------------------
-   Mantém compatibilidade com o fluxo antigo. O payload esperado
-   é o mesmo do formulário #requestModal:
-     {
-       title, initialDescription, requestType, projectDescription,
-       productionPayment, installmentCount, dueDay,
-       maintenancePreference
-     }
-   O arquivo, se houver, vem como 4º argumento ou dentro de
-   `payload.attachment`.
+   Campos esperados pelo painel (todos opcionais exceto os 2
+   obrigatórios marcados com *):
+     * titulo
+     * descricao_projeto
+       descricao_inicial
+       tipo_pedido
+       pagamento_producao
+       parcelas
+       dia_vencimento
+       manutencao
+       origem
+       attachment (arquivo)
    ============================================================ */
 
 export async function submitRequest(payload, file = null) {
   const data = payload || {};
 
-  // Validação mínima do lado do cliente
+  // ---- Validações (mesmas do modals.js, defesa em profundidade) ----
   if (!data.title || !String(data.title).trim()) {
     return { ok: false, error: 'Informe o título do pedido.' };
   }
@@ -216,15 +244,40 @@ export async function submitRequest(payload, file = null) {
 /* ============================================================
    5. ENVIO DA JORNADA — journeyModal (13 etapas)
    ------------------------------------------------------------
-   Recebe o payload produzido por assistant.js#buildForminitPayload
-   e o arquivo opcional. Achata os grupos em campos
-   compreensíveis para o painel Forminit.
+   Recebe o payload de assistant.js#buildForminitPayload e o
+   arquivo opcional. Achata os grupos em campos compreensíveis
+   para o painel Forminit.
+
+   CAMPOS OBRIGATÓRIOS no painel Forminit (devem ter bloco):
+     - tipo_solicitante
+     - email
+     - nome_projeto
+     - categoria_id / servico_id
+     - nome_solicitante OU nome_empresa
+     - problema
+     - publico_alvo
+     - pagamento_producao
+
+   CAMPOS OPCIONAIS (só precisam de bloco se forem ser usados):
+     - nome_empresa, responsavel, segmento
+     - categoria, servico, tipo_projeto
+     - contexto, objetivo, resultado_esperado, acao_esperada
+     - requisitos_json
+     - possui_identidade_visual, cores, referencias, evitar
+     - recursos_disponiveis, fgp_deve_produzir
+     - possui_dominio, possui_hospedagem, precisa_integracoes,
+       detalhes_integracoes
+     - tipo_prazo, data_desejada, prioridade
+     - manutencao, observacoes_comerciais
+     - telefone_pais, telefone_nacional (componentes do telefone)
+
+   O campo `attachment` (arquivo) é opcional.
    ============================================================ */
 
 export async function submitJourney(payload, file = null) {
   const data = payload || {};
 
-  // Validações essenciais (defesa em profundidade — o assistant.js já valida)
+  // ---- Validações essenciais (o assistant.js já valida, defesa extra) ----
   if (!data.client_type) {
     return { ok: false, error: 'Tipo de solicitante não informado.' };
   }
@@ -240,18 +293,18 @@ export async function submitJourney(payload, file = null) {
 
   /* ------------------------------------------------------------
      Mapeamento para os blocos do Forminit.
-     Os nomes à esquerda (chaves) devem corresponder aos blocos
-     configurados no painel. Se o painel usar nomes diferentes,
-     ajuste APENAS este objeto — o resto do código continua igual.
+     Ajuste APENAS este objeto se o painel usar nomes diferentes.
      ------------------------------------------------------------ */
   const fields = {
     /* --- Solicitante --- */
-    tipo_solicitante: data.client_type,
+    tipo_solicitante: data.client_type,                    // 'individual' | 'company'
     nome_solicitante: data.client_name || data.contact_name || '',
     nome_empresa: data.company_name || '',
     responsavel: data.contact_name || '',
     email: data.client_email,
-    telefone: data.client_phone || '',
+    telefone: data.client_phone || '',                     // composto: "+55 (11) 98765-4321"
+    telefone_pais: data.client_phone_country || '',        // "55"
+    telefone_nacional: data.client_phone_national || '',   // "11987654321"
     segmento: data.company_segment || '',
 
     /* --- Catálogo --- */
@@ -270,7 +323,7 @@ export async function submitJourney(payload, file = null) {
     publico_alvo: data.target_audience || '',
     acao_esperada: data.audience_action || '',
 
-    /* --- Requisitos (JSON) --- */
+    /* --- Requisitos (JSON serializado) --- */
     requisitos_json: data.requirements_json || '{}',
 
     /* --- Identidade visual --- */
@@ -308,14 +361,8 @@ export async function submitJourney(payload, file = null) {
 }
 
 /* ============================================================
-   6. ALIAS DEFAULT
-   ------------------------------------------------------------
-   Permite `import forminit from './forminit.js'` e chamar
-   `forminit(payload, file)` diretamente — compatível com o
-   fallback do assistant.js que procura `submitJourney`,
-   `submitRequest`, `submit` ou `default`.
+   6. ALIASES E DEFAULT
    ============================================================ */
 
 export const submit = submitJourney;
-
 export default submitJourney;
