@@ -1,12 +1,16 @@
 /* ============================================================
-FGP TECHNOLOGIES — state.js
-Estado global, constantes e referências DOM centralizadas.
-Este arquivo não contém lógica de negócio, apenas dados e referências.
-============================================================ */
+   FGP TECHNOLOGIES — state.js
+   Estado global, constantes e referências DOM centralizadas.
+   Este arquivo não contém lógica de negócio, apenas dados e referências.
+   ============================================================ */
+
+/* Re-export da chave de rascunho (definida em utils.js) para que
+   qualquer módulo possa importá-la de um ponto único. */
+export { JOURNEY_DRAFT_KEY } from './utils.js';
 
 /* ============================================================
-1. BASE DE DADOS HIERÁRQUICA (Catálogo)
-============================================================ */
+   1. BASE DE DADOS HIERÁRQUICA (Catálogo)
+   ============================================================ */
 export const CATEGORIES_DB = [
   {
     id: 'apps',
@@ -405,7 +409,7 @@ export const CATEGORIES_DB = [
         projectTypes: ['Add-ons de itens', 'Add-ons de entidades', 'Mecânicas e comportamentos', 'Pacotes personalizados', 'Projetos Minecraft Bedrock'],
         paymentTerms: ['Por projeto ou etapas', 'Primeira parcela antes do início'],
         additionalCosts: ['Recursos gráficos e texturas', 'Testes em servidores dedicados', 'Publicação em lojas específicas'],
-        observations: ['Não há preço de mercado único comparável.', 'Quantidade de itens e complexidade das mecâ define m o valor.']
+        observations: ['Não há preço de mercado único comparável.', 'Quantidade de itens e complexidade das mecânicas definem o valor.']
       },
       {
         id: 'parceria-dev',
@@ -451,62 +455,81 @@ export const NavState = {
   currentSubcategory: null
 };
 
+/* ============================================================
+   2. ESTADO DA JORNADA
+   ------------------------------------------------------------
+   Convenções de telefone:
+   - `clientPhoneCountry`  → código numérico do país (sem '+')
+                             ex.: '55' (Brasil), '351' (Portugal)
+   - `clientPhoneNational` → apenas os dígitos do número nacional
+                             (sem DDD separado, sem máscara)
+   - `clientPhone`         → valor COMPOSTO final exibido/enviado:
+                             "+55 (11) 98765-4321". Atualizado
+                             automaticamente por composePhone().
+
+   Os três campos são a fonte única de verdade. O input de telefone
+   usa country + national; o payload do Forminit usa `clientPhone`
+   já composto.
+   ============================================================ */
 export const JourneyState = {
   step: 1,
+
   // Etapa 1: Identificação
   clientType: null, // 'individual' | 'company'
   clientName: '',
   clientEmail: '',
-  clientPhone: '',
+  clientPhone: '',           // valor composto final (+xx …)
+  clientPhoneCountry: '55',  // país padrão: Brasil
+  clientPhoneNational: '',   // apenas dígitos, sem máscara
   companyName: '',
   contactName: '',
   companySegment: '',
-  
+
   // Etapas 2, 3, 4: Catálogo
   category: null,
   subcategory: null,
   projectType: '',
-  
+
   // Etapa 5: Identificação do Projeto
   projectName: '',
   projectContext: '',
   projectProblem: '',
   projectObjective: '',
   expectedResult: '',
-  
+
   // Etapa 6: Público-alvo
   targetAudience: '',
   audienceAction: '',
-  
-  // Etapa 7: Requisitos Detalhados (Objeto dinâmico)
+
+  // Etapa 7: Requisitos Detalhados (objeto dinâmico)
   requirements: {},
-  
+
   // Etapa 8: Identidade Visual
   hasVisualIdentity: null, // 'sim' | 'nao' | 'parcial'
   brandColors: '',
   references: '',
   elementsToAvoid: '',
-  
+
   // Etapa 9: Conteúdo e Recursos
   availableResources: [],
   needsContentCreation: null, // 'sim' | 'nao' | 'parcial'
-  
+
   // Etapa 10: Infraestrutura
   hasDomain: null,
   hasHosting: null,
   needsIntegrations: null,
   integrationDetails: '',
-  
+
   // Etapa 11: Prazo
   deadlineType: null, // 'flexivel' | 'asap' | 'especifica' | 'indefinido'
   deadlineDate: '',
   priority: '',
-  
+
   // Etapa 12: Comercial
   payment: null,
   maintenance: null,
   commercialObservations: '',
-  
+
   // Etapa 13: Arquivo
   file: null
 };
